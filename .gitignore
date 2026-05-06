@@ -1,0 +1,8 @@
+node_modules/
+dist/
+packages/*/dist/
+packages/*/node_modules/
+packages/agents-audit/.tmp-*/
+.DS_Store
+coverage/
+*.log
