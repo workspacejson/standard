@@ -1,0 +1,24 @@
+{
+  "name": "agents-audit-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.0.0",
+  "homepage": "https://workspacejson.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/workspace-json/agents-audit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/workspace-json/agents-audit/issues"
+  },
+  "dependencies": {
+    "@workspacejson/spec": "workspace:*",
+    "@workspacejson/rules": "workspace:*",
+    "agents-audit": "workspace:*"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

@@ -1,0 +1,7 @@
+[project]
+name = "fixture-python"
+version = "0.1.0"
+dependencies = [
+  "fastapi",
+  "pytest"
+]
