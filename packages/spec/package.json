@@ -10,7 +10,10 @@
     "workspace-json",
     "ai-agents",
     "specification",
-    "aaif"
+    "aaif",
+    "schema",
+    "types",
+    "open-source"
   ],
   "repository": {
     "type": "git",

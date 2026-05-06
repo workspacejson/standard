@@ -11,7 +11,11 @@
     "rule-engine",
     "AGENTS.md",
     "ai-agents",
-    "developer-tools"
+    "developer-tools",
+    "audit",
+    "lint",
+    "monorepo",
+    "open-source"
   ],
   "repository": {
     "type": "git",
