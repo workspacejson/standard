@@ -12,6 +12,7 @@ export function createRuleCoverageGapRule(): Rule {
       category: 'meta',
       scope: 'workspace',
       firingMode: 'threshold',
+      prerequisites: ['churn-fragility', 'blast-radius', 'missing-file-reference'],
       cost: 'cheap',
       requiredTier: 'open',
     },
@@ -44,7 +45,8 @@ export function createRuleCoverageGapRule(): Rule {
         }
       }
 
-      const gapRatio = (sourceFiles.length - coveredFiles.size) / sourceFiles.length;
+      const rawGap = (sourceFiles.length - coveredFiles.size) / sourceFiles.length;
+      const gapRatio = Math.max(0, Math.min(1, rawGap));
 
       if (gapRatio <= 0.6) {
         return [{
