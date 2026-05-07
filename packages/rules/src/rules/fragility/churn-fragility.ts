@@ -1,5 +1,5 @@
-import { weightedConfidence } from '../../../engine/temporal-decay.js';
-import type { ConfidenceSignal, Finding, Rule, RuleContext } from '../../../types.js';
+import { weightedConfidence } from '../../engine/temporal-decay.js';
+import type { ConfidenceSignal, Finding, Rule, RuleContext } from '../../types.js';
 
 interface ChurnFragilityConfig {
   churnThreshold?: number;

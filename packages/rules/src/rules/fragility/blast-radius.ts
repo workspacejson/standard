@@ -1,5 +1,5 @@
 import { readFileSync, existsSync } from 'node:fs';
-import type { Finding, Rule, RuleContext } from '../../../types.js';
+import type { Finding, Rule, RuleContext } from '../../types.js';
 
 interface BlastRadiusConfig {
   minImporters?: number;
