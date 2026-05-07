@@ -4,14 +4,14 @@ import { createReviewTimeAnomalyRule } from '../review-time-anomaly.js';
 
 const COMMIT_HASH = 'abc123def456';
 
-function makeGit(recentCommitsResult: { hash: string; message: string; author: string; date: Date }[] = []): GitSignals {
+function makeGit(commitsBetweenResult: { hash: string; message: string; author: string; date: Date }[] = []): GitSignals {
   return {
-    recentCommits: async () => recentCommitsResult,
+    recentCommits: async () => [],
     fileAge: async () => 0,
     churnScore: async () => 0,
     lastModified: async () => new Date(),
     authorCount: async () => 0,
-    commitsBetween: async () => [],
+    commitsBetween: async () => commitsBetweenResult,
     modificationVelocity: async () => 0,
   };
 }
