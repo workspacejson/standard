@@ -280,7 +280,13 @@ export class RuleTester {
 
     // Attach legacy fields for the bridge cast used by migrated workspace-scoped rules.
     // TODO(v0.3): remove once all rules access agentsMd via WorkspaceSignals.
-    return Object.assign(ctx, { agentsMd, repo, config: legacyConfig }) as RuleContext;
+    // Only set config on the legacy attachment if the caller did not explicitly provide one,
+    // so that test-specified ctx.config values are not overwritten by legacyConfig.
+    const legacyAttachment: Record<string, unknown> = { agentsMd, repo };
+    if (merged.config === undefined) {
+      legacyAttachment.config = legacyConfig;
+    }
+    return Object.assign(ctx, legacyAttachment) as RuleContext;
   }
 
   buildStaticContext(partial?: DeepPartial<StaticRuleContext>): StaticRuleContext {
