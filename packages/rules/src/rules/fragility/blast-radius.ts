@@ -1,6 +1,10 @@
 import { readFileSync, existsSync } from 'node:fs';
 import type { Finding, Rule, RuleContext } from '../../types.js';
 
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 interface BlastRadiusConfig {
   minImporters?: number;
 }
@@ -35,12 +39,11 @@ export function createBlastRadiusRule(config: BlastRadiusConfig = {}): Rule {
 
         try {
           const content = existsSync(repoFile) ? readFileSync(repoFile, 'utf8') : '';
-          if (
-            content.includes(`'${filePath}'`) ||
-            content.includes(`"${filePath}"`) ||
-            content.includes(`'${basename}'`) ||
-            content.includes(`"${basename}"`)
-          ) {
+          const importRe = new RegExp(
+            `(import|require|from)\\s+['"\`]${escapeRegex(basename)}['"\`]`,
+            'm',
+          );
+          if (importRe.test(content)) {
             importers.push(repoFile);
           }
         } catch {
