@@ -53,6 +53,20 @@ export const missingFileReference: Rule = {
       }
     }
 
+    if (findings.length === 0) {
+      return [{
+        ruleId: this.meta.id,
+        ruleVersion: this.meta.version,
+        state: 'PASS',
+        confidence: 1,
+        signals: [],
+        temporalWeight: 1,
+        evidence: { file: agentsMd.filePath },
+        message: 'All file references in AGENTS.md resolve on disk.',
+        firedAt: new Date(),
+      }];
+    }
+
     return findings;
   },
 };
