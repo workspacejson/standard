@@ -90,10 +90,11 @@ export function createSectionStalenessRule(config?: { stalenessThresholdDays?: n
         : legacyCtx.config;
       const patchedCtx = Object.assign({}, ctx) as RuleContext;
       Object.assign(patchedCtx, { agentsMd: legacyCtx.agentsMd, repo: legacyCtx.repo, config: overriddenConfig });
-      return sectionStaleness.evaluate.call(
+      const result = await sectionStaleness.evaluate.call(
         { meta: sectionStaleness.meta },
         patchedCtx,
       );
+      return Array.isArray(result) ? result : [result];
     },
   };
 }
