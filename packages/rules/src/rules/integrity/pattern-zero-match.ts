@@ -6,7 +6,7 @@ export const patternZeroMatch: Rule = {
     id: 'pattern-zero-match',
     version: '2.0.0',
     description: 'A pattern referenced in AGENTS.md matches zero files in the repository.',
-    category: 'convention',
+    category: 'integrity',
     scope: 'workspace',
     firingMode: 'threshold',
     cost: 'cheap',

@@ -8,7 +8,7 @@ export type FindingState =
 export type Severity = 'critical' | 'error' | 'warning' | 'info';
 
 export type RuleCategory =
-  | 'fragility' | 'staleness' | 'coupling' | 'convention' | 'meta' | 'intelligence';
+  | 'fragility' | 'staleness' | 'coupling' | 'convention' | 'meta' | 'intelligence' | 'integrity';
 
 export type FiringMode = 'threshold' | 'trend' | 'projected' | 'compound';
 export type RuleScope = 'file' | 'package' | 'workspace' | 'cross-language-coupling';

@@ -7,7 +7,7 @@ export const missingFileReference: Rule = {
     id: 'missing-file-reference',
     version: '2.0.0',
     description: 'AGENTS.md references a file path that does not exist on disk.',
-    category: 'convention',
+    category: 'integrity',
     scope: 'workspace',
     firingMode: 'threshold',
     cost: 'cheap',
