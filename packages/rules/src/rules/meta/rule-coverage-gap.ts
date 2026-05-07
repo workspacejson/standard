@@ -1,4 +1,4 @@
-import type { Finding, Rule, RuleContext } from '../../../types.js';
+import type { Finding, Rule, RuleContext } from '../../types.js';
 
 const SOURCE_EXTENSIONS = ['.ts', '.js', '.py', '.rs', '.go', '.rb', '.java', '.kt', '.cs'];
 const COVERAGE_RULES = ['churn-fragility', 'blast-radius', 'missing-file-reference'];
