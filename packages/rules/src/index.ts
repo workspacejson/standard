@@ -1,4 +1,5 @@
-export { RuleEngine, computeHygieneScore } from './engine/rule-engine.js';
+export { RuleEngine } from './engine/rule-engine.js';
+export { computeHygieneScore } from './engine/hygiene-score.js';
 export { AgentsMdParser } from './parser/agents-md-parser.js';
 export { RepoScanner } from './scanner/repo-scanner.js';
 export { WorkspaceJsonValidator } from './validator/workspace-json-validator.js';
