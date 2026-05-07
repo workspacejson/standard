@@ -67,3 +67,34 @@ export const sectionStaleness: Rule = {
     return findings;
   },
 };
+
+export function createSectionStalenessRule(config?: { stalenessThresholdDays?: number }): Rule {
+  const customThreshold = config?.stalenessThresholdDays;
+  return {
+    ...sectionStaleness,
+    meta: {
+      ...sectionStaleness.meta,
+      configSchema: {
+        stalenessThresholdDays: customThreshold,
+      },
+    },
+    async evaluate(ctx: RuleContext): Promise<Finding[]> {
+      const legacyCtx = ctx as unknown as {
+        agentsMd: ParsedAgentsMd;
+        repo: RepoState;
+        config: AuditConfig;
+      };
+      // Override threshold if factory config provides one
+      const overriddenConfig = customThreshold !== undefined
+        ? { ...legacyCtx.config, stalenessThresholdDays: customThreshold }
+        : legacyCtx.config;
+      const patchedCtx = Object.assign({}, ctx) as RuleContext;
+      Object.assign(patchedCtx, { agentsMd: legacyCtx.agentsMd, repo: legacyCtx.repo, config: overriddenConfig });
+      const result = await sectionStaleness.evaluate.call(
+        { meta: sectionStaleness.meta },
+        patchedCtx,
+      );
+      return Array.isArray(result) ? result : [result];
+    },
+  };
+}
