@@ -24,7 +24,18 @@ export class RuleEngine {
     const skipped: EngineResult['skipped'] = [];
     const previewed: EngineResult['previewed'] = [];
 
-    const orderedRules = this.rdg.topologicalOrder();
+    let orderedRules: Rule[];
+    try {
+      orderedRules = this.rdg.topologicalOrder();
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      return {
+        findings: [],
+        skipped: [{ ruleId: '__graph__', reason }],
+        previewed: [],
+        durationMs: Date.now() - start,
+      };
+    }
 
     for (const rule of orderedRules) {
       // PREVIEW: rule requires non-open tier and vreko is absent
@@ -81,15 +92,16 @@ export class RuleEngine {
       const timeoutMs =
         rule.meta.timeoutMs ?? (rule.meta.cost === 'expensive' ? 5000 : 1000);
 
-      const timeoutPromise = new Promise<Finding[]>((_, reject) =>
-        setTimeout(
+      let timerId: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<Finding[]>((_, reject) => {
+        timerId = setTimeout(
           () =>
             reject(
               new Error(`Rule "${rule.meta.id}" timed out after ${timeoutMs}ms`),
             ),
           timeoutMs,
-        ),
-      );
+        );
+      });
 
       let rawFindings: Finding[];
       try {
@@ -99,8 +111,10 @@ export class RuleEngine {
           ),
           timeoutPromise,
         ]);
+        clearTimeout(timerId);
         rawFindings = result;
       } catch (err) {
+        clearTimeout(timerId);
         const reason = err instanceof Error ? err.message : String(err);
         skipped.push({ ruleId: rule.meta.id, reason });
         const skipFinding: Finding = {
