@@ -39,8 +39,10 @@ export function createBlastRadiusRule(config: BlastRadiusConfig = {}): Rule {
 
         try {
           const content = existsSync(repoFile) ? readFileSync(repoFile, 'utf8') : '';
+          // Match import/require/from statements referencing this file by path-without-extension
+          // (the standard resolution form) or the full path including extension.
           const importRe = new RegExp(
-            `(import|require|from)\\s+['"\`]${escapeRegex(basename)}['"\`]`,
+            `(import|require|from)\\s+['"\`]${escapeRegex(basename)}(?:\\.[a-zA-Z]+)?['"\`]`,
             'm',
           );
           if (importRe.test(content)) {
