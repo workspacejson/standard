@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AuditConfig, Finding, Rule, RuleContext } from '../types.js';
+import type { AuditConfig, Finding, ParsedAgentsMd, RepoState, Rule, RuleContext } from '../types.js';
 
 export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>
@@ -9,20 +9,30 @@ export type DeepPartial<T> = {
       : T[K];
 };
 
+// LegacyTestContext: union of v0.2 RuleContext fields and legacy v0.1 fields used by tests.
+// Tests pass partial agentsMd/repo/config objects; buildContext merges them into a full
+// v0.2 RuleContext with legacy fields attached for the bridge cast.
+// TODO(v0.3): remove legacy fields once all rules are migrated to WorkspaceSignals.
+type LegacyTestContext = DeepPartial<RuleContext> & {
+  agentsMd?: DeepPartial<ParsedAgentsMd>;
+  repo?: DeepPartial<RepoState>;
+  config?: DeepPartial<AuditConfig>;
+};
+
 export interface ValidCase {
   name: string;
-  context: DeepPartial<RuleContext>;
+  context: LegacyTestContext;
 }
 
 export interface InvalidCase {
   name: string;
-  context: DeepPartial<RuleContext>;
+  context: LegacyTestContext;
   expectedFindings: Partial<Finding>[];
 }
 
 export interface RuleTesterConfig {
   rule: Rule;
-  defaultContext?: DeepPartial<RuleContext>;
+  defaultContext?: LegacyTestContext;
 }
 
 const DEFAULT_CONFIG: AuditConfig = {
@@ -37,7 +47,7 @@ const DEFAULT_CONFIG: AuditConfig = {
 
 export class RuleTester {
   private readonly rule: Rule;
-  private readonly defaultCtx: DeepPartial<RuleContext>;
+  private readonly defaultCtx: LegacyTestContext;
 
   constructor(config: RuleTesterConfig) {
     this.rule = config.rule;
@@ -45,7 +55,7 @@ export class RuleTester {
   }
 
   run(name: string, cases: { valid: ValidCase[]; invalid: InvalidCase[] }): void {
-    describe(`Rule: ${name} (${this.rule.id})`, () => {
+    describe(`Rule: ${name} (${this.rule.meta.id})`, () => {
       describe('valid cases - expect zero findings', () => {
         for (const validCase of cases.valid) {
           it(validCase.name, async () => {
@@ -79,8 +89,8 @@ export class RuleTester {
     });
   }
 
-  private buildContext(partial: DeepPartial<RuleContext>): RuleContext {
-    const agentsMd = {
+  private buildContext(partial: LegacyTestContext): RuleContext {
+    const agentsMd: ParsedAgentsMd = {
       raw: '',
       filePath: 'AGENTS.md',
       lastModified: new Date(),
@@ -91,9 +101,9 @@ export class RuleTester {
       patterns: [],
       ...this.defaultCtx.agentsMd,
       ...partial.agentsMd,
-    } as RuleContext['agentsMd'];
+    };
 
-    const repo = {
+    const repo: RepoState = {
       root: process.cwd(),
       files: [],
       isMonorepo: false,
@@ -106,25 +116,54 @@ export class RuleTester {
       },
       ...this.defaultCtx.repo,
       ...partial.repo,
-    } as RuleContext['repo'];
+    };
 
-    const config = {
+    const config: AuditConfig = {
       ...DEFAULT_CONFIG,
       ...this.defaultCtx.config,
       ...partial.config,
-    } as AuditConfig;
-
-    const context: RuleContext = {
-      agentsMd,
-      repo,
-      config,
     };
 
-    const workspace = partial.workspace ?? this.defaultCtx.workspace;
-    if (workspace !== undefined) {
-      context.workspace = workspace;
-    }
+    // v0.2 RuleContext base — workspace-scoped rules use the legacy bridge cast
+    // to access agentsMd/repo/config; per-file git/file fields are stubs.
+    const base: RuleContext = {
+      repo: {
+        root: repo.root,
+        files: repo.files,
+        isMonorepo: repo.isMonorepo,
+      },
+      workspace: {
+        topology: repo.isMonorepo ? 'monorepo' : 'single-package',
+        ciProvider: 'unknown',
+        manifests: {},
+        packages: repo.packages,
+        agentFiles: {},
+      },
+      config: config as unknown as Record<string, unknown>,
+      file: {
+        path: agentsMd.filePath,
+        language: 'unknown',
+        content: agentsMd.raw,
+      },
+      git: {
+        recentCommits: async () => [],
+        fileAge: async () => 0,
+        churnScore: async () => 0,
+        lastModified: async () => new Date(),
+        authorCount: async () => 0,
+        commitsBetween: async () => [],
+        modificationVelocity: async () => 0,
+      },
+      findings: {
+        findingsFor: () => [],
+        hasFinding: () => false,
+        confidence: () => null,
+      },
+      emit: () => {},
+    };
 
-    return context;
+    // Attach legacy fields for the bridge cast used by migrated workspace-scoped rules.
+    // TODO(v0.3): remove once all rules access agentsMd via WorkspaceSignals.
+    return Object.assign(base, { agentsMd, repo, config }) as RuleContext;
   }
 }
