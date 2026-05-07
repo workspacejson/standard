@@ -154,10 +154,12 @@ export const conventionMismatch: ConventionMismatchRule = {
   },
 
   async checkFilenameCase(convention: ConventionEntry, agentsMd: ParsedAgentsMd, repo: RepoState, caseType: 'kebab' | 'camel' | 'pascal' | 'snake'): Promise<Finding | null> {
-    const sourceFiles = await fg('src/**/*.{ts,js,tsx,jsx}', {
-      cwd: repo.root,
-      ignore: ['node_modules/**', 'dist/**', '**/*.d.ts'],
-    });
+    const globs = repo.isMonorepo
+      ? repo.packages.map((pkg) => `${pkg.path}/src/**/*.{ts,js,tsx,jsx}`)
+      : ['src/**/*.{ts,js,tsx,jsx}'];
+    const sourceFiles = (await Promise.all(
+      globs.map((g) => fg(g, { cwd: repo.root, ignore: ['node_modules/**', 'dist/**', '**/*.d.ts'] }))
+    )).flat();
 
     const violations = sourceFiles.filter((file) => {
       const name = basename(file).replace(/\.(ts|js|tsx|jsx)$/, '');
