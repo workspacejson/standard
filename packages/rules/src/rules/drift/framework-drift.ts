@@ -1,4 +1,4 @@
-import type { Finding, Rule, RuleContext } from '../../types.js';
+import type { AuditConfig, Finding, ParsedAgentsMd, RepoState, Rule, RuleContext } from '../../types.js';
 
 const FRAMEWORK_MANIFEST_MAP: Record<string, string[]> = {
   react: ['react', '@types/react'],
@@ -33,21 +33,36 @@ const FRAMEWORK_MANIFEST_MAP: Record<string, string[]> = {
 };
 
 export const frameworkDrift: Rule = {
-  id: 'framework-drift',
-  category: 'drift',
-  severity: 'warning',
-  description: 'AGENTS.md mentions a framework not found in any detected manifest.',
+  meta: {
+    id: 'framework-drift',
+    version: '2.0.0',
+    description: 'AGENTS.md mentions a framework not found in any detected manifest.',
+    category: 'staleness',
+    scope: 'workspace',
+    firingMode: 'threshold',
+    cost: 'cheap',
+    requiredTier: 'open',
+  },
 
   async evaluate(ctx: RuleContext): Promise<Finding[]> {
+    // v0.2 migration bridge: workspace-scoped rules access agentsMd via legacy cast.
+    // TODO(v0.3): move agentsMd into WorkspaceSignals or a dedicated workspace rule context.
+    const legacyCtx = ctx as unknown as {
+      agentsMd: ParsedAgentsMd;
+      repo: RepoState;
+      config: AuditConfig;
+    };
+    const { agentsMd, repo } = legacyCtx;
+
     const findings: Finding[] = [];
 
-    if (ctx.repo.manifests.length === 0) {
+    if (repo.manifests.length === 0) {
       return findings;
     }
 
-    const allDependencies = new Set(ctx.repo.manifests.flatMap((manifest) => manifest.dependencies));
+    const allDependencies = new Set(repo.manifests.flatMap((manifest) => manifest.dependencies));
 
-    for (const token of ctx.agentsMd.frameworkTokens) {
+    for (const token of agentsMd.frameworkTokens) {
       const variants = FRAMEWORK_MANIFEST_MAP[token];
       if (!variants) continue;
 
@@ -59,14 +74,20 @@ export const frameworkDrift: Rule = {
 
       if (!found) {
         findings.push({
-          ruleId: this.id,
-          severity: this.severity,
-          message: `Framework "${token}" is mentioned in AGENTS.md but not found in any manifest.`,
+          ruleId: this.meta.id,
+          ruleVersion: this.meta.version,
+          state: 'WARN',
+          severity: 'warning',
+          confidence: 1,
+          signals: [],
+          temporalWeight: 1,
           evidence: {
-            file: ctx.agentsMd.filePath,
+            file: agentsMd.filePath,
             snippet: token,
           },
+          message: `Framework "${token}" is mentioned in AGENTS.md but not found in any manifest.`,
           remediation: `If "${token}" is no longer used, remove it from AGENTS.md. If it is used, verify the manifest includes it.`,
+          firedAt: new Date(),
         });
       }
     }
