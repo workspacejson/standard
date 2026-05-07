@@ -27,7 +27,7 @@ export const missingFileReference: Rule = {
     const findings: Finding[] = [];
 
     for (const filePath of agentsMd.filePaths) {
-      if (filePath.startsWith('http') || filePath.startsWith('#')) continue;
+      if (filePath.startsWith('http://') || filePath.startsWith('https://') || filePath.startsWith('#')) continue;
       if (filePath.includes('*') || filePath.includes('{')) continue;
 
       const normalized = filePath.replace(/^\.\//, '');
