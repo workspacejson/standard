@@ -5,7 +5,9 @@ export { computeHygieneScore } from './engine/hygiene-score.js';
 export { RuleDependencyGraph } from './engine/rule-dependency-graph.js';
 export { FindingGraphImpl } from './engine/finding-graph.js';
 export { computeTemporalWeight, weightedConfidence } from './engine/temporal-decay.js';
-export { IncrementalCache } from './engine/incremental-cache.js';
+// NOTE: IncrementalCache is not exported here because it is not yet wired into RuleEngine.
+// It is an @internal implementation detail until per-rule caching is fully integrated.
+// export { IncrementalCache } from './engine/incremental-cache.js';
 
 // Parsers / Scanners / Validators (unchanged from v0.1)
 export { AgentsMdParser } from './parser/agents-md-parser.js';
