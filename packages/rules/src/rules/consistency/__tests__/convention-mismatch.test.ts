@@ -27,9 +27,8 @@ tester.run('convention-mismatch', {
         },
       },
     },
-  ],
-  invalid: [
     {
+      // convention-mismatch returns WARN (not FAIL), so use expectedState: 'WARN'
       name: 'tests in tests dir but tests are elsewhere',
       context: {
         repo: {
@@ -53,9 +52,8 @@ tester.run('convention-mismatch', {
           ],
         },
       },
-      expectedFindings: [
-        { ruleId: 'convention-mismatch', severity: 'warning' },
-      ],
+      expectedState: 'WARN',
     },
   ],
+  invalid: [],
 });

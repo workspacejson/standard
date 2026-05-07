@@ -22,9 +22,9 @@ tester.run('section-staleness', {
         },
       },
     },
-  ],
-  invalid: [
     {
+      // section-staleness returns WARN (not FAIL), so stale docs are a "valid" case
+      // in the v2 API sense (no FAIL). Use expectedState: 'WARN' to assert the warning fires.
       name: 'stale with activity and referenced file change',
       context: {
         agentsMd: {
@@ -39,9 +39,8 @@ tester.run('section-staleness', {
           },
         },
       },
-      expectedFindings: [
-        { ruleId: 'section-staleness' },
-      ],
+      expectedState: 'WARN',
     },
   ],
+  invalid: [],
 });

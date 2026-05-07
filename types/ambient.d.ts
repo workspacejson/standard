@@ -172,16 +172,27 @@ declare module 'ajv/dist/2020.js' {
 declare module 'vitest' {
   export function describe(name: string, fn: () => void): void;
   export function it(name: string, fn: () => unknown): void;
-  export function expect(value: unknown): {
+
+  interface Assertion {
     toHaveLength(length: number): void;
     toBe(value: unknown): void;
     toBeDefined(): void;
+    toBeUndefined(): void;
+    toBeNull(): void;
     toBeGreaterThan(value: number): void;
     toBeGreaterThanOrEqual(value: number): void;
     toBeLessThanOrEqual(value: number): void;
     toBeLessThan(value: number): void;
     toContain(value: unknown): void;
-    toMatch(value: RegExp): void;
+    toMatch(value: RegExp | string): void;
     toBeTruthy(): void;
-  };
+    toEqual(value: unknown): void;
+    toBeInstanceOf(expected: unknown): void;
+    toBeTypeOf(expected: 'bigint' | 'boolean' | 'function' | 'number' | 'object' | 'string' | 'symbol' | 'undefined'): void;
+    toBeCloseTo(value: number, precision?: number): void;
+    not: Assertion;
+    toThrow(expected?: string | RegExp): void;
+  }
+
+  export function expect(value: unknown): Assertion;
 }

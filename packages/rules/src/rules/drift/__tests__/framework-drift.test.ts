@@ -25,9 +25,8 @@ tester.run('framework-drift', {
         },
       },
     },
-  ],
-  invalid: [
     {
+      // framework-drift returns WARN (not FAIL), so use expectedState: 'WARN'
       name: 'framework missing from manifest',
       context: {
         repo: {
@@ -44,9 +43,8 @@ tester.run('framework-drift', {
           frameworkTokens: ['react'],
         },
       },
-      expectedFindings: [
-        { ruleId: 'framework-drift', severity: 'warning' },
-      ],
+      expectedState: 'WARN',
     },
   ],
+  invalid: [],
 });

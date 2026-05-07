@@ -23,9 +23,8 @@ tester.run('pattern-zero-match', {
         },
       },
     },
-  ],
-  invalid: [
     {
+      // pattern-zero-match returns WARN (not FAIL), so use expectedState: 'WARN'
       name: 'zero-match glob',
       context: {
         repo: {
@@ -41,9 +40,8 @@ tester.run('pattern-zero-match', {
           ],
         },
       },
-      expectedFindings: [
-        { ruleId: 'pattern-zero-match', severity: 'warning' },
-      ],
+      expectedState: 'WARN',
     },
   ],
+  invalid: [],
 });
