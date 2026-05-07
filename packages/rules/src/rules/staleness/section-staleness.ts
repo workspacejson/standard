@@ -36,7 +36,17 @@ export const sectionStaleness: Rule = {
     const gate3 = repo.gitHistory.filesChangedLast30Days.some((file) => referencedFiles.has(file) || referencedFiles.has(`./${file}`));
 
     if (!gate1 || !gate2 || !gate3) {
-      return findings;
+      return [{
+        ruleId: this.meta.id,
+        ruleVersion: this.meta.version,
+        state: 'PASS',
+        confidence: 1,
+        signals: [],
+        temporalWeight: 1,
+        evidence: { file: agentsMd.filePath },
+        message: 'AGENTS.md is current relative to repository activity.',
+        firedAt: new Date(),
+      }];
     }
 
     const stalenessRatio = ageDays / thresholdDays;
@@ -75,7 +85,7 @@ export function createSectionStalenessRule(config?: { stalenessThresholdDays?: n
     meta: {
       ...sectionStaleness.meta,
       configSchema: {
-        stalenessThresholdDays: customThreshold,
+        stalenessThresholdDays: { type: 'number', minimum: 1 },
       },
     },
     async evaluate(ctx: RuleContext): Promise<Finding[]> {
