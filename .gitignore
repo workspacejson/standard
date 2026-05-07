@@ -6,3 +6,8 @@ packages/agents-audit/.tmp-*/
 .DS_Store
 coverage/
 *.log
+
+# Local planning/config — not for public repo
+.planning/
+.claude/
+CLAUDE.md
