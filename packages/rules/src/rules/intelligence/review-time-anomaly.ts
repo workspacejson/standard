@@ -49,9 +49,11 @@ export function createReviewTimeAnomalyRule(): Rule {
 
         let reviewSeconds: number;
         try {
-          const recentCommits = await ctx.git.recentCommits(1);
-          if (recentCommits.length === 0) continue;
-          reviewSeconds = ctx.vreko.velocity.reviewTime(recentCommits[0]!.hash);
+          const windowStart = new Date(activity.at.getTime() - 3_600_000);
+          const windowEnd   = new Date(activity.at.getTime() + 3_600_000);
+          const commits = await ctx.git.commitsBetween(filePath, windowStart, windowEnd);
+          if (commits.length === 0) continue;
+          reviewSeconds = ctx.vreko.velocity.reviewTime(commits[0]!.hash);
         } catch {
           continue;
         }
