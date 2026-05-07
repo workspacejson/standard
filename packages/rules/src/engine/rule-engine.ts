@@ -1,54 +1,142 @@
-import type { Finding, HygieneScore, Rule, RuleContext } from '../types.js';
+import { FindingGraphImpl } from './finding-graph.js';
+import { RuleDependencyGraph } from './rule-dependency-graph.js';
+import { computeTemporalWeight } from './temporal-decay.js';
+import type { Finding, Rule, RuleContext } from '../types.js';
+
+export interface EngineResult {
+  findings: Finding[];
+  skipped: Array<{ ruleId: string; reason: string }>;
+  previewed: Array<{ ruleId: string; message: string }>;
+  durationMs: number;
+}
 
 export class RuleEngine {
-  private rules: Rule[] = [];
+  private readonly rdg = new RuleDependencyGraph();
 
   register(rule: Rule): void {
-    this.rules.push(rule);
+    this.rdg.register(rule); // throws on duplicate
   }
 
-  async run(ctx: RuleContext): Promise<{ findings: Finding[]; durationMs: number }> {
+  async run(ctx: RuleContext): Promise<EngineResult> {
     const start = Date.now();
-    const findings: Finding[] = [];
+    const findingGraph = new FindingGraphImpl();
+    const allFindings: Finding[] = [];
+    const skipped: EngineResult['skipped'] = [];
+    const previewed: EngineResult['previewed'] = [];
 
-    const results = await Promise.allSettled(this.rules.map((rule) => rule.evaluate(ctx)));
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        findings.push(...result.value);
+    const orderedRules = this.rdg.topologicalOrder();
+
+    for (const rule of orderedRules) {
+      // PREVIEW: rule requires non-open tier and vreko is absent
+      if (rule.meta.requiredTier !== 'open' && !ctx.vreko) {
+        const message = rule.meta.previewMessage
+          ? rule.meta.previewMessage(ctx)
+          : `Rule "${rule.meta.id}" requires ${rule.meta.requiredTier} tier`;
+        previewed.push({ ruleId: rule.meta.id, message });
+
+        const previewFinding: Finding = {
+          ruleId: rule.meta.id,
+          ruleVersion: rule.meta.version,
+          state: 'PREVIEW',
+          confidence: 1,
+          signals: [],
+          temporalWeight: 1,
+          evidence: {},
+          message,
+          firedAt: new Date(),
+        };
+        allFindings.push(previewFinding);
+        findingGraph.add([previewFinding]);
+        continue;
       }
+
+      // SKIP: prerequisite rules did not PASS or WARN
+      if (rule.meta.prerequisites && rule.meta.prerequisites.length > 0) {
+        const prereqsMet = rule.meta.prerequisites.every(
+          (prereqId) =>
+            findingGraph.hasFinding(prereqId, 'PASS') ||
+            findingGraph.hasFinding(prereqId, 'WARN'),
+        );
+        if (!prereqsMet) {
+          const reason = `Prerequisites not met: ${rule.meta.prerequisites.join(', ')}`;
+          skipped.push({ ruleId: rule.meta.id, reason });
+          const skipFinding: Finding = {
+            ruleId: rule.meta.id,
+            ruleVersion: rule.meta.version,
+            state: 'SKIP',
+            confidence: 0,
+            signals: [],
+            temporalWeight: 0,
+            evidence: {},
+            message: reason,
+            firedAt: new Date(),
+          };
+          allFindings.push(skipFinding);
+          findingGraph.add([skipFinding]);
+          continue;
+        }
+      }
+
+      // TIMEOUT: wrap evaluate() in a race
+      const timeoutMs =
+        rule.meta.timeoutMs ?? (rule.meta.cost === 'expensive' ? 5000 : 1000);
+
+      const timeoutPromise = new Promise<Finding[]>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(`Rule "${rule.meta.id}" timed out after ${timeoutMs}ms`),
+            ),
+          timeoutMs,
+        ),
+      );
+
+      let rawFindings: Finding[];
+      try {
+        const result = await Promise.race([
+          Promise.resolve(rule.evaluate(ctx)).then((r) =>
+            Array.isArray(r) ? r : [r],
+          ),
+          timeoutPromise,
+        ]);
+        rawFindings = result;
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        skipped.push({ ruleId: rule.meta.id, reason });
+        const skipFinding: Finding = {
+          ruleId: rule.meta.id,
+          ruleVersion: rule.meta.version,
+          state: 'SKIP',
+          confidence: 0,
+          signals: [],
+          temporalWeight: 0,
+          evidence: {},
+          message: reason,
+          firedAt: new Date(),
+        };
+        allFindings.push(skipFinding);
+        findingGraph.add([skipFinding]);
+        continue;
+      }
+
+      // Apply temporal decay to each finding
+      const decayed = rawFindings.map((f) => ({
+        ...f,
+        temporalWeight: computeTemporalWeight(
+          f.firedAt,
+          rule.meta.decayConstant ?? 0.01,
+        ),
+      }));
+
+      allFindings.push(...decayed);
+      findingGraph.add(decayed);
     }
 
     return {
-      findings,
+      findings: allFindings,
+      skipped,
+      previewed,
       durationMs: Date.now() - start,
     };
   }
-}
-
-export function computeHygieneScore(findings: Finding[]): HygieneScore {
-  const errorCount = findings.filter((finding) => finding.severity === 'error').length;
-  const warningCount = findings.filter((finding) => finding.severity === 'warning').length;
-  const infoCount = findings.filter((finding) => finding.severity === 'info').length;
-
-  let score =
-    100 *
-    Math.max(0, 1 - errorCount / 10) *
-    Math.max(0, 1 - warningCount / 50) *
-    Math.max(0, 1 - infoCount / 200);
-
-  if (errorCount > 0) {
-    score = Math.min(score, 70);
-  }
-
-  score = Math.round(score);
-
-  const grade = score >= 95 ? 'A' : score >= 80 ? 'B' : score >= 65 ? 'C' : score >= 50 ? 'D' : 'F';
-
-  return {
-    value: score,
-    grade,
-    errorCount,
-    warningCount,
-    infoCount,
-  };
 }
