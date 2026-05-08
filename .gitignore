@@ -11,3 +11,6 @@ coverage/
 .planning/
 .claude/
 CLAUDE.md
+
+# Automated audit outputs — not for public repo
+audit-output/

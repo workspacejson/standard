@@ -5,15 +5,44 @@ export const workspaceJsonSchema = {
   type: 'object',
   required: ['version'],
   properties: {
-    version: {
+    version: { type: 'string' },
+    generatedAt: { type: 'string', format: 'date-time' },
+    repository: { type: 'string' },
+    topology: {
       type: 'string',
+      enum: ['single-package', 'monorepo', 'polyglot-monorepo'],
     },
-    generatedAt: {
+    ciProvider: {
       type: 'string',
-      format: 'date-time',
+      enum: ['github-actions', 'gitlab-ci', 'circleci', 'jenkins', 'none', 'unknown'],
     },
-    repository: {
-      type: 'string',
+    agentFiles: {
+      type: 'object',
+      properties: {
+        agentsMd: { type: 'string' },
+        workspaceJson: { type: 'string' },
+      },
+      additionalProperties: false,
+    },
+    frameworks: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    conventions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['raw', 'type', 'canonical'],
+        properties: {
+          raw: { type: 'string' },
+          type: {
+            type: 'string',
+            enum: ['filename-case', 'directory-layout', 'naming', 'structural', 'other'],
+          },
+          canonical: { type: 'string' },
+        },
+        additionalProperties: false,
+      },
     },
     packages: {
       type: 'array',
@@ -23,9 +52,30 @@ export const workspaceJsonSchema = {
         properties: {
           name: { type: 'string' },
           path: { type: 'string' },
+          agentsMd: { type: 'string' },
+          dependencies: { type: 'array', items: { type: 'string' } },
         },
         additionalProperties: true,
       },
+    },
+    gitSummary: {
+      type: 'object',
+      properties: {
+        nonAgentsCommitCount30Days: { type: 'integer', minimum: 0 },
+        filesChangedLast30Days: { type: 'array', items: { type: 'string' } },
+      },
+      additionalProperties: false,
+    },
+    hygiene: {
+      type: 'object',
+      properties: {
+        score: { type: 'number', minimum: 0, maximum: 100 },
+        grade: { type: 'string', enum: ['A', 'B', 'C', 'D', 'F'] },
+        failCount: { type: 'integer', minimum: 0 },
+        warnCount: { type: 'integer', minimum: 0 },
+        scannedAt: { type: 'string', format: 'date-time' },
+      },
+      additionalProperties: false,
     },
     metadata: {
       type: 'object',

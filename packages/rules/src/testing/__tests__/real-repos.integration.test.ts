@@ -48,9 +48,13 @@ describe('Real repo integration - workspace root', () => {
 
     for (const finding of findings) {
       expect(finding.ruleId).toBeTruthy();
-      expect(finding.severity).toMatch(/^(error|warning|info)$/);
       expect(finding.message).toBeTruthy();
       expect(typeof finding.evidence).toBe('object');
+      if (finding.state === 'FAIL' || finding.state === 'WARN') {
+        expect(finding.severity).toMatch(/^(error|warning|info)$/);
+      } else {
+        expect(finding.severity).toBeUndefined();
+      }
     }
   });
 
