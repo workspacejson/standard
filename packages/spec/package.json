@@ -51,7 +51,8 @@
     "dist",
     "schema",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsc && node scripts/generate-types.js",

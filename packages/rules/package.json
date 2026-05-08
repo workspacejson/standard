@@ -53,7 +53,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup src/index.ts src/testing/rule-tester.ts --format esm --dts --external vitest",
