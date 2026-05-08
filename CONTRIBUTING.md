@@ -25,3 +25,8 @@ node packages/agents-audit/dist/cli.js scan .
 - Update `CHANGELOG.md` for release-facing changes
 - Keep the CLI contract documented in `packages/agents-audit/README.md`
 
+## Reporting Issues
+
+File bugs at [GitHub Issues](https://github.com/workspace-json/agents-audit/issues).
+For security vulnerabilities, follow the process in [`SECURITY.md`](./SECURITY.md).
+

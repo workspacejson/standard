@@ -121,7 +121,7 @@ export class AgentsMdParser {
     const sections = this.extractSections(tree, content);
     const filePaths = this.extractFilePaths(content);
     const frameworkTokens = this.extractFrameworkTokens(content);
-    const conventions = this.extractConventions(tree);
+    const conventions = this.extractConventions(tree, content);
     const patterns = this.extractPatterns(content);
 
     return {
@@ -182,7 +182,8 @@ export class AgentsMdParser {
     return KNOWN_FRAMEWORKS.filter((token) => lower.includes(token));
   }
 
-  private extractConventions(tree: MdNode): ConventionEntry[] {
+  private extractConventions(tree: MdNode, raw: string): ConventionEntry[] {
+    const rawLines = raw.split('\n');
     const conventions: ConventionEntry[] = [];
 
     walk(tree, (node) => {
@@ -190,9 +191,13 @@ export class AgentsMdParser {
         return;
       }
 
-      const text = toText(node);
-      const lower = text.toLowerCase();
       const lineNumber = node.position?.start?.line ?? 1;
+      const lineEnd = node.position?.end?.line ?? lineNumber;
+      // Use raw source lines for synonym matching so Markdown formatting (e.g. __bold__)
+      // does not strip characters that are meaningful to the synonym phrases.
+      const rawText = rawLines.slice(lineNumber - 1, lineEnd).join('\n');
+      const lower = rawText.toLowerCase();
+      const text = toText(node);
 
       for (const [phrase, canonical] of Object.entries(CONVENTION_SYNONYMS)) {
         if (lower.includes(phrase)) {

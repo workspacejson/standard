@@ -19,13 +19,21 @@ export function computeHygieneScore(
     previewCount: 0,
   };
 
+  let totalPenalty = 0;
+  let hasCriticalFail = false;
+  let hasAnyFail = false;
+
   for (const f of findings) {
     switch (f.state) {
       case 'FAIL':
         breakdown.failCount++;
+        hasAnyFail = true;
+        if (f.severity === 'critical') hasCriticalFail = true;
+        totalPenalty += (SEVERITY_WEIGHTS[f.severity ?? 'error'] ?? SEVERITY_WEIGHTS.error) * f.confidence * f.temporalWeight;
         break;
       case 'WARN':
         breakdown.warnCount++;
+        totalPenalty += 3 * f.confidence * f.temporalWeight;
         break;
       case 'INSUFFICIENT_DATA':
         breakdown.insufficientDataCount++;
@@ -36,25 +44,6 @@ export function computeHygieneScore(
       case 'PREVIEW':
         breakdown.previewCount++;
         break;
-      // PASS findings don't affect breakdown counts (good news)
-    }
-  }
-
-  // Compute penalty from FAIL and WARN findings using severity weights + temporal weighting
-  let totalPenalty = 0;
-  let hasCriticalFail = false;
-  let hasAnyFail = false;
-
-  for (const f of findings) {
-    if (f.state === 'FAIL') {
-      hasAnyFail = true;
-      const weight = SEVERITY_WEIGHTS[f.severity ?? 'error'] ?? SEVERITY_WEIGHTS.error;
-      totalPenalty += weight * f.confidence * f.temporalWeight;
-      if (f.severity === 'critical') hasCriticalFail = true;
-    }
-    if (f.state === 'WARN') {
-      // WARN penalty: 3 * confidence * temporalWeight
-      totalPenalty += 3 * f.confidence * f.temporalWeight;
     }
   }
 
