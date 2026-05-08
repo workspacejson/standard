@@ -26,8 +26,7 @@ describe('Real repo integration - workspace root', () => {
     const agentsMdContent = await readFile(AGENTS_MD_PATH, 'utf8');
     const agentsMd = await parser.parse(AGENTS_MD_PATH, agentsMdContent);
     const repo = await scanner.scan(VREKO_ROOT);
-
-    const { findings, durationMs } = await engine.run({
+    const context = {
       agentsMd,
       repo,
       config: {
@@ -39,7 +38,9 @@ describe('Real repo integration - workspace root', () => {
         reportDir: '.agents/audit-history',
         ignore: [],
       },
-    });
+    } as unknown;
+
+    const { findings, durationMs } = await engine.run(context as never);
     const score = computeHygieneScore(findings);
 
     expect(durationMs).toBeLessThan(10_000);
@@ -72,7 +73,7 @@ describe('Real repo integration - workspace root', () => {
     const agentsMdContent = await readFile(AGENTS_MD_PATH, 'utf8');
     const agentsMd = await parser.parse(AGENTS_MD_PATH, agentsMdContent);
     const repo = await scanner.scan(VREKO_ROOT);
-    await engine.run({
+    const context = {
       agentsMd,
       repo,
       config: {
@@ -84,7 +85,8 @@ describe('Real repo integration - workspace root', () => {
         reportDir: '.agents/audit-history',
         ignore: [],
       },
-    });
+    } as unknown;
+    await engine.run(context as never);
     const elapsed = Date.now() - start;
     expect(elapsed).toBeLessThan(3_000);
   });

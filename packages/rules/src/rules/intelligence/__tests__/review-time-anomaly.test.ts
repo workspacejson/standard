@@ -58,15 +58,15 @@ function makeActivity(overrides: {
 
 function makeCtx(overrides: {
   filePath?: string;
-  vreko?: VrekoContext;
   repoFiles?: string[];
   git?: GitSignals;
+  vreko?: VrekoContext;
 }): RuleContext {
   const {
     filePath = 'src/service.ts',
-    vreko,
     repoFiles = [],
     git = makeGit([{ hash: COMMIT_HASH, message: 'feat: add service', author: 'dev', date: new Date() }]),
+    vreko,
   } = overrides;
 
   const findings: FindingGraph = {
@@ -89,14 +89,14 @@ function makeCtx(overrides: {
     git,
     findings,
     emit: () => {},
-    vreko,
+    ...(vreko !== undefined ? { vreko } : {}),
   };
 }
 
 describe('review-time-anomaly rule', () => {
   it('returns [] when ctx.vreko is undefined (defensive guard)', async () => {
     const rule = createReviewTimeAnomalyRule();
-    const ctx = makeCtx({ vreko: undefined });
+    const ctx = makeCtx({});
     const findings = await rule.evaluate(ctx);
     expect(findings).toEqual([]);
   });

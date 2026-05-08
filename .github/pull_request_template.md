@@ -7,6 +7,7 @@ Describe what changed and why.
 - [ ] `pnpm -r typecheck`
 - [ ] `pnpm -r test`
 - [ ] `pnpm -r build`
+- [ ] `node packages/agents-audit/dist/cli.js scan . --fail-on error`
 
 ## Notes
 

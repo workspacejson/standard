@@ -24,8 +24,8 @@ function makeRule(
       firingMode: 'threshold',
       cost: opts?.cost ?? 'cheap',
       requiredTier: opts?.requiredTier ?? 'open',
-      prerequisites: opts?.prerequisites,
-      timeoutMs: opts?.timeoutMs,
+      ...(opts?.prerequisites !== undefined ? { prerequisites: opts.prerequisites } : {}),
+      ...(opts?.timeoutMs !== undefined ? { timeoutMs: opts.timeoutMs } : {}),
     },
     evaluate: opts?.evaluate ?? (async () => []),
   };
@@ -239,7 +239,7 @@ describe('RuleEngine', () => {
 
     const skipFinding = result.findings.find((f) => f.ruleId === 'slow-rule');
     expect(skipFinding?.state).toBe('SKIP');
-  }, 10_000);
+  });
 
   it('expensive rules get 5000ms timeout by default', async () => {
     const engine = new RuleEngine();

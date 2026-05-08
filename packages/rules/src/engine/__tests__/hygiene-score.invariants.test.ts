@@ -9,13 +9,13 @@ function makeFinding(state: FindingState, severity?: Severity): Finding {
     ruleId: 'test',
     ruleVersion: '1.0.0',
     state,
-    severity,
     confidence: 1,
     signals: [],
     temporalWeight: 1,
     evidence: {},
     message: 'test',
     firedAt: new Date(),
+    ...(severity !== undefined ? { severity } : {}),
   };
 }
 
@@ -76,9 +76,10 @@ describe('HygieneScore invariants', () => {
     expect(score.breakdown.failCount).toBe(2);
     expect(score.breakdown.warnCount).toBe(2);
     // Verify no legacy flat count fields
-    expect((score as Record<string, unknown>).errorCount).toBeUndefined();
-    expect((score as Record<string, unknown>).warningCount).toBeUndefined();
-    expect((score as Record<string, unknown>).infoCount).toBeUndefined();
+    const scoreView = score as unknown as Record<string, unknown>;
+    expect(scoreView.errorCount).toBeUndefined();
+    expect(scoreView.warningCount).toBeUndefined();
+    expect(scoreView.infoCount).toBeUndefined();
   });
 
   it('more errors = lower or equal score', () => {

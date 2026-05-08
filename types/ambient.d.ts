@@ -51,6 +51,7 @@ declare module 'commander' {
     argument(value: string, description?: string, defaultValue?: string): this;
     option(flags: string, description?: string): this;
     action(handler: (...args: any[]) => unknown): this;
+    exitOverride(): this;
     parseAsync(argv: string[]): Promise<void>;
   }
 }
@@ -170,8 +171,31 @@ declare module 'ajv/dist/2020.js' {
 }
 
 declare module 'vitest' {
-  export function describe(name: string, fn: () => void): void;
-  export function it(name: string, fn: () => unknown): void;
+  interface MockInstance {
+    mockImplementation(impl: (...args: any[]) => unknown): this;
+    mockImplementationOnce(impl: (...args: any[]) => unknown): this;
+    mockResolvedValue(value: unknown): this;
+    mockResolvedValueOnce(value: unknown): this;
+    mockReturnValue(value: unknown): this;
+    mockReturnValueOnce(value: unknown): this;
+    mockRestore(): void;
+    mockClear(): void;
+  }
+
+  type Mock = MockInstance & ((...args: any[]) => unknown);
+
+  interface ItFn {
+    (name: string, fn: () => unknown): void;
+    each(cases: unknown[]): (name: string, fn: (...args: any[]) => unknown) => void;
+  }
+
+  export const describe: {
+    (name: string, fn: () => void): void;
+  };
+  export const it: ItFn;
+  export const beforeEach: (fn: () => unknown) => void;
+  export const afterEach: (fn: () => unknown) => void;
+  export const afterAll: (fn: () => unknown) => void;
 
   interface Assertion {
     toHaveLength(length: number): void;
@@ -190,9 +214,27 @@ declare module 'vitest' {
     toBeInstanceOf(expected: unknown): void;
     toBeTypeOf(expected: 'bigint' | 'boolean' | 'function' | 'number' | 'object' | 'string' | 'symbol' | 'undefined'): void;
     toBeCloseTo(value: number, precision?: number): void;
+    toHaveBeenCalled(): void;
+    toHaveBeenCalledWith(...args: unknown[]): void;
+    toMatchObject(expected: unknown): void;
+    resolves: Assertion;
+    rejects: Assertion;
     not: Assertion;
     toThrow(expected?: string | RegExp): void;
   }
 
-  export function expect(value: unknown): Assertion;
+  interface ExpectStatic {
+    (value: unknown): Assertion;
+    any(value: unknown): unknown;
+  }
+
+  export const expect: ExpectStatic;
+
+  export const vi: {
+    fn<T extends (...args: any[]) => unknown>(impl?: T): MockInstance & T;
+    spyOn<T extends object, K extends keyof T>(obj: T, method: K, accessType?: 'get' | 'set'): MockInstance & ((...args: any[]) => unknown);
+    hoisted<T>(factory: () => T): T;
+    mock(moduleName: string, factory?: () => unknown): void;
+    clearAllMocks(): void;
+  };
 }

@@ -49,5 +49,4 @@ jobs:
           node -e "import('agents-audit')"
 
       - name: Run agents-audit on this repo
-        run: node packages/agents-audit/dist/cli.js scan .
-        continue-on-error: true
+        run: node packages/agents-audit/dist/cli.js scan . --fail-on error

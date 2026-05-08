@@ -1,27 +1,21 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { describe, expect, it, afterAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { FindingGraph, GitSignals, RuleContext } from '../../../types.js';
 import { createBlastRadiusRule } from '../blast-radius.js';
-
-// Create a temporary directory for test files (blast-radius reads real files)
-const TEST_DIR = join(tmpdir(), `blast-radius-test-${process.pid}`);
-mkdirSync(TEST_DIR, { recursive: true });
-
-afterAll(() => {
-  rmSync(TEST_DIR, { recursive: true, force: true });
-});
 
 function makeCtx(overrides: {
   filePath?: string;
   repoFiles?: string[];
   hasFinding?: boolean;
+  rootDir: string;
 }): RuleContext {
   const {
-    filePath = join(TEST_DIR, 'target.ts'),
+    filePath = join(overrides.rootDir, 'target.ts'),
     repoFiles = [],
     hasFinding = false,
+    rootDir,
   } = overrides;
 
   const git: GitSignals = {
@@ -42,7 +36,7 @@ function makeCtx(overrides: {
   };
 
   return {
-    repo: { root: TEST_DIR, files: repoFiles, isMonorepo: false },
+    repo: { root: rootDir, files: repoFiles, isMonorepo: false },
     workspace: {
       topology: 'single-package',
       ciProvider: 'unknown',
@@ -65,6 +59,9 @@ describe('blast-radius rule', () => {
   });
 
   it('returns PASS when fan-in < minImporters (default 5)', async () => {
+    const TEST_DIR = join(tmpdir(), `blast-radius-test-${process.pid}-${Date.now()}`);
+    mkdirSync(TEST_DIR, { recursive: true });
+    try {
     const rule = createBlastRadiusRule();
     const targetFile = join(TEST_DIR, 'low-fanin.ts');
     writeFileSync(targetFile, 'export const x = 1;');
@@ -77,13 +74,19 @@ describe('blast-radius rule', () => {
       importers.push(f);
     }
 
-    const ctx = makeCtx({ filePath: targetFile, repoFiles: [...importers, targetFile] });
-    const findings = await rule.evaluate(ctx);
-    expect(findings).toHaveLength(1);
-    expect(findings[0]!.state).toBe('PASS');
+      const ctx = makeCtx({ rootDir: TEST_DIR, filePath: targetFile, repoFiles: [...importers, targetFile] });
+      const findings = await rule.evaluate(ctx);
+      expect(findings).toHaveLength(1);
+      expect(findings[0]!.state).toBe('PASS');
+    } finally {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
   });
 
   it('returns WARN when fan-in >= minImporters but no churn concern', async () => {
+    const TEST_DIR = join(tmpdir(), `blast-radius-test-${process.pid}-${Date.now()}`);
+    mkdirSync(TEST_DIR, { recursive: true });
+    try {
     const rule = createBlastRadiusRule();
     const targetFile = join(TEST_DIR, 'high-fanin-no-churn.ts');
     writeFileSync(targetFile, 'export const y = 2;');
@@ -96,18 +99,25 @@ describe('blast-radius rule', () => {
       importers.push(f);
     }
 
-    const ctx = makeCtx({
-      filePath: targetFile,
-      repoFiles: [...importers, targetFile],
-      hasFinding: false,
-    });
-    const findings = await rule.evaluate(ctx);
-    expect(findings).toHaveLength(1);
-    expect(findings[0]!.state).toBe('WARN');
-    expect(findings[0]!.severity).toBe('warning');
+      const ctx = makeCtx({
+        rootDir: TEST_DIR,
+        filePath: targetFile,
+        repoFiles: [...importers, targetFile],
+        hasFinding: false,
+      });
+      const findings = await rule.evaluate(ctx);
+      expect(findings).toHaveLength(1);
+      expect(findings[0]!.state).toBe('WARN');
+      expect(findings[0]!.severity).toBe('warning');
+    } finally {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
   });
 
   it('returns FAIL when fan-in >= minImporters AND churn concern present', async () => {
+    const TEST_DIR = join(tmpdir(), `blast-radius-test-${process.pid}-${Date.now()}`);
+    mkdirSync(TEST_DIR, { recursive: true });
+    try {
     const rule = createBlastRadiusRule();
     const targetFile = join(TEST_DIR, 'high-fanin-with-churn.ts');
     writeFileSync(targetFile, 'export const z = 3;');
@@ -120,18 +130,25 @@ describe('blast-radius rule', () => {
       importers.push(f);
     }
 
-    const ctx = makeCtx({
-      filePath: targetFile,
-      repoFiles: [...importers, targetFile],
-      hasFinding: true, // simulates churn-fragility FAIL/WARN finding
-    });
-    const findings = await rule.evaluate(ctx);
-    expect(findings).toHaveLength(1);
-    expect(findings[0]!.state).toBe('FAIL');
-    expect(findings[0]!.severity).toBe('error');
+      const ctx = makeCtx({
+        rootDir: TEST_DIR,
+        filePath: targetFile,
+        repoFiles: [...importers, targetFile],
+        hasFinding: true, // simulates churn-fragility FAIL/WARN finding
+      });
+      const findings = await rule.evaluate(ctx);
+      expect(findings).toHaveLength(1);
+      expect(findings[0]!.state).toBe('FAIL');
+      expect(findings[0]!.severity).toBe('error');
+    } finally {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
   });
 
   it('respects custom minImporters threshold', async () => {
+    const TEST_DIR = join(tmpdir(), `blast-radius-test-${process.pid}-${Date.now()}`);
+    mkdirSync(TEST_DIR, { recursive: true });
+    try {
     const rule = createBlastRadiusRule({ minImporters: 2 });
     const targetFile = join(TEST_DIR, 'custom-threshold.ts');
     writeFileSync(targetFile, 'export const q = 4;');
@@ -144,17 +161,24 @@ describe('blast-radius rule', () => {
       importers.push(f);
     }
 
-    const ctx = makeCtx({
-      filePath: targetFile,
-      repoFiles: [...importers, targetFile],
-      hasFinding: false,
-    });
-    const findings = await rule.evaluate(ctx);
-    // Should be WARN with custom threshold=2 and fan-in=3
-    expect(findings[0]!.state).toBe('WARN');
+      const ctx = makeCtx({
+        rootDir: TEST_DIR,
+        filePath: targetFile,
+        repoFiles: [...importers, targetFile],
+        hasFinding: false,
+      });
+      const findings = await rule.evaluate(ctx);
+      // Should be WARN with custom threshold=2 and fan-in=3
+      expect(findings[0]!.state).toBe('WARN');
+    } finally {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
   });
 
   it('ignores non-source-extension files when counting fan-in', async () => {
+    const TEST_DIR = join(tmpdir(), `blast-radius-test-${process.pid}-${Date.now()}`);
+    mkdirSync(TEST_DIR, { recursive: true });
+    try {
     const rule = createBlastRadiusRule({ minImporters: 2 });
     const targetFile = join(TEST_DIR, 'ignored-ext-target.ts');
     writeFileSync(targetFile, 'export const r = 5;');
@@ -167,10 +191,13 @@ describe('blast-radius rule', () => {
       repoFiles.push(f);
     }
 
-    const ctx = makeCtx({ filePath: targetFile, repoFiles });
-    const findings = await rule.evaluate(ctx);
-    // .md files are not counted, so fan-in = 0 < 2 → PASS
-    expect(findings[0]!.state).toBe('PASS');
+      const ctx = makeCtx({ rootDir: TEST_DIR, filePath: targetFile, repoFiles });
+      const findings = await rule.evaluate(ctx);
+      // .md files are not counted, so fan-in = 0 < 2 → PASS
+      expect(findings[0]!.state).toBe('PASS');
+    } finally {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
   });
 
   it('has correct rule metadata', () => {

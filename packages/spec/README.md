@@ -1,12 +1,9 @@
 # @workspacejson/spec
 
-[![npm version](https://img.shields.io/npm/v/@workspacejson%2fspec.svg)](https://www.npmjs.com/package/@workspacejson/spec)
-[![npm downloads](https://img.shields.io/npm/dm/@workspacejson%2fspec.svg)](https://www.npmjs.com/package/@workspacejson/spec)
-
 JSON Schema and TypeScript types for `agents.workspace.json`.
 
-This package is published from the `workspace-json/agents-audit` monorepo and is the
-canonical spec package for the v0.1 line.
+This package is published from the `agents-audit` workspace and is the canonical
+specification package for the workspace metadata format.
 
 ## Install
 
@@ -14,12 +11,21 @@ canonical spec package for the v0.1 line.
 pnpm add @workspacejson/spec
 ```
 
-## Use
+## API
 
 ```ts
 import { workspaceJsonSchema } from '@workspacejson/spec';
+import type { WorkspaceJson } from '@workspacejson/spec';
 ```
 
-Homepage: https://workspacejson.dev
+## Contents
 
-Package page: https://www.npmjs.com/package/@workspacejson/spec
+- `schema/v1.json` contains the published JSON Schema
+- `src/index.ts` re-exports the schema and type surface
+- `src/types.ts` holds the TypeScript representation
+
+## Notes
+
+- The package publishes only schema, generated types, and package metadata
+- The schema is intended to be consumed by `agents-audit` and external tools that validate `agents.workspace.json`
+

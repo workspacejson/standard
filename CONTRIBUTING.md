@@ -1,27 +1,27 @@
 # Contributing
 
-Thanks for helping improve `agents-audit`.
+This repository is a workspace for `agents-audit`, `@workspacejson/spec`, and
+`@workspacejson/rules`.
 
-## Working locally
+## Before You Start
 
-- Install dependencies with `pnpm install`
-- Run `pnpm -r typecheck`
-- Run `pnpm -r test`
-- Run `pnpm -r build`
+- Read `AGENTS.md` at the repo root
+- Keep changes within the owning package when possible
+- Avoid changing package entrypoints unless the public surface changes
 
-## Pull requests
+## Common Commands
 
-- Keep changes small and focused
-- Include or update tests for behavioral changes
-- Update README or changelog entries when user-facing behavior changes
+```bash
+pnpm install
+pnpm -r typecheck
+pnpm -r test
+pnpm -r build
+node packages/agents-audit/dist/cli.js scan .
+```
 
-## Releases
+## Change Expectations
 
-- Releases are cut from the monorepo
-- Published packages are `@workspacejson/spec`, `@workspacejson/rules`, and `agents-audit`
-- Publishing should use GitHub Actions trusted publishing when configured in npm
+- Update package READMEs when public APIs change
+- Update `CHANGELOG.md` for release-facing changes
+- Keep the CLI contract documented in `packages/agents-audit/README.md`
 
-## Support
-
-- File bugs through GitHub issues
-- Use the security policy for sensitive reports

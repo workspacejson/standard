@@ -7,13 +7,13 @@ function makeFinding(ruleId: string, state: Finding['state'] = 'FAIL', file?: st
     ruleId,
     ruleVersion: '1.0.0',
     state,
-    severity: state === 'FAIL' ? 'error' : undefined,
     confidence: 0.9,
     signals: [],
     temporalWeight: 1.0,
-    evidence: { file },
     message: `Finding for ${ruleId}`,
     firedAt: new Date(),
+    ...(state === 'FAIL' ? { severity: 'error' as const } : {}),
+    ...(file !== undefined ? { evidence: { file } } : { evidence: {} }),
   };
 }
 
@@ -154,7 +154,8 @@ describe('FindingGraphImpl', () => {
     it('readOnly does not expose add()', () => {
       const graph = new FindingGraphImpl();
       const ro = graph.readOnly();
-      expect((ro as Record<string, unknown>)['add']).toBeUndefined();
+      const roView = ro as unknown as Record<string, unknown>;
+      expect(roView.add).toBeUndefined();
     });
 
     it('reflects underlying data changes after readOnly() is called', () => {

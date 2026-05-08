@@ -1,12 +1,17 @@
-# Security Policy
+# Security
 
-If you believe you have found a security issue in `agents-audit` or the supporting packages, report it privately.
+If you discover a security issue in `agents-audit` or the workspace packages,
+please report it through the GitHub security workflow for this repository.
 
-Preferred reporting path:
+## What to Include
 
-- `security@workspacejson.dev`
-- Or a private GitHub Security Advisory if available for the repository
+- a short summary of the issue
+- affected package or command path
+- reproduction steps
+- whether the issue affects published packages or only local development
 
-Do not open a public issue for a potential vulnerability until it has been reviewed.
+## What Not to Include
 
-For published packages, we prefer GitHub Actions trusted publishing over long-lived npm tokens.
+- public issue reports for sensitive vulnerabilities before coordinated disclosure
+- secrets, tokens, or private repository data
+

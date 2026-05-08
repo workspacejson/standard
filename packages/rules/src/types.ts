@@ -70,7 +70,7 @@ export interface RuleMeta {
 
 export interface Rule {
   meta: RuleMeta;
-  evaluate(context: RuleContext): Promise<Finding | Finding[]>;
+  evaluate(context: RuleContext): Promise<Finding[]>;
 }
 
 export type RuleFactory<TConfig = Record<string, unknown>> = (config: TConfig) => Rule;
