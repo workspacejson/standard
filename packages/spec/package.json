@@ -24,11 +24,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/workspace-json/agents-audit.git",
-    "directory": "packages/spec"
+    "url": "git+https://github.com/workspace-json/spec.git"
   },
   "bugs": {
-    "url": "https://github.com/workspace-json/agents-audit/issues"
+    "url": "https://github.com/workspace-json/spec/issues"
   },
   "publishConfig": {
     "access": "public"
