@@ -4,6 +4,15 @@ All notable changes to `@workspacejson/rules` are documented here.
 
 ## Unreleased
 
+## 0.2.1 - 2026-05-10
+
+### Changed
+
+- Republish against `@workspacejson/spec@0.2.1` so the package metadata and dependency line
+  reflect the standalone spec repo.
+
+## Unreleased
+
 ## 0.2.0 - 2026-05-08
 
 ### Added
