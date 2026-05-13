@@ -45,3 +45,47 @@ export interface WorkspaceJson {
   metadata?: Record<string, unknown>;
   [key: string]: unknown;
 }
+
+// v0.3 types
+
+export interface FrameworkEntry {
+  name: string;
+  version?: string;
+  confidence: number;
+}
+
+export interface FileIndexEntry {
+  fragility?: number;
+  aiModificationCount?: number;
+  humanModificationCount?: number;
+  [key: string]: unknown;
+}
+
+export type IntelligenceState = 'INSUFFICIENT_DATA' | 'OBSERVING' | 'CONFIDENT';
+
+export interface WorkspaceJsonV3 {
+  manual: {
+    fragileFiles?: Array<{ path: string; reason?: string }>;
+    coChangePatterns?: Array<{ files: string[]; note?: string }>;
+    [key: string]: unknown;
+  };
+  generated: {
+    specVersion: '0.3';
+    generatedAt: string;
+    by: { name: string; version: string };
+    frameworkManifest: FrameworkEntry[];
+    fileIndex: Record<string, FileIndexEntry>;
+    topology?: { packageCount?: number; [key: string]: unknown };
+    warnings?: string[];
+    [key: string]: unknown;
+  };
+  agents: Record<string, unknown>;
+  health: {
+    intelligenceState: IntelligenceState;
+    observationCount: number;
+    confidence: number;
+    averageFragility?: number;
+    fragileFileCount?: number;
+    [key: string]: unknown;
+  };
+}
