@@ -104,3 +104,26 @@ describe('schema identity invariants', () => {
     expect((json['$schema'] as string).startsWith('https://')).toBe(true);
   });
 });
+
+// ─── Schema structural invariants ────────────────────────────────────────────
+// These tests prevent split-brain between schema.ts and schema/v1.json.
+// $id equality is necessary but not sufficient — the body must also match.
+describe('schema structural invariants', () => {
+  it('workspaceJsonSchema required array matches schema/v1.json required (no split-brain)', () => {
+    const json = JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>;
+    const jsonRequired = ([...(json['required'] as string[])]).sort();
+    const tsRequired = ([...workspaceJsonSchema.required]).sort();
+    expect(tsRequired).toEqual(jsonRequired);
+  });
+
+  it('workspaceJsonSchema top-level property keys match schema/v1.json', () => {
+    const json = JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>;
+    const jsonProps = Object.keys((json['properties'] as Record<string, unknown>) ?? {}).sort();
+    const tsProps = Object.keys(workspaceJsonSchema.properties).sort();
+    expect(tsProps).toEqual(jsonProps);
+  });
+
+  it('workspaceJsonSchema additionalProperties is false (v0.3 is strict)', () => {
+    expect((workspaceJsonSchema as Record<string, unknown>)['additionalProperties']).toBe(false);
+  });
+});
