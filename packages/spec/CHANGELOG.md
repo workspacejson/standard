@@ -4,7 +4,7 @@ All notable changes to `@workspacejson/spec` are documented here.
 
 ## Unreleased
 
-## [0.3.0] - 2026-05-22
+## [0.3.0] - 2026-05-12
 
 ### Breaking changes
 - Schema shape changed to four-property structure: `manual`, `generated`, `agents`, `health`.
