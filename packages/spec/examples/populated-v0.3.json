@@ -2,7 +2,7 @@
   "manual": {},
   "generated": {
     "specVersion": "0.3",
-    "generatedAt": "2026-05-22T00:00:00Z",
+    "generatedAt": "2026-05-12T00:00:00Z",
     "by": { "name": "vreko-daemon", "version": "0.3.0" },
     "frameworkManifest": [
       { "name": "next.js", "version": "15.0.0", "confidence": 0.95 }
