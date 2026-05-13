@@ -1,99 +1,103 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://workspacejson.dev/schemas/agents.workspace.v1.json",
+  "$id": "https://www.workspacejson.dev/schema/v1.json",
   "title": "agents.workspace.json",
   "type": "object",
-  "required": ["version"],
+  "required": ["manual", "generated", "agents", "health"],
+  "additionalProperties": false,
   "properties": {
-    "version": {
-      "type": "string"
-    },
-    "generatedAt": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "repository": {
-      "type": "string"
-    },
-    "topology": {
-      "type": "string",
-      "enum": ["single-package", "monorepo", "polyglot-monorepo"]
-    },
-    "ciProvider": {
-      "type": "string",
-      "enum": ["github-actions", "gitlab-ci", "circleci", "jenkins", "none", "unknown"]
-    },
-    "agentFiles": {
+    "manual": {
       "type": "object",
+      "description": "Human-authored content preserved across regenerations.",
       "properties": {
-        "agentsMd": { "type": "string" },
-        "workspaceJson": { "type": "string" }
-      },
-      "additionalProperties": false
-    },
-    "frameworks": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "conventions": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["raw", "type", "canonical"],
-        "properties": {
-          "raw": { "type": "string" },
-          "type": {
-            "type": "string",
-            "enum": ["filename-case", "directory-layout", "naming", "structural", "other"]
-          },
-          "canonical": { "type": "string" }
-        },
-        "additionalProperties": false
-      }
-    },
-    "packages": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["path"],
-        "properties": {
-          "name": { "type": "string" },
-          "path": { "type": "string" },
-          "agentsMd": { "type": "string" },
-          "dependencies": {
-            "type": "array",
-            "items": { "type": "string" }
+        "fragileFiles": {
+          "type": "array",
+          "description": "Human-annotated fragile files. Read by gsd-plugin v2.42.3.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string" },
+              "reason": { "type": "string" }
+            }
           }
         },
-        "additionalProperties": true
-      }
-    },
-    "gitSummary": {
-      "type": "object",
-      "properties": {
-        "nonAgentsCommitCount30Days": { "type": "integer", "minimum": 0 },
-        "filesChangedLast30Days": {
+        "coChangePatterns": {
           "type": "array",
-          "items": { "type": "string" }
+          "description": "Human-annotated co-change observations. Read by gsd-plugin v2.42.3.",
+          "items": { "type": "object" }
         }
       },
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "hygiene": {
+    "generated": {
       "type": "object",
+      "required": ["specVersion", "generatedAt", "by"],
       "properties": {
-        "score": { "type": "number", "minimum": 0, "maximum": 100 },
-        "grade": { "type": "string", "enum": ["A", "B", "C", "D", "F"] },
-        "failCount": { "type": "integer", "minimum": 0 },
-        "warnCount": { "type": "integer", "minimum": 0 },
-        "scannedAt": { "type": "string", "format": "date-time" }
+        "specVersion": { "const": "0.3" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "by": {
+          "type": "object",
+          "required": ["name", "version"],
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" }
+          }
+        },
+        "frameworkManifest": {
+          "type": "array",
+          "description": "Detected frameworks (confidence >= 0.7). Read by gsd-plugin v2.42.3.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "fileIndex": {
+          "type": "object",
+          "description": "Per-file behavioral intelligence keyed by relative path. Read by gsd-plugin v2.42.3.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "fragility": { "type": "number", "minimum": 0, "maximum": 1 },
+              "aiModificationCount": { "type": "integer", "minimum": 0 },
+              "humanModificationCount": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "topology": { "type": "object" },
+        "conventions": { "type": "array" },
+        "gitSummary": { "type": "object" },
+        "hygiene": { "type": "object" },
+        "warnings": { "type": "array", "items": { "type": "string" } }
       },
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "metadata": {
+    "agents": {
       "type": "object",
+      "description": "Cross-tool agent configuration surface."
+    },
+    "health": {
+      "type": "object",
+      "description": "Summary metrics and intelligence state. Per-file detail belongs under generated.fileIndex.",
+      "properties": {
+        "intelligenceState": {
+          "type": "string",
+          "enum": ["INSUFFICIENT_DATA", "OBSERVING", "CONFIDENT"]
+        },
+        "observationCount": { "type": "integer", "minimum": 0 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "boundRate": { "type": "number" },
+        "averageFragility": { "type": "number" },
+        "fragileFileCount": { "type": "integer", "minimum": 0 },
+        "aiAttributionRate": { "type": "number" },
+        "rollbackRate": { "type": "number" },
+        "trend": { "type": "string" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
       "additionalProperties": true
     }
-  },
-  "additionalProperties": true
+  }
 }

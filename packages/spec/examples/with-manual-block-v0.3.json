@@ -1,0 +1,27 @@
+{
+  "manual": {
+    "fragileFiles": [
+      { "path": "apps/api/src/auth.ts", "reason": "high rollback rate, auth logic" }
+    ],
+    "coChangePatterns": [
+      {
+        "files": ["apps/cli/src/commands/check.ts", "apps/cli/src/commands/interactive.ts"],
+        "note": "always change together"
+      }
+    ]
+  },
+  "generated": {
+    "specVersion": "0.3",
+    "generatedAt": "2026-05-22T00:00:00Z",
+    "by": { "name": "vreko-daemon", "version": "0.3.0" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "warnings": []
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "OBSERVING",
+    "observationCount": 42,
+    "confidence": 0.45
+  }
+}

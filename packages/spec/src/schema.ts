@@ -1,6 +1,6 @@
 export const workspaceJsonSchema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
-  $id: 'https://workspacejson.dev/schemas/agents.workspace.v1.json',
+  $id: 'https://www.workspacejson.dev/schema/v1.json',
   title: 'agents.workspace.json',
   type: 'object',
   required: ['version'],

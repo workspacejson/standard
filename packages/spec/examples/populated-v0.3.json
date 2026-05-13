@@ -1,0 +1,28 @@
+{
+  "manual": {},
+  "generated": {
+    "specVersion": "0.3",
+    "generatedAt": "2026-05-22T00:00:00Z",
+    "by": { "name": "vreko-daemon", "version": "0.3.0" },
+    "frameworkManifest": [
+      { "name": "next.js", "version": "15.0.0", "confidence": 0.95 }
+    ],
+    "fileIndex": {
+      "apps/api/src/auth.ts": {
+        "fragility": 0.82,
+        "aiModificationCount": 7,
+        "humanModificationCount": 3
+      }
+    },
+    "topology": { "packageCount": 38 },
+    "warnings": []
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "CONFIDENT",
+    "observationCount": 1247,
+    "confidence": 0.87,
+    "averageFragility": 0.34,
+    "fragileFileCount": 12
+  }
+}
