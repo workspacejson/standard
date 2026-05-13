@@ -1,0 +1,17 @@
+{
+  "manual": {},
+  "generated": {
+    "specVersion": "0.3",
+    "generatedAt": "2026-05-22T00:00:00Z",
+    "by": { "name": "example-producer", "version": "0.1.0" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "warnings": []
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "INSUFFICIENT_DATA",
+    "observationCount": 0,
+    "confidence": 0
+  }
+}
