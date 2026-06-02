@@ -2,6 +2,15 @@
 
 All notable changes to `@workspacejson/spec` are documented here.
 
+## [0.4.1] - 2026-06-02
+
+### Fixed
+- `coChange` entries now always include `occurrences`. The reference emitter
+  (Vreko daemon v3) was stripping this field in the initial v0.4.0 cut.
+- `fragility` entries now always include `changeCount` and `revertCount`. Same
+  emitter gap — both fields are defined by the spec and present in the underlying
+  git scan data but were dropped before serialization.
+
 ## [0.4.0] - 2026-06-01
 
 ### Added

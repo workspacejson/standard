@@ -29,8 +29,8 @@ describe('@workspacejson/spec smoke test', () => {
 });
 
 describe('version', () => {
-  it('is 0.4.0', () => {
-    expect(version).toBe('0.4.0');
+  it('is 0.4.1', () => {
+    expect(version).toBe('0.4.1');
   });
 });
 

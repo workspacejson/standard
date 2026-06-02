@@ -17,7 +17,7 @@ export type {
 
 import type { WorkspaceJsonV3, WorkspaceJsonV4 } from './types.js';
 
-export const version = '0.4.0';
+export const version = '0.4.1';
 
 export function validate(data: unknown): data is WorkspaceJsonV3 | WorkspaceJsonV4 {
   if (typeof data !== 'object' || data === null) return false;
