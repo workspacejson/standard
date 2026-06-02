@@ -1,13 +1,12 @@
 {
   "name": "@workspacejson/spec",
   "version": "0.4.1",
-  "description": "JSON Schema and TypeScript types for agents.workspace.json",
+  "description": "JSON Schema and TypeScript types for workspace.json",
   "license": "Apache-2.0",
   "author": "workspace-json contributors",
   "homepage": "https://www.workspacejson.dev",
   "keywords": [
     "workspace.json",
-    "agents.workspace.json",
     "ai-agents",
     "ai-coding-agents",
     "codebase-intelligence",

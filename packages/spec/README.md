@@ -1,6 +1,6 @@
 # @workspacejson/spec
 
-JSON Schema and TypeScript types for `agents.workspace.json` v0.3.
+JSON Schema and TypeScript types for `workspace.json` v0.3.
 
 This package is published from the `agents-audit` workspace and is the canonical
 specification package for the workspace metadata format.
@@ -30,7 +30,7 @@ validateLegacy(doc);  // true if doc is a valid v0.1/v0.2 document
 import { workspaceJsonSchema } from '@workspacejson/spec';
 
 // workspaceJsonSchema.$id === 'https://www.workspacejson.dev/schema/v1.json'
-// workspaceJsonSchema.title === 'agents.workspace.json'
+// workspaceJsonSchema.title === 'workspace.json'
 ```
 
 ### TypeScript types

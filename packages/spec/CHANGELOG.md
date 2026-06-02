@@ -49,7 +49,7 @@ check `generated.specVersion === "0.4"` or use `validateV4()` before accessing
 
 ### Breaking changes
 - Schema shape changed to four-property structure: `manual`, `generated`, `agents`, `health`.
-- Canonical write path corrected to `.agents/agents.workspace.json` (v0.2.0 incorrectly stated repo root).
+- Canonical write path corrected to `.agents/workspace.json` (v0.2.0 incorrectly stated repo root).
 - Top-level `version` field removed; schema version now lives at `generated.specVersion = "0.3"`.
 - Per-file fragility data lives at `generated.fileIndex.{path}` (not `files.{path}`).
 - Framework detection lives at `generated.frameworkManifest`.

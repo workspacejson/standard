@@ -24,7 +24,7 @@ const minimalV3 = {
 
 describe('@workspacejson/spec smoke test', () => {
   it('exports the schema object', () => {
-    expect(workspaceJsonSchema.title).toBe('agents.workspace.json');
+    expect(workspaceJsonSchema.title).toBe('workspace.json');
   });
 });
 
