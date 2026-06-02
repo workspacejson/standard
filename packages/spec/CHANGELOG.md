@@ -2,6 +2,38 @@
 
 All notable changes to `@workspacejson/spec` are documented here.
 
+## [0.4.0] - 2026-06-01
+
+### Added
+- `generated.coChange` — machine-derived co-change pairs array. Each entry carries
+  `files: [string, string]`, `rate: number`, `occurrences: number`, and
+  `generated: boolean`. The `generated` flag distinguishes tooling-coupled pairs
+  (e.g. lockfile + package.json) from real source couplings; consumers should filter
+  on this flag rather than applying path heuristics at read time.
+- `generated.fragility` — per-file fragility array derived from git history. Each entry
+  carries `file`, `changeCount`, `revertCount`, `revertRate`, `fragilityScore` (0-1),
+  and `excluded`. Entries with `excluded: true` are generated/lock files skipped in
+  analysis.
+- `health.workflowFragility`, `health.codebaseHealth`, `health.changeVolatility` — three
+  aggregate health scores (0-1) formally typed in v0.4. These have been emitted by
+  the Vreko daemon since the v0.3 bootstrap path; v0.4 promotes them from the
+  `additionalProperties: true` escape hatch to first-class typed fields.
+- `validateV4()` export — type guard for v0.4 documents (requires `specVersion === "0.4"`,
+  `coChange` array, `fragility` array).
+- `examples/populated-v0.4.json` — complete example showing all new v0.4 fields.
+
+### Changed
+- `specVersion` JSON Schema constraint widened from `{ const: "0.3" }` to
+  `{ enum: ["0.3", "0.4"] }` — v0.3 documents remain valid.
+- `validate()` now accepts both `"0.3"` and `"0.4"` documents (additive, not breaking).
+- Package version bumped to `0.4.0`.
+
+### Compatibility
+v0.3 consumers are unaffected. The new fields fall outside the v0.3 required set and
+`generated.additionalProperties: true` was already present. Upgrade path:
+check `generated.specVersion === "0.4"` or use `validateV4()` before accessing
+`coChange`, `fragility`, or the new health fields.
+
 ## Unreleased
 
 ## [0.3.0] - 2026-05-12

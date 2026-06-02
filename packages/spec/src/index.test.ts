@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { validate, validateLegacy, version, workspaceJsonSchema } from './index.js';
+import { validate, validateLegacy, validateV4, version, workspaceJsonSchema } from './index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_JSON_PATH = resolve(__dirname, '../schema/v1.json');
@@ -29,8 +29,8 @@ describe('@workspacejson/spec smoke test', () => {
 });
 
 describe('version', () => {
-  it('is 0.3.0', () => {
-    expect(version).toBe('0.3.0');
+  it('is 0.4.0', () => {
+    expect(version).toBe('0.4.0');
   });
 });
 
@@ -68,6 +68,47 @@ describe('validateLegacy()', () => {
 
   it('rejects null', () => {
     expect(validateLegacy(null)).toBe(false);
+  });
+});
+
+const minimalV4 = {
+  manual: {},
+  generated: {
+    specVersion: '0.4',
+    generatedAt: '2026-06-01T00:00:00Z',
+    by: { name: 'test', version: '0.1.0' },
+    frameworkManifest: [],
+    fileIndex: {},
+    coChange: [],
+    fragility: [],
+  },
+  agents: {},
+  health: { intelligenceState: 'OBSERVING' as const, observationCount: 0, confidence: 0 },
+};
+
+describe('validateV4()', () => {
+  it('accepts a minimal v0.4 document', () => {
+    expect(validateV4(minimalV4)).toBe(true);
+  });
+
+  it('rejects a v0.3 document', () => {
+    expect(validateV4(minimalV3)).toBe(false);
+  });
+
+  it('rejects a v0.4 document missing coChange array', () => {
+    const bad = { ...minimalV4, generated: { ...minimalV4.generated, coChange: undefined } };
+    expect(validateV4(bad)).toBe(false);
+  });
+
+  it('rejects a v0.4 document missing fragility array', () => {
+    const bad = { ...minimalV4, generated: { ...minimalV4.generated, fragility: undefined } };
+    expect(validateV4(bad)).toBe(false);
+  });
+});
+
+describe('validate() backward compat — v0.4 documents', () => {
+  it('accepts a v0.4 document (backward compat)', () => {
+    expect(validate(minimalV4)).toBe(true);
   });
 });
 

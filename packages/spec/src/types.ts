@@ -89,3 +89,38 @@ export interface WorkspaceJsonV3 {
     [key: string]: unknown;
   };
 }
+
+export interface CoChangeEntry {
+  files: [string, string];
+  rate: number;
+  occurrences: number;
+  /** true = tooling-coupled pair (e.g. lockfile + package.json); consumers skip these */
+  generated: boolean;
+}
+
+export interface FragilityEntry {
+  file: string;
+  changeCount: number;
+  revertCount: number;
+  /** revertCount / changeCount */
+  revertRate: number;
+  /** 0-1 composite score */
+  fragilityScore: number;
+  /** true = generated/lock file excluded from analysis */
+  excluded: boolean;
+}
+
+export interface WorkspaceJsonV4 {
+  manual: WorkspaceJsonV3['manual'];
+  generated: Omit<WorkspaceJsonV3['generated'], 'specVersion'> & {
+    specVersion: '0.4';
+    coChange: CoChangeEntry[];
+    fragility: FragilityEntry[];
+  };
+  agents: WorkspaceJsonV3['agents'];
+  health: WorkspaceJsonV3['health'] & {
+    workflowFragility?: number;
+    codebaseHealth?: number;
+    changeVolatility?: number;
+  };
+}

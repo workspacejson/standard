@@ -33,7 +33,7 @@
       "type": "object",
       "required": ["specVersion", "generatedAt", "by"],
       "properties": {
-        "specVersion": { "const": "0.3" },
+        "specVersion": { "enum": ["0.3", "0.4"] },
         "generatedAt": { "type": "string", "format": "date-time" },
         "by": {
           "type": "object",
@@ -67,6 +67,38 @@
             }
           }
         },
+        "coChange": {
+          "type": "array",
+          "description": "Machine-derived co-change pairs. Use generated=true to identify tooling-coupled pairs and skip them when surfacing real source couplings.",
+          "items": {
+            "type": "object",
+            "required": ["files", "rate", "occurrences", "generated"],
+            "properties": {
+              "files": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 },
+              "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+              "occurrences": { "type": "integer", "minimum": 0 },
+              "generated": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "fragility": {
+          "type": "array",
+          "description": "Per-file fragility derived from git history. excluded=true means the file was skipped in analysis (generated files, lock files).",
+          "items": {
+            "type": "object",
+            "required": ["file", "changeCount", "revertCount", "revertRate", "fragilityScore", "excluded"],
+            "properties": {
+              "file": { "type": "string" },
+              "changeCount": { "type": "integer", "minimum": 0 },
+              "revertCount": { "type": "integer", "minimum": 0 },
+              "revertRate": { "type": "number", "minimum": 0, "maximum": 1 },
+              "fragilityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+              "excluded": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
         "topology": { "type": "object" },
         "conventions": { "type": "array" },
         "gitSummary": { "type": "object" },
@@ -95,7 +127,13 @@
         "aiAttributionRate": { "type": "number" },
         "rollbackRate": { "type": "number" },
         "trend": { "type": "string" },
-        "lastUpdated": { "type": "string", "format": "date-time" }
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "workflowFragility": { "type": "number", "minimum": 0, "maximum": 1,
+          "description": "Aggregate workflow fragility score (0-1). Formally typed in v0.4." },
+        "codebaseHealth": { "type": "number", "minimum": 0, "maximum": 1,
+          "description": "Codebase health score (0-1). Formally typed in v0.4." },
+        "changeVolatility": { "type": "number", "minimum": 0, "maximum": 1,
+          "description": "Change volatility score (0-1). Formally typed in v0.4." }
       },
       "additionalProperties": true
     }

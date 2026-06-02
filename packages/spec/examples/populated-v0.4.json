@@ -1,0 +1,92 @@
+{
+  "manual": {
+    "fragileFiles": [
+      { "path": "apps/api/src/auth.ts", "reason": "high rollback rate, auth logic" }
+    ],
+    "coChangePatterns": [
+      {
+        "files": ["apps/cli/src/commands/check.ts", "apps/cli/src/commands/interactive.ts"],
+        "note": "always change together — verified by git history"
+      }
+    ]
+  },
+  "generated": {
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "by": { "name": "vrekod", "version": "3.0.0" },
+    "frameworkManifest": [
+      { "name": "turborepo", "confidence": 0.95 },
+      { "name": "next.js", "version": "15.0.0", "confidence": 0.90 }
+    ],
+    "fileIndex": {
+      "apps/api/src/auth.ts": {
+        "fragility": 0.82,
+        "aiModificationCount": 7,
+        "humanModificationCount": 3
+      },
+      "apps/vscode/src/services/DaemonBridge.ts": {
+        "fragility": 0.71,
+        "aiModificationCount": 12,
+        "humanModificationCount": 8
+      }
+    },
+    "coChange": [
+      {
+        "files": ["pnpm-lock.yaml", "package.json"],
+        "rate": 0.98,
+        "occurrences": 200,
+        "generated": true
+      },
+      {
+        "files": ["apps/cli/src/commands/check.ts", "apps/cli/src/commands/interactive.ts"],
+        "rate": 1.0,
+        "occurrences": 15,
+        "generated": false
+      },
+      {
+        "files": ["apps/api/src/auth.ts", "packages/contracts/src/auth.ts"],
+        "rate": 0.87,
+        "occurrences": 9,
+        "generated": false
+      }
+    ],
+    "fragility": [
+      {
+        "file": "apps/api/src/auth.ts",
+        "changeCount": 34,
+        "revertCount": 8,
+        "revertRate": 0.24,
+        "fragilityScore": 0.82,
+        "excluded": false
+      },
+      {
+        "file": "apps/vscode/src/services/DaemonBridge.ts",
+        "changeCount": 20,
+        "revertCount": 4,
+        "revertRate": 0.20,
+        "fragilityScore": 0.71,
+        "excluded": false
+      },
+      {
+        "file": "pnpm-lock.yaml",
+        "changeCount": 200,
+        "revertCount": 0,
+        "revertRate": 0.0,
+        "fragilityScore": 0.0,
+        "excluded": true
+      }
+    ],
+    "warnings": []
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "CONFIDENT",
+    "observationCount": 1847,
+    "confidence": 0.91,
+    "averageFragility": 0.38,
+    "fragileFileCount": 5,
+    "workflowFragility": 0.50,
+    "codebaseHealth": 0.70,
+    "changeVolatility": 0.40
+  }
+}
