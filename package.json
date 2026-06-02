@@ -12,13 +12,16 @@
     "url": "https://github.com/workspace-json/agents-audit/issues"
   },
   "dependencies": {
-    "@workspacejson/spec": "workspace:*",
     "@workspacejson/rules": "workspace:*",
+    "@workspacejson/spec": "workspace:*",
     "agents-audit": "workspace:*"
   },
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0"
   }
 }

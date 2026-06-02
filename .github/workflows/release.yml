@@ -31,7 +31,6 @@ jobs:
       - run: pnpm -r build
       - run: pnpm -r test
       - name: Publish packages
-        run: |
-          cd packages/spec && npm publish --provenance --access public
-          cd ../rules && npm publish --provenance --access public
-          cd ../agents-audit && npm publish --provenance --access public
+        run: pnpm changeset publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

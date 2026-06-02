@@ -2,18 +2,28 @@
 
 All notable changes to `@workspacejson/rules` are documented here.
 
-## Unreleased
+## [0.4.1] - 2026-06-02
 
-## 0.2.1 - 2026-05-10
+### Changed
+- Canonical workspace file path updated from `.agents/agents.workspace.json` to
+  `.agents/workspace.json` throughout rule context and validator references.
+- Package description and keywords updated to remove stale filename references.
+- `@workspacejson/spec` dependency updated to `0.4.1`.
+
+## [0.3.0] - 2026-05-12
+
+### Changed
+- Version bump to align with `@workspacejson/spec@0.3.0` monorepo restructure.
+  No rule logic changes; versioned together for consistent consumer installation.
+
+## [0.2.1] - 2026-05-10
 
 ### Changed
 
 - Republish against `@workspacejson/spec@0.2.1` so the package metadata and dependency line
   reflect the standalone spec repo.
 
-## Unreleased
-
-## 0.2.0 - 2026-05-08
+## [0.2.0] - 2026-05-08
 
 ### Added
 
@@ -56,13 +66,13 @@ All notable changes to `@workspacejson/rules` are documented here.
 - `IncrementalCache` removed from public index export until wired into `RuleEngine`.
 - `checkFilenameCase` glob expanded to cover monorepo package source directories.
 
-## 0.1.1 - 2026-05-06
+## [0.1.1] - 2026-05-06
 
 ### Changed
 
 - Added npm discoverability keywords.
 
-## 0.1.0 - 2026-05-06
+## [0.1.0] - 2026-05-06
 
 ### Added
 

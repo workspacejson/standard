@@ -17,3 +17,8 @@ audit-output/
 
 # Local swarm system — not for public repo
 .vreko-swarm/
+
+# Local artifacts
+agents-workspace-cannon-repo/
+audit-findings/
+shared-baseline-audit-2026-05-10.md
