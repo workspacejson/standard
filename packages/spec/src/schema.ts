@@ -58,7 +58,7 @@ export const workspaceJsonSchema = {
         fileIndex: {
           type: 'object',
           description:
-            'Per-file behavioral intelligence keyed by relative path. Read by Buildomator.',
+            'Per-file behavioral intelligence keyed by repository-root-relative POSIX path (forward slashes, no leading "./", no drive letters).',
           additionalProperties: {
             type: 'object',
             properties: {
@@ -75,7 +75,14 @@ export const workspaceJsonSchema = {
             type: 'object',
             required: ['files', 'rate', 'occurrences', 'generated'] as const,
             properties: {
-              files: { type: 'array', items: { type: 'string' }, minItems: 2, maxItems: 2 },
+              files: {
+                type: 'array',
+                items: { type: 'string' },
+                minItems: 2,
+                maxItems: 2,
+                description:
+                  'Unordered pair (set semantics — position is NOT meaningful; join by membership, not index). Each entry is a repository-root-relative POSIX path.',
+              },
               rate: { type: 'number', minimum: 0, maximum: 1 },
               occurrences: { type: 'integer', minimum: 0 },
               generated: { type: 'boolean' },
@@ -90,7 +97,7 @@ export const workspaceJsonSchema = {
             type: 'object',
             required: ['file', 'changeCount', 'revertCount', 'revertRate', 'fragilityScore', 'excluded'] as const,
             properties: {
-              file: { type: 'string' },
+              file: { type: 'string', description: 'Repository-root-relative POSIX path (forward slashes, no leading "./").' },
               changeCount: { type: 'integer', minimum: 0 },
               revertCount: { type: 'integer', minimum: 0 },
               revertRate: { type: 'number', minimum: 0, maximum: 1 },

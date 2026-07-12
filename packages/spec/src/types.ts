@@ -91,7 +91,14 @@ export interface WorkspaceJsonV3 {
 }
 
 export interface CoChangeEntry {
-  files: [string, string];
+  /**
+   * The co-changing pair. **Set semantics: exactly two entries, order NOT
+   * meaningful** — `files[0]` carries no positional significance and consumers
+   * must join by set membership, not index. Each entry is a
+   * repository-root-relative POSIX path (forward slashes, no leading "./").
+   * Invariant: length === 2 (mirrors schema minItems/maxItems: 2).
+   */
+  files: string[];
   rate: number;
   occurrences: number;
   /** true = tooling-coupled pair (e.g. lockfile + package.json); consumers skip these */

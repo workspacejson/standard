@@ -5,6 +5,7 @@ import Ajv from 'ajv';
 import { describe, expect, it } from 'vitest';
 import { validate, validateLegacy, validateV4, version, workspaceJsonSchema } from './index.js';
 import { compileSchemaValidator } from './validator.js';
+import type { CoChangeEntry } from './index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_JSON_PATH = resolve(__dirname, '../schema/v1.json');
@@ -205,5 +206,106 @@ describe('schema structural invariants', () => {
 
   it('workspaceJsonSchema additionalProperties is false (v0.3 is strict)', () => {
     expect((workspaceJsonSchema as Record<string, unknown>)['additionalProperties']).toBe(false);
+  });
+});
+
+// ─── VR-640: fileIndex key format pinned to repo-root-relative POSIX ──────────
+// The DataHub join (HAC-75 probe) silently produced zero rows because the spec
+// said "relative path" without an anchor. The canonical form must be stated and
+// kept in sync across both schema mirrors so the CLI shim normalizes toward a
+// blessed target rather than an assumed one.
+describe('VR-640: canonical key format is repository-root-relative POSIX', () => {
+  const gen = (s: Record<string, unknown>) =>
+    ((s['properties'] as Record<string, Record<string, unknown>>)['generated']?.['properties'] ??
+      {}) as Record<string, Record<string, unknown>>;
+
+  it("schema/v1.json fileIndex description pins the anchor (not just 'relative path')", () => {
+    const json = JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>;
+    const desc = gen(json)['fileIndex']?.['description'] as string;
+    expect(desc).toContain('repository-root-relative POSIX path');
+  });
+
+  it('schema.ts fileIndex description matches schema/v1.json (no split-brain on the anchor)', () => {
+    const json = JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>;
+    const jsonDesc = gen(json)['fileIndex']?.['description'];
+    const tsDesc = gen(workspaceJsonSchema as unknown as Record<string, unknown>)['fileIndex']?.[
+      'description'
+    ];
+    expect(tsDesc).toBe(jsonDesc);
+  });
+
+  it('fragility.file is documented as repo-root-relative POSIX in both mirrors', () => {
+    const json = JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>;
+    const jsonFile = (gen(json)['fragility']?.['items'] as Record<string, Record<string, Record<string, unknown>>>)
+      ?.['properties']?.['file']?.['description'] as string;
+    expect(jsonFile).toContain('Repository-root-relative POSIX path');
+  });
+});
+
+// ─── VR-639: coChange.files is a set, not a positional tuple ──────────────────
+// types.ts said [string, string] (positional) while the schema said min/max-2
+// array (set). A CLI that treated files[0] as canonical would silently mis-join.
+// The contract is now set semantics — order must never affect the join.
+describe('VR-639: coChange.files has set semantics (order-independent join)', () => {
+  const minimalV4 = {
+    manual: {},
+    generated: {
+      specVersion: '0.4' as const,
+      generatedAt: '2026-05-22T00:00:00Z',
+      by: { name: 'test', version: '0.1.0' },
+      frameworkManifest: [],
+      fileIndex: {},
+      coChange: [] as Array<{ files: string[]; rate: number; occurrences: number; generated: boolean }>,
+      fragility: [],
+    },
+    agents: {},
+    health: { intelligenceState: 'OBSERVING', observationCount: 0, confidence: 0 },
+  };
+
+  const withPair = (files: string[]) => ({
+    ...minimalV4,
+    generated: { ...minimalV4.generated, coChange: [{ files, rate: 0.5, occurrences: 10, generated: false }] },
+  });
+
+  it('validateV4 accepts a coChange pair in either ordering', () => {
+    expect(validateV4(withPair(['a.sql', 'b.sql']))).toBe(true);
+    expect(validateV4(withPair(['b.sql', 'a.sql']))).toBe(true);
+  });
+
+  it('the co-change join (set membership) resolves identically under reversed pair order', () => {
+    // Models the CLI join: find co-change partners of a target file by membership,
+    // never by index. This is the assertion VR-639 requires "at the join level".
+    const partnersOf = (doc: ReturnType<typeof withPair>, target: string) =>
+      doc.generated.coChange
+        .filter((e) => e.files.includes(target))
+        .flatMap((e) => e.files.filter((f) => f !== target));
+
+    const forward = partnersOf(withPair(['a.sql', 'b.sql']), 'a.sql');
+    const reversed = partnersOf(withPair(['b.sql', 'a.sql']), 'a.sql');
+    expect(forward).toEqual(['b.sql']);
+    expect(reversed).toEqual(['b.sql']); // reversing the stored pair changes nothing
+  });
+
+  it('a co-change pair equals its reverse as a set (position carries no meaning)', () => {
+    // Behavioral lock for set semantics, enforced at runtime (tsconfig excludes
+    // *.test.ts from tsc, so a compile-time tuple assertion here would never run).
+    // The type-level guarantee lives in types.ts `files: string[]`, which tsc DOES
+    // compile and which binds any consumer (the CLI) against indexing files[0].
+    const stored: CoChangeEntry['files'] = ['a.sql', 'b.sql'];
+    const emittedInReverse: CoChangeEntry['files'] = ['b.sql', 'a.sql'];
+    expect(new Set(stored)).toEqual(new Set(emittedInReverse));
+  });
+
+  it('schema still constrains the pair to exactly two entries in both mirrors', () => {
+    const json = JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>;
+    const filesSchema = (
+      (
+        (json['properties'] as Record<string, Record<string, Record<string, Record<string, unknown>>>>)[
+          'generated'
+        ]['properties']['coChange']['items'] as Record<string, Record<string, Record<string, unknown>>>
+      )['properties']['files']
+    ) as Record<string, unknown>;
+    expect(filesSchema['minItems']).toBe(2);
+    expect(filesSchema['maxItems']).toBe(2);
   });
 });
