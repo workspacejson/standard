@@ -102,6 +102,16 @@ const doc: WorkspaceJsonV4 = {
 **Consumer guidance for `fragility`**: filter `excluded: false` before ranking. Entries with
 `excluded: true` are generated or lock files with `fragilityScore: 0`.
 
+## Producer-conformance contract
+
+`workspace.json` deliberately separates human evidence from generated observations.
+Producers preserve `manual` verbatim across regeneration and replace the producer-owned
+`generated`, `agents`, and `health` sections. Human annotations for a producer belong under
+`manual`; consumers must not rely on generated sections remaining unchanged after a run.
+
+Producers should write only when their material projection changes. Timestamps identify the
+last material generation, not merely the last command invocation.
+
 ### JSON Schema file
 
 The raw JSON Schema is available via the `./schema` export:
