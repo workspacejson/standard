@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import Ajv from 'ajv';
 import { describe, expect, it } from 'vitest';
 import { validate, validateLegacy, validateV4, version, workspaceJsonSchema } from './index.js';
+import { compileSchemaValidator } from './validator.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_JSON_PATH = resolve(__dirname, '../schema/v1.json');
@@ -25,6 +27,30 @@ const minimalV3 = {
 describe('@workspacejson/spec smoke test', () => {
   it('exports the schema object', () => {
     expect(workspaceJsonSchema.title).toBe('workspace.json');
+  });
+});
+
+describe('draft-2020-12 validator', () => {
+  it('enforces prefixItems, which draft-07 does not define', () => {
+    const validateTuple = compileSchemaValidator<readonly [string, ...unknown[]]>({
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'array',
+      prefixItems: [{ type: 'string' }],
+      items: {},
+    });
+
+    expect(validateTuple([42])).toBe(false);
+    expect(validateTuple(['valid', 42])).toBe(true);
+  });
+
+  it('fails loudly with the default draft-07 Ajv import', () => {
+    const defaultAjv = new Ajv({ allErrors: true, strict: false, validateFormats: false });
+
+    expect(() => defaultAjv.compile({
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'array',
+      prefixItems: [{ type: 'string' }],
+    })).toThrow();
   });
 });
 
@@ -54,6 +80,19 @@ describe('validate()', () => {
   it('rejects a document with wrong specVersion', () => {
     const bad = { ...minimalV3, generated: { ...minimalV3.generated, specVersion: '0.2' } };
     expect(validate(bad)).toBe(false);
+  });
+
+  it('rejects a shallowly plausible document that violates the packaged schema', () => {
+    const missingRequiredGenerator = {
+      ...minimalV3,
+      generated: { specVersion: '0.4', generatedAt: '2026-06-01T00:00:00Z' },
+    };
+
+    expect(validate(missingRequiredGenerator)).toBe(false);
+  });
+
+  it('rejects additional root properties forbidden by the packaged schema', () => {
+    expect(validate({ ...minimalV3, unsupported: true })).toBe(false);
   });
 });
 
@@ -95,14 +134,14 @@ describe('validateV4()', () => {
     expect(validateV4(minimalV3)).toBe(false);
   });
 
-  it('rejects a v0.4 document missing coChange array', () => {
+  it('accepts a v0.4 document missing coChange array when the schema does not require it', () => {
     const bad = { ...minimalV4, generated: { ...minimalV4.generated, coChange: undefined } };
-    expect(validateV4(bad)).toBe(false);
+    expect(validateV4(bad)).toBe(true);
   });
 
-  it('rejects a v0.4 document missing fragility array', () => {
+  it('accepts a v0.4 document missing fragility array when the schema does not require it', () => {
     const bad = { ...minimalV4, generated: { ...minimalV4.generated, fragility: undefined } };
-    expect(validateV4(bad)).toBe(false);
+    expect(validateV4(bad)).toBe(true);
   });
 });
 

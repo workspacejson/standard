@@ -39,6 +39,10 @@ declare module 'node:module' {
   export function createRequire(url: string | URL): (id: string) => unknown;
 }
 
+declare module 'node:url' {
+  export function fileURLToPath(url: string | URL): string;
+}
+
 declare module 'node:readline' {
   export function emitKeypressEvents(stream: unknown): void;
 }

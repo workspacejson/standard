@@ -1,3 +1,7 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { compileSchemaValidator } from './validator.js';
+
 export { workspaceJsonSchema } from './schema.js';
 export type {
   WorkspaceJson,
@@ -17,25 +21,25 @@ export type {
 
 import type { WorkspaceJsonV3, WorkspaceJsonV4 } from './types.js';
 
+type WorkspaceJsonDocument = WorkspaceJsonV3 | WorkspaceJsonV4;
+
+// The runtime validator consumes the schema artifact that is published with
+// the package, rather than the authoring-time TypeScript mirror.
+const packagedSchema = JSON.parse(
+  readFileSync(fileURLToPath(new URL('../schema/v1.json', import.meta.url)), 'utf8'),
+) as object;
+const validateSchema = compileSchemaValidator<WorkspaceJsonDocument>(packagedSchema);
+
 export const version = '0.4.1';
 
 export function validate(data: unknown): data is WorkspaceJsonV3 | WorkspaceJsonV4 {
-  if (typeof data !== 'object' || data === null) return false;
-  const d = data as Record<string, unknown>;
-  if (!('manual' in d && 'generated' in d && 'agents' in d && 'health' in d)) return false;
-  const gen = d['generated'];
-  if (typeof gen !== 'object' || gen === null) return false;
-  const g = gen as Record<string, unknown>;
-  return (g['specVersion'] === '0.3' || g['specVersion'] === '0.4') &&
-    typeof g['generatedAt'] === 'string';
+  return validateSchema(data);
 }
 
 export function validateV4(data: unknown): data is WorkspaceJsonV4 {
   if (!validate(data)) return false;
   const g = (data as WorkspaceJsonV4).generated;
-  return g.specVersion === '0.4' &&
-    Array.isArray(g.coChange) &&
-    Array.isArray(g.fragility);
+  return g.specVersion === '0.4';
 }
 
 export function validateLegacy(data: unknown): boolean {

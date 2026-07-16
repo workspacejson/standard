@@ -57,6 +57,9 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "ajv": "^8.20.0"
+  },
   "devDependencies": {
     "json-schema-to-typescript": "^14.0.0",
     "typescript": "^5.4.0",
