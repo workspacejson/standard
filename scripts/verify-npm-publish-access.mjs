@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 
 const packages = ["@workspacejson/spec", "@workspacejson/rules", "agents-audit"];
 const username = JSON.parse(run("npm", ["whoami", "--json"]));
-const access = JSON.parse(run("npm", ["access", "ls-packages", username, "--json"]));
+const access = JSON.parse(run("npm", ["access", "list", "packages", username, "--json"]));
 const missing = packages.filter((name) => access[name] !== "read-write");
 
 if (missing.length > 0) {
