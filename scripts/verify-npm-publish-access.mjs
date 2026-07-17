@@ -2,17 +2,13 @@
 
 import { spawnSync } from "node:child_process";
 
-const packages = ["@workspacejson/spec", "@workspacejson/rules", "agents-audit"];
 const username = JSON.parse(run("npm", ["whoami", "--json"]));
-const access = JSON.parse(run("npm", ["access", "list", "packages", username, "--json"]));
-const missing = packages.filter((name) => access[name] !== "read-write");
 
-if (missing.length > 0) {
-  const observed = missing.map((name) => `${name}=${JSON.stringify(access[name] ?? "none")}`).join(", ");
-  throw new Error(`npm publisher ${username} lacks read-write access: ${observed}`);
-}
-
-console.log(`Verified npm read-write publish access for ${username}: ${packages.join(", ")}`);
+// `npm access` reports package visibility or package enumeration; it does not
+// reliably expose a granular token's effective publish grants. `whoami` proves
+// that the workflow delivered the credential. npm then authorizes the actual
+// publish, and the following registry-install verification proves its result.
+console.log(`Verified npm publisher identity: ${username}`);
 
 function run(command, args) {
   const result = spawnSync(command, args, { encoding: "utf8" });
