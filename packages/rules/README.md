@@ -1,7 +1,7 @@
 # @workspacejson/rules
 
 Deterministic parser, scanner, validator, and rule engine for `agents-audit`
-and other consumers of `.agents/agents.workspace.json`.
+and other consumers of `.agents/workspace.json`.
 
 This package is published from the `agents-audit` workspace and depends on
 the published `@workspacejson/spec` package.
@@ -28,7 +28,7 @@ import {
 
 - `src/parser` parses `AGENTS.md`
 - `src/scanner` walks repository structure
-- `src/validator` validates `.agents/agents.workspace.json`
+- `src/validator` validates `.agents/workspace.json`
 - `src/engine` evaluates deterministic rules
 - `src/testing` provides the published test helper surface
 

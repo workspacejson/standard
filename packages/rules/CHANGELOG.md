@@ -1,10 +1,19 @@
 # Changelog
 
+## 0.4.2
+
+### Patch Changes
+
+- Ship strict schema-backed validation, producer-safe generation, and package tarball release guards.
+- Updated dependencies
+  - @workspacejson/spec@0.4.2
+
 All notable changes to `@workspacejson/rules` are documented here.
 
 ## [0.4.1] - 2026-06-02
 
 ### Changed
+
 - Canonical workspace file path updated from `.agents/agents.workspace.json` to
   `.agents/workspace.json` throughout rule context and validator references.
 - Package description and keywords updated to remove stale filename references.
@@ -13,6 +22,7 @@ All notable changes to `@workspacejson/rules` are documented here.
 ## [0.3.0] - 2026-05-12
 
 ### Changed
+
 - Version bump to align with `@workspacejson/spec@0.3.0` monorepo restructure.
   No rule logic changes; versioned together for consistent consumer installation.
 

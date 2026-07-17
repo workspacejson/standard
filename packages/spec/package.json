@@ -59,7 +59,8 @@
   "scripts": {
     "build": "tsc && node scripts/generate-types.js",
     "test": "npm run build && vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test && node ../../scripts/verify-package-tarball.mjs"
   },
   "dependencies": {
     "ajv": "^8.20.0"
