@@ -1,5 +1,13 @@
 # @workspacejson/spec
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png">
+    <img src="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png" alt="workspace.json — Portable Repository Intelligence" width="520">
+  </picture>
+</p>
+
 JSON Schema and TypeScript types for `workspace.json` v0.4.
 
 This package is published from the `agents-audit` workspace and is the canonical
