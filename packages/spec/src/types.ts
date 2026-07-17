@@ -114,8 +114,8 @@ export interface WorkspaceJsonV4 {
   manual: WorkspaceJsonV3['manual'];
   generated: Omit<WorkspaceJsonV3['generated'], 'specVersion'> & {
     specVersion: '0.4';
-    coChange: CoChangeEntry[];
-    fragility: FragilityEntry[];
+    coChange?: CoChangeEntry[];
+    fragility?: FragilityEntry[];
   };
   agents: WorkspaceJsonV3['agents'];
   health: WorkspaceJsonV3['health'] & {

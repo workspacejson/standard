@@ -1,5 +1,13 @@
 # @workspacejson/spec
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png">
+    <img src="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png" alt="workspace.json — Portable Repository Intelligence" width="520">
+  </picture>
+</p>
+
 JSON Schema and TypeScript types for `workspace.json` v0.4.
 
 This package is published from the `agents-audit` workspace and is the canonical
@@ -18,10 +26,10 @@ pnpm add @workspacejson/spec
 ```ts
 import { validate, validateV4, validateLegacy, version } from '@workspacejson/spec';
 
-console.log(version); // '0.4.1'
+console.log(version); // '0.4.2'
 
 validate(doc);        // true if doc is a valid v0.3 or v0.4 document
-validateV4(doc);      // true if doc is a valid v0.4 document (requires coChange + fragility arrays)
+validateV4(doc);      // true if doc is a valid v0.4 document
 validateLegacy(doc);  // true if doc is a valid v0.1/v0.2 document
 ```
 
@@ -101,6 +109,16 @@ const doc: WorkspaceJsonV4 = {
 
 **Consumer guidance for `fragility`**: filter `excluded: false` before ranking. Entries with
 `excluded: true` are generated or lock files with `fragilityScore: 0`.
+
+## Producer-conformance contract
+
+`workspace.json` deliberately separates human evidence from generated observations.
+Producers preserve `manual` verbatim across regeneration and replace the producer-owned
+`generated`, `agents`, and `health` sections. Human annotations for a producer belong under
+`manual`; consumers must not rely on generated sections remaining unchanged after a run.
+
+Producers should write only when their material projection changes. Timestamps identify the
+last material generation, not merely the last command invocation.
 
 ### JSON Schema file
 

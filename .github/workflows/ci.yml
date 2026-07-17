@@ -34,11 +34,8 @@ jobs:
       - name: Run tests
         run: pnpm -r test
 
-      - name: Validate package tarballs
-        run: |
-          (cd packages/spec && npm_config_cache=/tmp/agents-audit-npm-cache npm pack --dry-run --silent)
-          (cd packages/rules && npm_config_cache=/tmp/agents-audit-npm-cache npm pack --dry-run --silent)
-          (cd packages/agents-audit && npm_config_cache=/tmp/agents-audit-npm-cache npm pack --dry-run --silent)
+      - name: Verify package tarballs
+        run: pnpm run release:verify-packs
 
       - name: Validate package exports
         run: |
