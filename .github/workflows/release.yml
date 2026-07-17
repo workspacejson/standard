@@ -26,6 +26,10 @@ jobs:
       - run: pnpm -r build
       - run: pnpm -r test
       - run: pnpm run release:verify-packs
+      - name: Verify npm publish access
+        run: node scripts/verify-npm-publish-access.mjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish packages
         run: pnpm changeset publish
         env:
