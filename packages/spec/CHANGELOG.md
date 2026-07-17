@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.3] - 2026-07-17
+
+### Patch Changes
+
+- Fix the `agents-audit` CLI entry-point guard so it fires when invoked through npm's `.bin` symlink (`npx agents-audit`, `npm exec agents-audit`). The guard previously compared `resolve(process.argv[1])` against the resolved module URL, which never matched through a symlink — every subcommand (`generate`, `scan`) silently no-op'd and exited 0 instead of running. It now compares real paths via `realpathSync`.
+
+  Also hardens `scripts/verify-package-tarball.mjs` for `agents-audit`: after packing and installing the tarball fresh, it now runs `npx agents-audit generate` and asserts `.agents/workspace.json` actually exists and parses, rather than trusting a clean exit code.
+
 ## [0.4.2] - 2026-07-16
 
 ### Added

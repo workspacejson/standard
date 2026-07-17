@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -40,6 +41,7 @@ try {
   assertNoWorkspaceProtocol(manifest, "package");
   assertFixedGroupDependencies(manifest);
   assertRuntimeFiles(manifest, files);
+  if (packageName === "agents-audit") assertAgentsAuditBinGenerates(tarballPath);
   console.log(`Verified ${basename(tarballPath)} with ${packer}: packed manifest and runtime files are release-safe.`);
 } finally {
   rmSync(tarballPath, { force: true });
@@ -92,4 +94,48 @@ function assertRuntimeFiles(manifest, files) {
 
 function normalizeArchivePath(file) {
   return file.replace(/^\.\//, "").replaceAll("\\", "/").replace(/\/{2,}/g, "/");
+}
+
+function assertAgentsAuditBinGenerates(tarballPath) {
+  const smokeDirectory = mkdtempSync(join(tmpdir(), "agents-audit-pack-"));
+  try {
+    writeFileSync(join(smokeDirectory, "package.json"), JSON.stringify({ private: true }));
+    // agents-audit's packed manifest depends on @workspacejson/rules and
+    // @workspacejson/spec at this same fixed-group version, which is not yet
+    // on the npm registry pre-publish. Pack and install those siblings from
+    // disk too, so the install resolves locally instead of hitting the registry.
+    const siblingTarballs = ["../rules", "../spec"].map((relative) =>
+      packSibling(join(packageDirectory, relative), smokeDirectory),
+    );
+    run("npm", ["install", "--ignore-scripts", "--no-package-lock", ...siblingTarballs, tarballPath], smokeDirectory);
+    run("npx", ["--no-install", "agents-audit", "generate"], smokeDirectory);
+
+    const artifact = join(smokeDirectory, ".agents", "workspace.json");
+    if (!existsSync(artifact)) {
+      throw new Error("Packed agents-audit bin exited without creating .agents/workspace.json.");
+    }
+    JSON.parse(readFileSync(artifact, "utf8"));
+  } finally {
+    rmSync(smokeDirectory, { recursive: true, force: true });
+  }
+}
+
+function packSibling(siblingDirectory, destinationDirectory) {
+  const siblingManifest = JSON.parse(readFileSync(join(siblingDirectory, "package.json"), "utf8"));
+  const siblingTarballName = `${siblingManifest.name.replace(/^@/, "").replaceAll("/", "-")}-${siblingManifest.version}.tgz`;
+  const packArgs = packer === "npm"
+    ? ["pack", "--ignore-scripts", "--pack-destination", destinationDirectory]
+    : ["pack", "--pack-destination", destinationDirectory];
+  const packed = spawnSync(packer, packArgs, { cwd: siblingDirectory, encoding: "utf8" });
+  process.stdout.write(packed.stdout);
+  process.stderr.write(packed.stderr);
+  if (packed.status !== 0) throw new Error(`${packer} pack failed for ${siblingDirectory}.`);
+  return join(destinationDirectory, siblingTarballName);
+}
+
+function run(command, args, cwd) {
+  const result = spawnSync(command, args, { cwd, encoding: "utf8" });
+  process.stdout.write(result.stdout);
+  process.stderr.write(result.stderr);
+  if (result.status !== 0) throw new Error(`${command} ${args.join(" ")} failed with exit ${result.status ?? 1}.`);
 }
