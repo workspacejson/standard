@@ -30,10 +30,12 @@ jobs:
         run: node scripts/verify-npm-publish-access.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish packages
         run: pnpm changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Verify published packages from the registry
         run: pnpm run release:verify-published
         env:
