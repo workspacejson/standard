@@ -1,6 +1,6 @@
 {
   "name": "@workspacejson/spec",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "JSON Schema and TypeScript types for workspace.json",
   "license": "Apache-2.0",
   "author": "workspace-json contributors",
@@ -23,10 +23,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/workspace-json/spec.git"
+    "url": "git+https://github.com/workspace-json/agents-audit.git",
+    "directory": "packages/spec"
   },
   "bugs": {
-    "url": "https://github.com/workspace-json/spec/issues"
+    "url": "https://github.com/workspace-json/agents-audit/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -38,6 +39,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "workspacejson-spec": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -54,7 +58,7 @@
   ],
   "scripts": {
     "build": "tsc && node scripts/generate-types.js",
-    "test": "vitest run",
+    "test": "npm run build && vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

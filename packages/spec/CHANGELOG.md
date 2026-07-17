@@ -2,6 +2,18 @@
 
 All notable changes to `@workspacejson/spec` are documented here.
 
+## [0.4.2] - 2026-07-16
+
+### Added
+
+- `workspacejson-spec validate <file>`, exposed through `npx @workspacejson/spec`.
+
+### Changed
+
+- `validate()` now enforces the packaged JSON Schema; schema-invalid documents now return `false`.
+- `validateV4()` follows the schema's optional v0.4 `coChange` and `fragility` fields.
+- Packaged schema annotations use the current Buildomator implementation name.
+
 ## [0.4.1] - 2026-06-02
 
 ### Changed

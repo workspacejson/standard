@@ -12,7 +12,7 @@ export const workspaceJsonSchema = {
       properties: {
         fragileFiles: {
           type: 'array',
-          description: 'Human-annotated fragile files. Read by gsd-plugin v2.42.3.',
+          description: 'Human-annotated fragile files. Read by Buildomator.',
           items: {
             type: 'object',
             properties: {
@@ -23,7 +23,7 @@ export const workspaceJsonSchema = {
         },
         coChangePatterns: {
           type: 'array',
-          description: 'Human-annotated co-change observations. Read by gsd-plugin v2.42.3.',
+          description: 'Human-annotated co-change observations. Read by Buildomator.',
           items: { type: 'object' },
         },
       },
@@ -45,7 +45,7 @@ export const workspaceJsonSchema = {
         },
         frameworkManifest: {
           type: 'array',
-          description: 'Detected frameworks (confidence >= 0.7). Read by gsd-plugin v2.42.3.',
+          description: 'Detected frameworks (confidence >= 0.7). Read by Buildomator.',
           items: {
             type: 'object',
             properties: {
@@ -58,7 +58,7 @@ export const workspaceJsonSchema = {
         fileIndex: {
           type: 'object',
           description:
-            'Per-file behavioral intelligence keyed by relative path. Read by gsd-plugin v2.42.3.',
+            'Per-file behavioral intelligence keyed by relative path. Read by Buildomator.',
           additionalProperties: {
             type: 'object',
             properties: {

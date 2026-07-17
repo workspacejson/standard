@@ -55,8 +55,8 @@ describe('draft-2020-12 validator', () => {
 });
 
 describe('version', () => {
-  it('is 0.4.1', () => {
-    expect(version).toBe('0.4.1');
+  it('is 0.4.2', () => {
+    expect(version).toBe('0.4.2');
   });
 });
 

@@ -1,5 +1,6 @@
 declare const process: {
   cwd(): string;
+  execPath: string;
   exit(code?: number): never;
   argv: string[];
   stdin: {
@@ -13,11 +14,22 @@ declare const process: {
   stdout: {
     write(value: string): boolean;
   };
+  stderr: {
+    write(value: string): boolean;
+  };
 };
 
 declare module 'node:fs' {
   export function existsSync(path: string): boolean;
   export function readFileSync(path: string, encoding: string): string;
+}
+
+declare module 'node:child_process' {
+  export function execFileSync(
+    command: string,
+    args?: string[],
+    options?: { cwd?: string; encoding?: string; stdio?: 'pipe' },
+  ): string;
 }
 
 declare module 'node:fs/promises' {
