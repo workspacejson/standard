@@ -17,7 +17,9 @@ if (!["pnpm", "npm"].includes(packer)) {
 
 const tarballName = `${packageName.replace(/^@/, "").replaceAll("/", "-")}-${expectedVersion}.tgz`;
 const tarballPath = join(packageDirectory, tarballName);
-rmSync(tarballPath, { force: true });
+if (existsSync(tarballPath)) {
+  throw new Error(`Refusing to overwrite existing tarball ${tarballName}; remove it before verification.`);
+}
 
 const packArgs = packer === "npm" ? ["pack", "--ignore-scripts"] : ["pack"];
 const packed = spawnSync(packer, packArgs, { cwd: packageDirectory, encoding: "utf8" });
