@@ -11,6 +11,13 @@
   rather than a positional tuple.
 - Corrected the exported runtime `version` to match the package manifest.
 
+### Compatibility note
+
+- `npx @workspacejson/spec validate <file>` resolves because npm selects this
+  package's sole `workspacejson-spec` bin. This release deliberately does not
+  reserve the generic `spec` bin alias. If a second bin is added in the future,
+  re-evaluate that npm single-bin fallback dependency as part of that change.
+
 ## [0.4.3] - 2026-07-17
 
 ### Patch Changes
