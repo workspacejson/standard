@@ -30,7 +30,7 @@ const packagedSchema = JSON.parse(
 ) as object;
 const validateSchema = compileSchemaValidator<WorkspaceJsonDocument>(packagedSchema);
 
-export const version = '0.4.2';
+export const version = '0.4.4';
 
 export function validate(data: unknown): data is WorkspaceJsonV3 | WorkspaceJsonV4 {
   return validateSchema(data);

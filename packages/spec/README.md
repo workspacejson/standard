@@ -26,7 +26,7 @@ pnpm add @workspacejson/spec
 ```ts
 import { validate, validateV4, validateLegacy, version } from '@workspacejson/spec';
 
-console.log(version); // '0.4.2'
+console.log(version); // '0.4.4'
 
 validate(doc);        // true if doc is a valid v0.3 or v0.4 document
 validateV4(doc);      // true if doc is a valid v0.4 document

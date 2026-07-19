@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.4] - Unreleased
+
+### Patch Changes
+
+- Updated dependency: `@workspacejson/spec@0.4.4`.
+
 ## [0.4.3] - 2026-07-17
 
 ### Patch Changes
