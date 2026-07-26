@@ -68,7 +68,7 @@
     "simple-git": "^3.25.0"
   },
   "devDependencies": {
-    "@types/node": "22.19.17",
+    "@types/node": "22.20.1",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"
