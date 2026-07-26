@@ -2,7 +2,7 @@
 
 // Architecture and clean-room guards for workspacejson/standard.
 //
-// Enforces META-165's dependency direction and the clean-room boundary:
+// Enforces the ratified dependency direction and the clean-room boundary:
 //
 //     workspacejson/standard          <- this repository, depends on NONE of the others
 //             |
@@ -113,7 +113,7 @@ for (const file of files) {
   }
 
   // ---- Second editable view of the standard contract -----------------------
-  // The META-239 migration removed a hand-written `declare module
+  // The extraction migration removed a hand-written `declare module
   // '@workspacejson/spec'` that was WINNING over the real package's types and
   // described a stale v0.3-only contract. It must not come back.
   if (/\.d\.ts$/.test(file) && /declare\s+module\s+['"]@workspacejson\/(spec|rules)['"]/.test(content)) {
@@ -137,7 +137,7 @@ for (const file of files) {
 }
 
 // ---- Exactly one normative schema -----------------------------------------
-// The website independently checked in a drifting copy of the schema (META-211).
+// The website independently checked in a drifting copy of the schema.
 // standard is the canonical source; a second copy here would recreate that
 // failure inside the repository that is supposed to be authoritative.
 {
@@ -170,7 +170,7 @@ for (const file of files.filter((f) => /^packages\/[^/]+\/package\.json$/.test(f
 
   // A committed workspace: protocol is correct HERE, because spec and rules
   // live in the same pnpm workspace and pnpm rewrites it to the exact version
-  // at pack time (META-239 Phase 7, proven against the published 0.4.4 tarball).
+  // at pack time, proven against the published 0.4.4 tarball.
   // A *floating range* on a standard-owned package is not — the fixed release
   // group would stop being coherent.
   for (const field of ["dependencies", "peerDependencies", "optionalDependencies"]) {
@@ -187,7 +187,7 @@ for (const file of files.filter((f) => /^packages\/[^/]+\/package\.json$/.test(f
 
 // ---- No workflow may be capable of publishing ------------------------------
 // Publish authority for standard-owned packages still belongs to
-// workspace-json/agents-audit until META-243. This repository ships NO release
+// workspace-json/agents-audit until a coordinated cutover. This repository ships NO release
 // workflow at all — see .github/RELEASE-AUTHORITY.md for why absence was chosen
 // over a disabled file. These checks scan EVERY workflow, so publication cannot
 // reappear under a different filename.
@@ -195,10 +195,10 @@ for (const workflow of files.filter((f) => /^\.github\/workflows\/.+\.ya?ml$/.te
   const content = stripComments(workflow, read(workflow));
 
   if (/changeset\s+publish|npm\s+publish|pnpm\s+publish/.test(content)) {
-    report("publish-authority", workflow, "workflow contains a publish step; this repository must be incapable of publishing until META-243");
+    report("publish-authority", workflow, "workflow contains a publish step; this repository must be incapable of publishing until authority transfers");
   }
   if (/secrets\.NPM_TOKEN|NODE_AUTH_TOKEN/.test(content)) {
-    report("publish-authority", workflow, "workflow references a publish credential; no npm credential may exist here until META-243");
+    report("publish-authority", workflow, "workflow references a publish credential; no npm credential may exist here until authority transfers");
   }
   if (/\bagents-audit\b/.test(content)) {
     report("foreign-publish", workflow, "workflow references agents-audit, which is published by workspacejson/cli");

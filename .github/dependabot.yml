@@ -1,0 +1,51 @@
+version: 2
+
+updates:
+  # Both packages live in one pnpm workspace, so a single npm entry at the root
+  # covers the whole dependency tree. Per-package entries would open duplicate
+  # pull requests for the same shared dependency.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      # Type definitions and build tooling churn constantly and carry no runtime
+      # risk. Grouping them keeps the review queue readable.
+      dev-tooling:
+        dependency-type: development
+        patterns:
+          - "@types/*"
+          - typescript
+          - tsup
+          - vitest
+          - "@changesets/*"
+    ignore:
+      # ajv is a runtime dependency of the validator. A major bump changes
+      # validation behavior, which is a change to the normative contract, not a
+      # dependency update — it needs an architecture decision record first.
+      # See GOVERNANCE.md.
+      - dependency-name: ajv
+        update-types: [version-update:semver-major]
+      # The packages declare `node >=20` and CI runs 20 and 22. A @types/node
+      # major that assumes a newer runtime would typecheck against a Node the
+      # packages do not claim to support.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+    commit-message:
+      prefix: ci

@@ -1,7 +1,44 @@
 name: Bug report
-description: Report a problem with agents-audit or the supporting packages
+description: Report a problem with the schema, types, validation semantics or rule engine
 labels: [bug]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        This repository owns the **specification** and its deterministic reference
+        behavior. If `.agents/workspace.json` is not being generated or is generated
+        wrongly, that is `workspacejson/cli`. If an MCP or editor integration
+        misbehaves, that is `workspacejson/integrations`. See
+        [SUPPORT.md](https://github.com/workspacejson/standard/blob/main/SUPPORT.md).
+
+        For a security vulnerability, stop and follow
+        [SECURITY.md](https://github.com/workspacejson/standard/blob/main/SECURITY.md)
+        instead of filing here.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected surface
+      description: Which part of this repository is wrong?
+      options:
+        - "@workspacejson/spec — JSON Schema"
+        - "@workspacejson/spec — TypeScript types"
+        - "@workspacejson/spec — validation API or workspacejson-spec binary"
+        - "@workspacejson/rules — AGENTS.md parser"
+        - "@workspacejson/rules — repository scanner"
+        - "@workspacejson/rules — rule engine"
+        - "@workspacejson/rules — workspace.json validator"
+        - Documentation in this repository
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Package and Node versions
+      description: Output of `npm ls @workspacejson/spec @workspacejson/rules` and `node --version`.
+      placeholder: "@workspacejson/spec 0.4.4, @workspacejson/rules 0.4.4, node v20.11.0"
+    validations:
+      required: true
   - type: textarea
     id: summary
     attributes:
@@ -14,21 +51,32 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
-      description: Include the minimum steps required to reproduce the issue.
-      placeholder: 1. ...
+      description: >
+        The minimum steps required. Include the smallest workspace.json document
+        that reproduces the problem, and the exact command you ran.
+      render: shell
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
       label: Expected behavior
-      description: What should have happened instead?
+      description: What should have happened instead, and what makes you say so — schema text, a documented guarantee, a stable read path?
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
       label: Actual behavior
-      description: What happened in practice?
+      description: What happened in practice. Paste the complete output rather than summarizing it.
+      render: shell
     validations:
       required: true
+  - type: checkboxes
+    id: contract
+    attributes:
+      label: Contract impact
+      description: Check any that apply. These change how the report is triaged.
+      options:
+        - label: This affects one of the four stable read paths (`manual.fragileFiles`, `manual.coChangePatterns`, `generated.fileIndex`, `generated.frameworkManifest`)
+        - label: This affects a published package, not only local development

@@ -22,8 +22,8 @@ merely asserted here.
 
 This repository is currently **incapable** of publishing: it has no npm secret
 and ships no release workflow. See
-[`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md). Authority
-transfer is META-243.
+[`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md), which records
+what a coordinated authority transfer must do.
 
 ## Consumes
 
@@ -68,10 +68,11 @@ packages. The reverse direction is prohibited.
 | Source repository | `workspace-json/agents-audit` |
 | Frozen source SHA | `e47eb1b8556c4f361db9a78190a2f36b400756e8` |
 | Extraction method | `git filter-repo` path filter, history preserved |
-| Governing issue | META-239 (parent program META-237) |
 | Rollback ref | `workspace-json/agents-audit@e47eb1b8556c4f361db9a78190a2f36b400756e8` |
 
-Full detail in [`migration/PROVENANCE.md`](./migration/PROVENANCE.md).
+Full detail — including the governing issue identifiers, tree hashes, commit map
+and intentional differences — is in
+[`migration/PROVENANCE.md`](./migration/PROVENANCE.md).
 
 The historical repository remains unmodified and remains the publication
-authority until META-243 completes.
+authority until the coordinated cutover completes.

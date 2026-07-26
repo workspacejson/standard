@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.4] - Unreleased
+## [0.4.4] - 2026-07-23
 
 ### Patch Changes
 

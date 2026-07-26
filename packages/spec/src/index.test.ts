@@ -209,12 +209,12 @@ describe('schema structural invariants', () => {
   });
 });
 
-// ─── VR-640: fileIndex key format pinned to repo-root-relative POSIX ──────────
-// The DataHub join (HAC-75 probe) silently produced zero rows because the spec
+// ─── fileIndex key format pinned to repo-root-relative POSIX ─────────────────
+// A downstream join probe silently produced zero rows because the spec
 // said "relative path" without an anchor. The canonical form must be stated and
 // kept in sync across both schema mirrors so the CLI shim normalizes toward a
 // blessed target rather than an assumed one.
-describe('VR-640: canonical key format is repository-root-relative POSIX', () => {
+describe('canonical key format is repository-root-relative POSIX', () => {
   const gen = (s: Record<string, unknown>) =>
     ((s['properties'] as Record<string, Record<string, unknown>>)['generated']?.['properties'] ??
       {}) as Record<string, Record<string, unknown>>;
@@ -242,11 +242,11 @@ describe('VR-640: canonical key format is repository-root-relative POSIX', () =>
   });
 });
 
-// ─── VR-639: coChange.files is a set, not a positional tuple ──────────────────
+// ─── coChange.files is a set, not a positional tuple ─────────────────────────
 // types.ts said [string, string] (positional) while the schema said min/max-2
 // array (set). A CLI that treated files[0] as canonical would silently mis-join.
 // The contract is now set semantics — order must never affect the join.
-describe('VR-639: coChange.files has set semantics (order-independent join)', () => {
+describe('coChange.files has set semantics (order-independent join)', () => {
   const minimalV4 = {
     manual: {},
     generated: {
@@ -274,7 +274,7 @@ describe('VR-639: coChange.files has set semantics (order-independent join)', ()
 
   it('the co-change join (set membership) resolves identically under reversed pair order', () => {
     // Models the CLI join: find co-change partners of a target file by membership,
-    // never by index. This is the assertion VR-639 requires "at the join level".
+    // never by index. This is the assertion set semantics requires at the join level.
     const partnersOf = (doc: ReturnType<typeof withPair>, target: string) =>
       doc.generated.coChange
         .filter((e) => e.files.includes(target))

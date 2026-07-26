@@ -6,9 +6,23 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege by default. This workflow only reads the repository — it does
+# not comment, label, publish or write any artifact. Any job needing more must
+# raise it at the job level with a reason, not here.
+permissions:
+  contents: read
+
+# A superseded push to the same branch has nothing left to prove. `main` is
+# excluded from cancellation so the record of what landed stays complete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         node-version: [20, 22]
@@ -33,11 +47,19 @@ jobs:
       - name: Architecture guard red tests
         run: pnpm run check:architecture:test
 
+      # Documentation decays silently. This proves every relative link still
+      # resolves, that no internal tracker identifier reached public prose, and
+      # that every documented `pnpm run` command actually exists. External links
+      # are syntax-checked only — fetching them in CI fails on someone else's
+      # outage and trains everyone to ignore red.
+      - name: Documentation integrity
+        run: pnpm run check:docs
+
       # Build precedes typecheck deliberately. @workspacejson/rules typechecks
       # against @workspacejson/spec's EMITTED declarations, which `tsc --noEmit`
       # never produces. In the source monorepo this ordering was hidden by a
       # hand-written ambient `declare module '@workspacejson/spec'`; removing
-      # that stub (META-239 Phase 3) made the real dependency visible.
+      # that stub during the extraction made the real dependency visible.
       - name: Build all packages
         run: pnpm -r build
 
@@ -52,7 +74,7 @@ jobs:
 
       # Standard owns the normative schema. These two gates prove the package
       # ships the canonical bytes and that every shipped example validates
-      # against them. See META-211.
+      # against them.
       - name: Verify schema provenance
         run: pnpm run check:schema
 

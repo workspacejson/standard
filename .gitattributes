@@ -1,0 +1,32 @@
+# Normalize line endings in the repository, check out native on the working tree.
+# Without this, a CRLF checkout changes the bytes of the canonical schema and the
+# SHA-256 that downstream repositories pin against it.
+* text=auto eol=lf
+
+# The normative schema and the shipped examples are byte-significant. Never let a
+# platform, filter or merge driver rewrite them.
+packages/spec/schema/v1.json   text eol=lf
+packages/spec/examples/*.json  text eol=lf
+
+# Generated or vendored — exclude from language statistics and collapse in diffs.
+pnpm-lock.yaml                 linguist-generated=true -diff
+migration/parity-*.txt         linguist-generated=true
+migration/commit-map.txt       linguist-generated=true
+migration/architecture-red-tests.txt linguist-generated=true
+
+# Documentation should count as documentation, not as code.
+*.md                           linguist-documentation=true
+
+# Binary assets.
+*.png                          binary
+*.jpg                          binary
+*.svg                          text eol=lf
+
+# Keep the packed tarball free of repository-only material. `files` in each
+# package manifest is the primary control; this is defense in depth for anything
+# consuming the repository as an archive.
+/.github/                      export-ignore
+/migration/                    export-ignore
+/docs/                         export-ignore
+/.editorconfig                 export-ignore
+/.gitattributes                export-ignore

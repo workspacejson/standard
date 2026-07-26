@@ -9,10 +9,17 @@ and its deterministic reference behavior. It publishes `@workspacejson/spec` and
 - Read [`OWNERSHIP.md`](./OWNERSHIP.md) — it states what belongs here and what
   belongs in `workspacejson/cli`, `workspacejson/integrations` or
   `workspacejson/site`.
+- Read [`GOVERNANCE.md`](./GOVERNANCE.md) — changes to the normative surface need
+  an architecture decision record **merged before** implementation. Finding that
+  out after writing the code is the expensive way.
 - Read [`AGENTS.md`](./AGENTS.md) for entry points and the "do not change
   without an issue" list.
 - Keep changes within the owning package where possible.
 - Avoid changing package entry points unless the public surface changes.
+
+New here? [`docs/troubleshooting.md`](./docs/troubleshooting.md) covers the
+failure modes that surprise people on a first clean checkout — chiefly that you
+must **build before you typecheck**.
 
 ## Common commands
 
@@ -26,8 +33,15 @@ pnpm run check:architecture        # dependency direction + clean-room guards
 pnpm run check:architecture:test   # deliberate violations must be rejected
 pnpm run check:schema              # canonical schema provenance
 pnpm run check:examples            # every shipped example must validate
+pnpm run check:docs                # links, documented commands, public prose
 pnpm run release:verify-packs      # packed tarball gates
 ```
+
+`check:docs` will fail if you add a relative link that does not resolve, document
+a `pnpm run` command that does not exist, or put an internal tracker identifier
+into public prose. That last rule exists because a reader outside this
+organization cannot resolve one; describe the work instead. Provenance records
+under `migration/` and `docs/adr/` are exempt.
 
 ## Changes that need extra care
 

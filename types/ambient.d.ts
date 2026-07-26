@@ -1,4 +1,4 @@
-// Interop shims retained after the META-239 migration.
+// Interop shims retained after the extraction migration.
 //
 // These four declarations are NOT contract duplication. Each package below ships
 // real TypeScript types; each shim exists only because a CommonJS default export
@@ -6,9 +6,9 @@
 // Removing any one of them produces real compile errors (measured: simple-git 3,
 // remark 1, ajv 1, ajv/dist/2020.js 3+1). Fixing them properly means changing
 // import style in package source, which is deliberately out of scope for a
-// move-first migration. Tracked on META-165.
+// move-first migration. Tracked as its own interoperability work.
 //
-// Everything else that used to live here was removed during META-239:
+// Everything else that used to live here was removed during the extraction:
 //   * `declare module '@workspacejson/spec'` — a stale, v0.3-only duplicate of a
 //     standard-owned contract that was WINNING over the real package's types.
 //     scripts/check-architecture.mjs now rejects its reintroduction.

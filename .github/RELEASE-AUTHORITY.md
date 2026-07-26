@@ -4,7 +4,7 @@
 
 `@workspacejson/spec` and `@workspacejson/rules` are still published from
 `workspace-json/agents-audit`, which holds the `NPM_TOKEN` secret. Transferring
-that authority is **META-243**, and it has not happened.
+that authority is a separate, coordinated change, and it has not happened.
 
 ## Why absence rather than a disabled workflow
 
@@ -28,7 +28,7 @@ the current state. There is nothing to accidentally enable.
    `scripts/check-architecture.test.mjs` prove those guards reject deliberate
    violations.
 
-## What META-243 must do
+## What the authority transfer must do
 
 When publication authority transfers, in a single coordinated change:
 

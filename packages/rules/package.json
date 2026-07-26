@@ -1,10 +1,10 @@
 {
   "name": "@workspacejson/rules",
   "version": "0.4.4",
-  "description": "Rule engine for auditing AGENTS.md hygiene using .agents/workspace.json",
+  "description": "Deterministic reference behavior for workspace.json: AGENTS.md parser, repository scanner, validator and rule engine",
   "license": "Apache-2.0",
-  "author": "workspace-json contributors",
-  "homepage": "https://workspacejson.dev/audit/",
+  "author": "workspacejson contributors",
+  "homepage": "https://workspacejson.dev",
   "keywords": [
     "workspace.json",
     "ai-agents",
@@ -13,7 +13,6 @@
     "open-standard",
     "json-schema",
     "developer-tools",
-    "aaif",
     "AGENTS.md",
     "claude-code",
     "cursor",

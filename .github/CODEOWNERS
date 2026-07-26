@@ -1,0 +1,29 @@
+# Code owners for workspacejson/standard.
+#
+# GitHub requests review from the owners of every path a pull request touches.
+# This file mirrors MAINTAINERS.md; keep the two in step.
+#
+# Paths are listed most-general first — later patterns win.
+
+*                               @qmarcelle
+
+# The normative surface. Changes here alter the contract for every consumer and
+# require an architecture decision record before implementation. See GOVERNANCE.md.
+/packages/spec/schema/          @qmarcelle
+/packages/spec/src/types.ts     @qmarcelle
+/packages/spec/src/schema.ts    @qmarcelle
+/docs/adr/                      @qmarcelle
+
+# Boundary and publication guards. A change here can silently disable the checks
+# that keep this repository incapable of publishing and free of cross-repository
+# dependencies.
+/scripts/                       @qmarcelle
+/.github/workflows/             @qmarcelle
+/.github/RELEASE-AUTHORITY.md   @qmarcelle
+
+# Governance and ownership statements.
+/GOVERNANCE.md                  @qmarcelle
+/MAINTAINERS.md                 @qmarcelle
+/OWNERSHIP.md                   @qmarcelle
+/SECURITY.md                    @qmarcelle
+/.github/CODEOWNERS             @qmarcelle
