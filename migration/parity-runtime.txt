@@ -1,0 +1,39 @@
+Installing packed candidates into clean directories...
+  old -> /var/folders/sy/frt_v9rn73lbqr1l92qfjxhw0000gp/T/wsjson-old-BU768K
+  new -> /var/folders/sy/frt_v9rn73lbqr1l92qfjxhw0000gp/T/wsjson-new-Z0zFKc
+
+=== @workspacejson/spec — binary (workspacejson-spec) ===
+  PASS  workspacejson-spec (no args) -> usage  exit=1
+  PASS  workspacejson-spec --help -> usage  exit=1
+  PASS  workspacejson-spec validate VALID -> exit 0  exit=0
+  PASS  workspacejson-spec validate INVALID: missing-required  exit=1
+  PASS  workspacejson-spec validate INVALID: extra-property  exit=1
+  PASS  workspacejson-spec validate INVALID: malformed-fragilefiles  exit=1
+  PASS  workspacejson-spec validate INVALID: malformed-fileindex  exit=1
+  PASS  workspacejson-spec validate INVALID: bad-specversion  exit=1
+  PASS  workspacejson-spec validate INVALID: not-an-object  exit=1
+  PASS  workspacejson-spec validate INVALID: empty  exit=1
+  PASS  workspacejson-spec validate INVALID: corrupt  exit=1
+  PASS  workspacejson-spec validate missing file  exit=1
+
+=== @workspacejson/spec — public API ===
+  PASS  import('@workspacejson/spec') surface  exit=0
+  PASS  import('@workspacejson/spec/schema')  exit=0
+  PASS  validate()/validateLegacy() across all fixtures  exit=0
+
+=== @workspacejson/rules — public API ===
+  PASS  import('@workspacejson/rules') surface  exit=0
+  PASS  ./testing export exercised INSIDE vitest — RuleTester usable on both sides  exit=0
+  PASS  rules WorkspaceJsonValidator across all fixtures  exit=0
+  PASS  rules AgentsMdParser deterministic parse  exit=0
+  PASS  rules RuleEngine — referenced file ABSENT  exit=0
+  PASS  rules RuleEngine PERTURBED — referenced file PRESENT  exit=0
+  PASS  rules computeHygieneScore graded output  exit=0
+
+=== Perturbation sanity — the harness can tell behavior apart ===
+  validate() accepted: valid-v4.json
+  validate() rejected: bad-specversion.json, empty.json, extra-property.json, malformed-fileindex.json, malformed-fragilefiles.json, missing-required.json, not-an-object.json
+  PASS  validator discriminates: 1 accepted / 7 rejected
+  PASS  rule engine discriminates: state FAIL -> PASS when the file is created
+
+24 passed, 0 failed

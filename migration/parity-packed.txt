@@ -1,0 +1,93 @@
+
+=== @workspacejson/spec — packed parity ===
+  PASS  file inventory old == new  15 entries
+  PASS  file inventory published == new  15 entries
+  manifest vs PUBLISHED: 16/21 keys identical
+    identical: author bin dependencies description engines exports files license main module name publishConfig scripts type types version
+    DIFFERS  bugs
+      published: {"url":"https://github.com/workspace-json/agents-audit/issues"}
+      new      : {"url":"https://github.com/workspacejson/standard/issues"}
+    DIFFERS  devDependencies
+      published: {"json-schema-to-typescript":"^14.0.0","typescript":"^5.4.0","vitest":"^1.6.0"}
+      new      : {"@types/node":"22.19.17","json-schema-to-typescript":"^14.0.0","typescript":"^5.4.0","vitest":"^1.6.0"}
+    DIFFERS  homepage
+      published: "https://www.workspacejson.dev"
+      new      : "https://workspacejson.dev"
+    DIFFERS  keywords
+      published: ["workspace.json","ai-agents","ai-coding-agents","codebase-intelligence","open-standard","json-schema","developer-tools","aaif","agents-audit","AGENTS.md","claude-code","cursor","goose","cline"]
+      new      : ["workspace.json","ai-agents","ai-coding-agents","codebase-intelligence","open-standard","json-schema","developer-tools","aaif","AGENTS.md","claude-code","cursor","goose","cline"]
+    DIFFERS  repository
+      published: {"type":"git","url":"git+https://github.com/workspace-json/agents-audit.git","directory":"packages/spec"}
+      new      : {"type":"git","url":"git+https://github.com/workspacejson/standard.git","directory":"packages/spec"}
+  PASS  name unchanged  @workspacejson/spec
+  PASS  version unchanged  0.4.4
+  PASS  bin unchanged  {"workspacejson-spec":"./dist/cli.js"}
+  PASS  main unchanged  ./dist/index.js
+  PASS  module unchanged  ./dist/index.js
+  PASS  types unchanged  ./dist/index.d.ts
+  PASS  exports unchanged
+  PASS  files unchanged
+  PASS  engines unchanged  {"node":">=20.0.0"}
+  PASS  runtime dependencies unchanged
+  PASS  publishConfig unchanged
+  PASS  license unchanged  Apache-2.0
+  PASS  no workspace: protocol in packed manifest
+  PASS  content published == new: CHANGELOG.md  6f617e7661e6
+  PASS  content published == new: LICENSE  512c6696cd7c
+  PASS  content published == new: README.md  7c8cb4943145
+  PASS  content published == new: dist/cli.d.ts  43e818adf601
+  PASS  content published == new: dist/cli.js  f9bf756a7fc9
+  PASS  content published == new: dist/index.d.ts  eac3f50adb2a
+  PASS  content published == new: dist/index.js  b9faa0bbf8ea
+  PASS  content published == new: dist/schema.d.ts  ec426f0a6d6a
+  PASS  content published == new: dist/schema.js  34013a49f76c
+  PASS  content published == new: dist/types.d.ts  7fe13c3ffaf3
+  PASS  content published == new: dist/types.js  8e609bb71c20
+  PASS  content published == new: dist/validator.d.ts  ff99a0e29baf
+  PASS  content published == new: dist/validator.js  3a3a87f608da
+  PASS  content published == new: schema/v1.json  7f1635bbeff4
+
+=== @workspacejson/rules — packed parity ===
+  PASS  file inventory old == new  9 entries
+  PASS  file inventory published == new  9 entries
+  manifest vs PUBLISHED: 15/20 keys identical
+    identical: author dependencies description engines exports files license main module name publishConfig scripts type types version
+    DIFFERS  bugs
+      published: {"url":"https://github.com/workspace-json/agents-audit/issues"}
+      new      : {"url":"https://github.com/workspacejson/standard/issues"}
+    DIFFERS  devDependencies
+      published: {"typescript":"^5.4.0","tsup":"^8.0.0","vitest":"^1.6.0"}
+      new      : {"@types/node":"22.19.17","tsup":"^8.0.0","typescript":"^5.4.0","vitest":"^1.6.0"}
+    DIFFERS  homepage
+      published: "https://www.workspacejson.dev/audit/"
+      new      : "https://workspacejson.dev/audit/"
+    DIFFERS  keywords
+      published: ["workspace.json","ai-agents","ai-coding-agents","codebase-intelligence","open-standard","json-schema","developer-tools","aaif","agents-audit","AGENTS.md","claude-code","cursor","goose","cline"]
+      new      : ["workspace.json","ai-agents","ai-coding-agents","codebase-intelligence","open-standard","json-schema","developer-tools","aaif","AGENTS.md","claude-code","cursor","goose","cline"]
+    DIFFERS  repository
+      published: {"type":"git","url":"git+https://github.com/workspace-json/agents-audit.git","directory":"packages/rules"}
+      new      : {"type":"git","url":"git+https://github.com/workspacejson/standard.git","directory":"packages/rules"}
+  PASS  name unchanged  @workspacejson/rules
+  PASS  version unchanged  0.4.4
+  PASS  bin unchanged  null
+  PASS  main unchanged  ./dist/index.js
+  PASS  module unchanged  ./dist/index.js
+  PASS  types unchanged  ./dist/index.d.ts
+  PASS  exports unchanged
+  PASS  files unchanged
+  PASS  engines unchanged  {"node":">=20.0.0"}
+  PASS  runtime dependencies unchanged
+  PASS  publishConfig unchanged
+  PASS  license unchanged  Apache-2.0
+  PASS  no workspace: protocol in packed manifest
+  PASS  rules->spec packed as exact version  0.4.4
+  PASS  content published == new: CHANGELOG.md  b30b3dba427a
+  PASS  content published == new: LICENSE  512c6696cd7c
+  PASS  content published == new: README.md  f3e0bbe2964b
+  PASS  content published == new: dist/index.d.ts  9d9c6224c6bd
+  PASS  content published == new: dist/index.js  ee14ecc90a41
+  PASS  content published == new: dist/testing/rule-tester.d.ts  fa67dde1f53a
+  PASS  content published == new: dist/testing/rule-tester.js  4d2535bdd35d
+  PASS  content published == new: dist/types-M0UBZl08.d.ts  475249b40511
+
+53 passed, 0 failed

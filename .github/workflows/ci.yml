@@ -25,11 +25,24 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Typecheck all packages
-        run: pnpm -r typecheck
+      # Architecture and clean-room guards run FIRST: a boundary violation
+      # should fail before anything else has a chance to look green.
+      - name: Architecture and clean-room guards
+        run: pnpm run check:architecture
 
+      - name: Architecture guard red tests
+        run: pnpm run check:architecture:test
+
+      # Build precedes typecheck deliberately. @workspacejson/rules typechecks
+      # against @workspacejson/spec's EMITTED declarations, which `tsc --noEmit`
+      # never produces. In the source monorepo this ordering was hidden by a
+      # hand-written ambient `declare module '@workspacejson/spec'`; removing
+      # that stub (META-239 Phase 3) made the real dependency visible.
       - name: Build all packages
         run: pnpm -r build
+
+      - name: Typecheck all packages
+        run: pnpm -r typecheck
 
       - name: Run tests
         run: pnpm -r test
@@ -37,11 +50,23 @@ jobs:
       - name: Verify package tarballs
         run: pnpm run release:verify-packs
 
+      # Standard owns the normative schema. These two gates prove the package
+      # ships the canonical bytes and that every shipped example validates
+      # against them. See META-211.
+      - name: Verify schema provenance
+        run: pnpm run check:schema
+
+      - name: Validate shipped examples against the package schema
+        run: pnpm run check:examples
+
+      # Only packages this repository publishes are verified here.
+      # agents-audit belongs to workspacejson/cli and is deliberately absent.
       - name: Validate package exports
         run: |
           node -e "import('@workspacejson/spec')"
+          node -e "import('@workspacejson/spec/schema', { with: { type: 'json' } }).catch(() => import('@workspacejson/spec/schema'))"
           node -e "import('@workspacejson/rules')"
-          node -e "import('agents-audit')"
+          node -e "import('@workspacejson/rules/testing')"
 
-      - name: Run agents-audit on this repo
-        run: node packages/agents-audit/dist/cli.js scan . --fail-on error
+      - name: Verify the spec binary
+        run: node packages/spec/dist/cli.js --help

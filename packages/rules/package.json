@@ -4,7 +4,7 @@
   "description": "Rule engine for auditing AGENTS.md hygiene using .agents/workspace.json",
   "license": "Apache-2.0",
   "author": "workspace-json contributors",
-  "homepage": "https://www.workspacejson.dev/audit/",
+  "homepage": "https://workspacejson.dev/audit/",
   "keywords": [
     "workspace.json",
     "ai-agents",
@@ -14,7 +14,6 @@
     "json-schema",
     "developer-tools",
     "aaif",
-    "agents-audit",
     "AGENTS.md",
     "claude-code",
     "cursor",
@@ -23,11 +22,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/workspace-json/agents-audit.git",
+    "url": "git+https://github.com/workspacejson/standard.git",
     "directory": "packages/rules"
   },
   "bugs": {
-    "url": "https://github.com/workspace-json/agents-audit/issues"
+    "url": "https://github.com/workspacejson/standard/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -74,8 +73,9 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
+    "@types/node": "22.19.17",
     "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
     "vitest": "^1.6.0"
   }
 }
