@@ -17,9 +17,20 @@ updates:
       include: scope
     groups:
       # Type definitions and build tooling churn constantly and carry no runtime
-      # risk. Grouping them keeps the review queue readable.
+      # risk at the patch/minor level. Grouping them keeps the review queue
+      # readable.
+      #
+      # Majors are excluded from the group deliberately. The first run of this
+      # config bundled a harmless `@types/node` patch with `typescript` 5 -> 7
+      # and `vitest` 1 -> 4, and the whole group failed on `error TS5102:
+      # Option 'baseUrl' has been removed`. One safe update was held hostage by
+      # two ecosystem migrations. Majors now arrive as individual pull requests
+      # that can be scheduled as the real work they are.
       dev-tooling:
         dependency-type: development
+        update-types:
+          - minor
+          - patch
         patterns:
           - "@types/*"
           - typescript
@@ -37,6 +48,19 @@ updates:
       # major that assumes a newer runtime would typecheck against a Node the
       # packages do not claim to support.
       - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+      # A TypeScript major is a migration, not an update: TypeScript 7 removes
+      # compiler options this repository's tsconfig still sets. It emits the
+      # declarations that `@workspacejson/rules` typechecks against and that
+      # consumers install, so it is upgraded deliberately, with the tsconfig
+      # changes in the same pull request.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # vitest 1 -> 4 crosses three majors, and `@workspacejson/rules` re-exports
+      # vitest helpers through its published `./testing` entry point — so a
+      # vitest major is a public-surface change for consumers writing rule tests,
+      # not an internal test-runner bump.
+      - dependency-name: vitest
         update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions

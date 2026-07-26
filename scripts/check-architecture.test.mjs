@@ -117,6 +117,15 @@ red("foreign-package: a package this repo does not own", "foreign-package", (d) 
 red("unpinned-standard-dependency: floating range on a standard package", "unpinned-standard-dependency", (d) =>
   patchJson(d, "packages/rules/package.json", (m) => { m.dependencies["@workspacejson/spec"] = "^0.4.0"; }));
 
+// ------------------------------------------------------- unused dependencies
+red("unused-dependency: a runtime dependency nothing imports", "unused-dependency", (d) =>
+  patchJson(d, "packages/rules/package.json", (m) => { m.dependencies["left-pad"] = "^1.3.0"; }));
+
+// The inverse case: a dependency that IS imported must not be reported. Without
+// it, a guard that flagged every dependency would pass the red test above.
+baseline("unused-dependency: an imported subpath dependency is ACCEPTED", (d) =>
+  patchJson(d, "packages/rules/package.json", (m) => { m.dependencies["ajv"] = "^8.16.0"; }));
+
 red("publish-authority: a release workflow reappears with a publish step", "publish-authority", (d) =>
   write(d, ".github/workflows/release.yml", `name: Release\non:\n  workflow_dispatch:\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: pnpm changeset publish\n`));
 
