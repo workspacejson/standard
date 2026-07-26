@@ -185,6 +185,47 @@ for (const file of files.filter((f) => /^packages\/[^/]+\/package\.json$/.test(f
   }
 }
 
+// ---- Declared runtime dependencies must actually be imported ---------------
+// A `dependencies` entry is a promise to every consumer that they will install
+// this package. Four entries here (dedent, ignore, unified, zod) were declared
+// and never imported — consumers installed them for nothing, and dependency
+// bots opened major-version upgrade PRs for code that does not exist. Those
+// upgrades pass CI trivially, because nothing exercises them.
+//
+// devDependencies are deliberately NOT checked: build tools, type packages and
+// test runners are legitimately invoked by config and scripts rather than by an
+// import statement, so absence of an import proves nothing there.
+for (const file of files.filter((f) => /^packages\/[^/]+\/package\.json$/.test(f))) {
+  let manifest;
+  try { manifest = JSON.parse(read(file)); } catch { continue; }
+
+  const packageDir = file.replace(/\/package\.json$/, "");
+  const sources = files.filter((f) => f.startsWith(`${packageDir}/src/`) && isSource(f));
+  // No source at all means nothing can be concluded; stay silent rather than
+  // reporting every dependency as unused.
+  if (sources.length === 0) continue;
+
+  const allSource = sources.map((f) => read(f)).join("\n");
+
+  for (const dep of Object.keys(manifest.dependencies ?? {})) {
+    // Matches `from 'dep'`, `import('dep')`, `require('dep')` and any subpath
+    // such as `ajv/dist/2020.js`.
+    const escaped = dep.replace(/[.*+?^${}()|[\]\\/-]/g, "\\$&");
+    const imported = new RegExp(
+      `(?:from|import|require)\\s*\\(?\\s*['"]${escaped}(?:/[^'"]*)?['"]`,
+    ).test(allSource);
+
+    if (!imported) {
+      report(
+        "unused-dependency",
+        file,
+        `dependencies.${dep} is declared but never imported by ${packageDir}/src; ` +
+          `a runtime dependency consumers install for nothing. Remove it, or import it.`,
+      );
+    }
+  }
+}
+
 // ---- No workflow may be capable of publishing ------------------------------
 // Publish authority for standard-owned packages still belongs to
 // workspace-json/agents-audit until a coordinated cutover. This repository ships NO release
