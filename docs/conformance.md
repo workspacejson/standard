@@ -140,11 +140,66 @@ CI runs on Node 20 and 22. In order:
 | Executable examples | `check:examples` | Every shipped example validates |
 | Export validation | inline in CI | Each declared export resolves and imports |
 | Binary behavior | inline in CI | `validate` succeeds on a valid document; a bare invocation exits non-zero |
+| Producer conformance | `check:conformance` | A producer candidate satisfies the four-path contract |
+| Producer conformance red tests | `check:conformance:test` | Breaking each protected behavior makes that suite fail |
 
 The guard red tests deserve emphasis. A guard that rejected everything would look
 identical to a working guard from a green build, so the suite includes a baseline
 case asserting that the unmodified repository is *accepted*. Coverage without
 that case is not evidence.
+
+## The executable producer contract
+
+`check:conformance` is the standard's assertion about what any conforming
+producer must do. It runs against a **candidate** — a built producer package —
+because the producer lives in `workspacejson/cli`, not here:
+
+```bash
+WORKSPACEJSON_CLI_CANDIDATE=/path/to/cli/packages/cli pnpm run check:conformance
+WORKSPACEJSON_CLI_CANDIDATE=/path/to/cli/packages/cli pnpm run check:conformance:test
+```
+
+It **does not skip** when the candidate is absent; it exits non-zero with
+instructions. A conformance gate that goes green because it could not find the
+implementation reports conformance it never measured.
+
+What it asserts, by stable path:
+
+| Path | Asserted |
+| -- | -- |
+| `generated.fileIndex` | Non-empty from repository evidence; every key repository-root-relative POSIX; every key names a file that exists; the repository's real files are represented; keys deterministically ordered |
+| `generated.frameworkManifest` | A framework corroborated by a declared dependency is published at the documented `>= 0.7` floor; an uncorroborated `AGENTS.md` token is **not**; entries deterministically ordered |
+| `manual.fragileFiles` | Preserved verbatim across regeneration; absent evidence left absent, never fabricated |
+| `manual.coChangePatterns` | Preserved verbatim across regeneration; absent evidence left absent, never fabricated |
+
+And beyond the four paths: an unparseable or schema-invalid artifact is refused
+rather than overwritten, `--force` moves it aside recoverably instead of
+destroying it, `generated.by.name` identifies the producer rather than an
+invoker, output validates against the package-owned schema, a second run against
+an unchanged repository is byte-identical, and mediated invocation produces the
+same artifact as direct invocation after removing only `generated.generatedAt`.
+
+### What it deliberately does not assert
+
+**Per-file values inside `fileIndex`.** `FileIndexEntry` declares `fragility`,
+`aiModificationCount` and `humanModificationCount` as optional, so `{}` is a
+conformant entry. Those values are behavioral, their only available source is
+git-derived, and whether that source may enter the stable contract is an open
+question tracked outside this repository. A suite requiring them would fail a
+producer that is behaving correctly, and would pre-empt a ruling the standard
+does not own.
+
+Nor does it require non-empty human-owned fields, or add git-derived co-change
+to the acceptance surface.
+
+### Vreko-mediated invocation
+
+The contract asserts that mediation does not change what a producer emits. It
+verifies this against the **public** mediation surface — a host importing the
+package and calling the exported producer. Vreko itself is private and outside
+this repository's clean-room boundary, so it cannot be executed here; a
+Vreko-specific regression belongs in that repository and does not replace this
+contract.
 
 ## Known gaps
 
