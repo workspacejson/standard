@@ -1,23 +1,60 @@
 name: Feature request
-description: Suggest an improvement for agents-audit or its packages
+description: Propose a change to the specification, schema or reference behavior
 labels: [enhancement]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Two properties of this standard are load-bearing and are enforced in CI:
+
+        - **Descriptive, never prescriptive.** `workspace.json` reports what a
+          repository *is*. It does not encode what a team *must do*.
+        - **Daemon-free.** The committed file must remain useful with nothing running.
+
+        Proposals that change either property, the bytes of the normative schema,
+        or the four stable read paths require an architecture decision record
+        before implementation — see
+        [GOVERNANCE.md](https://github.com/workspacejson/standard/blob/main/GOVERNANCE.md).
   - type: textarea
     id: problem
     attributes:
       label: Problem statement
-      description: What problem are you trying to solve?
+      description: What problem are you trying to solve? Describe the situation, not the solution.
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed solution
-      description: What should the repo or package do differently?
+      label: Proposed change
+      description: What should the specification or reference behavior do differently?
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Does this change the normative surface?
+      description: >
+        The normative surface is the schema bytes, the four stable read paths, and
+        the public exports of either package.
+      options:
+        - "No — additive or internal only"
+        - "Yes — schema bytes change"
+        - "Yes — a stable read path changes"
+        - "Yes — a public export changes"
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: consumers
+    attributes:
+      label: Consumer impact
+      description: >
+        Who reads this data today, and what breaks if the change lands? If you know
+        of no existing consumer, say so — that is useful information.
     validations:
       required: true
   - type: textarea
     id: context
     attributes:
       label: Additional context
-      description: Add links, examples, or screenshots if helpful.
+      description: Links, prior art, an example document, or the alternatives you rejected.

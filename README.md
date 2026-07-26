@@ -6,7 +6,22 @@ producer-generated repository metadata with evidence authored by humans or
 specialized tools.
 
 This repository is the **canonical source of the specification** and of the
-deterministic reference behavior that interprets it. It is one of four:
+deterministic reference behavior that interprets it.
+
+## Status
+
+**The format is at v0.4 and the packages are at `0.4.4`. It is usable and
+published, and it is pre-1.0.** Four read paths are treated as a hard
+compatibility floor and will not be removed or renamed without a recorded
+decision. Everything outside that floor may still change.
+
+There is no external conformance suite yet, and the known gaps are listed
+plainly in [`docs/conformance.md`](./docs/conformance.md). No adoption,
+endorsement or standards-body status is claimed.
+
+## The four repositories
+
+This is one of four, with one-way ownership:
 
 | Repository | Owns |
 | -- | -- |
@@ -37,7 +52,40 @@ violations tested in `scripts/check-architecture.test.mjs`.
 | [`@workspacejson/rules`](./packages/rules) | `0.4.4` | AGENTS.md parser, repository scanner, workspace.json validator integration, and the deterministic rule engine |
 
 Published versions are **registry-defined**. The versions above describe the
-current release family; the registry remains the source of truth.
+current release family; the registry remains the source of truth:
+
+```bash
+npm view @workspacejson/spec version
+npm view @workspacejson/rules version
+```
+
+Both packages are released as a fixed group, so they always carry the same
+version number.
+
+## Quickstart
+
+Validate a `workspace.json` document without cloning anything:
+
+```bash
+npm install @workspacejson/spec
+npx workspacejson-spec validate .agents/workspace.json
+```
+
+The command exits `0` on a valid document and non-zero otherwise. `validate
+<file>` is its only command — there is no `--help` flag.
+
+To use the schema and types directly:
+
+```ts
+import { validate, validateV4 } from '@workspacejson/spec';
+import schema from '@workspacejson/spec/schema' with { type: 'json' };
+
+validate(doc);    // true for a valid v0.3 or v0.4 document
+validateV4(doc);  // true for a valid v0.4 document
+```
+
+This repository defines the format; it does not generate the artifact. Producing
+`.agents/workspace.json` belongs to `workspacejson/cli`.
 
 ## Two properties that are load-bearing
 
@@ -91,8 +139,14 @@ pnpm run check:architecture        # dependency direction + clean-room guards
 pnpm run check:architecture:test   # deliberate violations must be rejected
 pnpm run check:schema              # canonical schema provenance
 pnpm run check:examples            # every shipped example must validate
+pnpm run check:docs                # links, documented commands, public prose
 pnpm run release:verify-packs      # packed tarball gates
 ```
+
+Build before typecheck. `@workspacejson/rules` typechecks against
+`@workspacejson/spec`'s **emitted declarations**, which `tsc --noEmit` never
+produces — CI uses the same order deliberately. See
+[`docs/troubleshooting.md`](./docs/troubleshooting.md).
 
 `@workspacejson/rules` depends on `@workspacejson/spec` via `workspace:*`. That
 is correct here: both packages live in **this one** pnpm workspace, and `pnpm
@@ -108,8 +162,8 @@ proves no `workspace:` protocol ever reaches a packed manifest.
 `workspace-json/agents-audit`, which holds the credential. This repository has
 no npm secret and **no release workflow at all** — see
 [`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md). Transferring
-authority is tracked as META-243 and must revoke the old authority in the same
-change.
+authority is a separate coordinated change that must revoke the old authority in
+the same act.
 
 ## Provenance
 
@@ -119,6 +173,52 @@ standard-owned paths. See [`migration/PROVENANCE.md`](./migration/PROVENANCE.md)
 for the exact command, included and excluded paths, tree hashes, commit map and
 rollback reference.
 
+## Documentation
+
+| Document | What it answers |
+| -- | -- |
+| [Versioning and compatibility](./docs/versioning.md) | What may I rely on, and what may change? |
+| [Conformance](./docs/conformance.md) | How do I check an implementation — and what is not yet covered? |
+| [Troubleshooting](./docs/troubleshooting.md) | Why did that fail, and is it deliberate? |
+| [Glossary](./docs/glossary.md) | What does this term mean here? |
+| [Architecture decision records](./docs/adr/) | Why is it this way, and who decided? |
+| [Repository settings](./docs/repository-settings.md) | What configuration is intended, and what is actually set? |
+
+## Project
+
+| | |
+| -- | -- |
+| [`CONTRIBUTING.md`](./CONTRIBUTING.md) | How to propose and land a change |
+| [`GOVERNANCE.md`](./GOVERNANCE.md) | How decisions are made and what needs an ADR |
+| [`MAINTAINERS.md`](./MAINTAINERS.md) | Who reviews and merges |
+| [`OWNERSHIP.md`](./OWNERSHIP.md) | What this repository owns and must never define |
+| [`SUPPORT.md`](./SUPPORT.md) | Where to ask, and what response to expect |
+| [`SECURITY.md`](./SECURITY.md) | How to report a vulnerability privately |
+| [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) | Expected conduct |
+
+## Known limitations
+
+Stated here rather than discovered later:
+
+- **No external conformance suite.** An independent implementation cannot yet run
+  a standard battery to claim conformance. See
+  [`docs/conformance.md`](./docs/conformance.md) for the full gap list, including
+  the absence of negative examples and of a shipped legacy-profile fixture.
+- **This repository cannot publish.** Both packages are released from the
+  historical repository, which holds the only credential. That is deliberate and
+  enforced in CI.
+- **The schema `$id` host disagrees with the canonical domain.** The schema
+  declares the `www.` host while the package manifests use the bare domain. Both
+  serve the schema, so nothing is broken, but the strings differ. Reconciling
+  them changes schema bytes and is tracked as a normative change.
+- **`v1.json` is a legacy filename**, not a claim that the format is at 1.0.
+- **Four ambient interop shims are retained** in `types/ambient.d.ts` for
+  `simple-git`, `remark` and `ajv`. They are real CJS/ESM mismatches in
+  third-party packages, tracked as their own work rather than papered over.
+- **The repository is private and on a plan without branch protection.** Both
+  constraints and the gate they create before any publication authority are
+  recorded in [`docs/repository-settings.md`](./docs/repository-settings.md).
+
 ## License
 
-[Apache-2.0](./LICENSE).
+[Apache-2.0](./LICENSE). Copyright the workspacejson contributors.

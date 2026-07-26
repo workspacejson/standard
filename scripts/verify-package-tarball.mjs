@@ -2,7 +2,7 @@
 
 // Packed-tarball gate for the packages workspacejson/standard publishes.
 //
-// Adapted from workspace-json/agents-audit@e47eb1b8 during the META-239
+// Adapted from workspace-json/agents-audit@e47eb1b8 during the extraction
 // migration. Two things changed, both because this repository publishes a
 // different set of packages than the monorepo did:
 //
@@ -12,8 +12,8 @@
 //     were removed. That helper packed ../rules and ../spec from disk, an
 //     assumption that only held inside the monorepo.
 //
-// `assertFixedGroupDependencies` is load-bearing for META-239's Phase 7
-// decision: @workspacejson/rules keeps `"@workspacejson/spec": "workspace:*"`
+// `assertFixedGroupDependencies` is load-bearing for the migration's decision
+// to keep the intra-workspace link: @workspacejson/rules keeps `"@workspacejson/spec": "workspace:*"`
 // in committed source because both packages live in this one pnpm workspace.
 // This assertion is the proof that the protocol never reaches the registry —
 // it fails if the packed manifest carries anything other than the exact
@@ -75,8 +75,8 @@ function tar(...args) {
 }
 
 // This repository must never pack a package it does not own. Publishing a
-// foreign package from a second repository is the specific failure META-243
-// exists to prevent.
+// foreign package from a second repository is the specific failure the
+// one-authority-per-package rule exists to prevent.
 function assertStandardOwnedPackage(manifest) {
   if (!STANDARD_OWNED_PACKAGES.has(manifest.name)) {
     throw new Error(
@@ -123,8 +123,8 @@ function assertRuntimeFiles(manifest, files) {
   }
 }
 
-// META-201: consumers click repository/bugs first. Both pointed at a repository
-// that never existed before the 0.4.4 line; they must now point here, with a
+// Consumers click repository/bugs first. Both pointed at a repository that
+// never existed before the 0.4.4 line; they must now point here, with a
 // directory pointer, or the published package is misleading again.
 function assertOwnershipMetadata(manifest) {
   const expectedRepository = "git+https://github.com/workspacejson/standard.git";

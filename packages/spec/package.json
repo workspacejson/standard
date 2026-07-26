@@ -3,7 +3,7 @@
   "version": "0.4.4",
   "description": "JSON Schema and TypeScript types for workspace.json",
   "license": "Apache-2.0",
-  "author": "workspace-json contributors",
+  "author": "workspacejson contributors",
   "homepage": "https://workspacejson.dev",
   "keywords": [
     "workspace.json",
@@ -13,7 +13,6 @@
     "open-standard",
     "json-schema",
     "developer-tools",
-    "aaif",
     "AGENTS.md",
     "claude-code",
     "cursor",

@@ -2,22 +2,36 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png">
-    <img src="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png" alt="workspace.json — Portable Repository Intelligence" width="520">
+    <source media="(prefers-color-scheme: dark)" srcset="../../assets/workspace-json-lockup-dark.png">
+    <img src="../../assets/workspace-json-lockup-light.png" alt="workspace.json — portable repository intelligence" width="520">
   </picture>
 </p>
 
 JSON Schema and TypeScript types for `workspace.json` v0.4.
 
-This package is published from the `agents-audit` workspace and is the canonical
-specification package for the workspace metadata format.
+This is the **canonical specification package**. The schema it ships is the
+normative one — there is exactly one copy, and downstream repositories
+materialize it from this package rather than maintaining their own.
+
+Source of truth: [`workspacejson/standard`](https://github.com/workspacejson/standard).
+Publication authority for this package currently sits with the historical
+repository it was extracted from; see the repository's release-authority note.
 
 ## Install
 
 ```bash
-pnpm add @workspacejson/spec
+npm install @workspacejson/spec
 ```
+
+## Validate a document
+
+```bash
+npx workspacejson-spec validate .agents/workspace.json
+```
+
+Exits `0` on a valid document, non-zero otherwise. `validate <file>` is the only
+command; there is no `--help` flag, and any other invocation exits non-zero with
+usage.
 
 ## API
 
@@ -125,11 +139,20 @@ last material generation, not merely the last command invocation.
 The raw JSON Schema is available via the `./schema` export:
 
 ```ts
-import schema from '@workspacejson/spec/schema';
-// or: import the file directly at packages/spec/schema/v1.json
+import schema from '@workspacejson/spec/schema' with { type: 'json' };
 ```
 
-Served at: `https://www.workspacejson.dev/schema/v1.json`
+Materialize it from this package and hash-check it. Do not maintain an editable
+second copy — that is how copies drift.
+
+The schema declares `$id: https://www.workspacejson.dev/schema/v1.json` and is
+also served at that URL. Note that the `$id` host carries the `www.` prefix while
+this package's `homepage` uses the bare domain; both hosts serve the schema, but
+the two strings disagree. Reconciling them changes schema bytes and is tracked as
+a normative change rather than a documentation fix.
+
+The `v1` in the filename is a legacy artifact of the file's original naming, not
+a claim that the format is at version 1.0. The current document profile is v0.4.
 
 ## Contents
 
@@ -178,3 +201,20 @@ v0.3 replaces the flat top-level shape with four required sections:
 ```
 
 Use `validateLegacy(doc)` to detect v0.1/v0.2 documents; use `validate(doc)` for v0.3/v0.4.
+
+## Requirements
+
+Node.js >= 20.
+
+## Further reading
+
+Full documentation lives in the source repository:
+
+- [Versioning and compatibility](https://github.com/workspacejson/standard/blob/main/docs/versioning.md)
+- [Conformance](https://github.com/workspacejson/standard/blob/main/docs/conformance.md)
+- [Troubleshooting](https://github.com/workspacejson/standard/blob/main/docs/troubleshooting.md)
+- [Glossary](https://github.com/workspacejson/standard/blob/main/docs/glossary.md)
+
+## License
+
+[Apache-2.0](./LICENSE).

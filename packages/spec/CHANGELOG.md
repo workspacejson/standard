@@ -1,11 +1,12 @@
 # Changelog
 
-## [0.4.4] - Unreleased
+## [0.4.4] - 2026-07-23
 
 ### Fixed
 
-- Reconciled the strict packaged-schema validator with the VR-639/640 contract
-  fixes that had diverged across earlier release branches.
+- Reconciled the strict packaged-schema validator with the `coChange.files` and
+  `fileIndex` key-format contract fixes that had diverged across earlier release
+  branches.
 - Documented `generated.fileIndex` keys as repository-root-relative POSIX paths.
 - Typed and documented `generated.coChange[].files` as an unordered two-file set,
   rather than a positional tuple.

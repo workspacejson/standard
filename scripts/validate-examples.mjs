@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Executable examples gate (META-211).
+// Executable examples gate.
 //
 // Every example this repository ships must validate against the package-owned
 // schema, using the package's own validator — not a re-implementation. If an

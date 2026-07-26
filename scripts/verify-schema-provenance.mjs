@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Schema provenance gate (META-211).
+// Schema provenance gate.
 //
 // workspacejson/standard is the canonical source of the normative schema.
 // The website currently checks in an independently-edited copy that has
@@ -14,7 +14,7 @@
 //   4. the packed tarball would include it (`files` covers `schema`);
 //   5. the four stable read paths are present.
 //
-// This gate does NOT modify the website. Materialization is META-211/META-210.
+// This gate does NOT modify the website. Downstream materialization is tracked separately.
 
 import { readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";

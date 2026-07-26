@@ -1,11 +1,31 @@
 # Security
 
 If you discover a security issue in `@workspacejson/spec`, `@workspacejson/rules`,
-or the workspace.json specification itself, please report it privately through
-this repository's GitHub security advisory workflow.
+or the workspace.json specification itself, report it privately through
+[this repository's security advisory form](https://github.com/workspacejson/standard/security/advisories/new).
 
 Do not open a public issue for a sensitive vulnerability before coordinated
 disclosure.
+
+> **Maintainer note — this channel is not live yet.** GitHub private
+> vulnerability reporting cannot be enabled while this repository is private on
+> its current plan, so the link above does not resolve today. Nobody outside the
+> organization can read this file yet either, so no report is currently being
+> dropped. **Enabling private vulnerability reporting is a required step of
+> making this repository public** — see
+> [`docs/repository-settings.md`](./docs/repository-settings.md). This note is
+> removed when that is done.
+
+## Supported versions
+
+| Version | Supported |
+| -- | -- |
+| `0.4.x` | Yes — the current release family |
+| `< 0.4` | No |
+
+Both packages are released as a fixed group and always carry the same version.
+Fixes are made on the current release family; there is no long-term-support
+branch, and claiming one would be inaccurate.
 
 ## What to include
 

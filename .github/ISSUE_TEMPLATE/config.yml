@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/workspacejson/standard/security/advisories/new
+    about: Report privately through a GitHub security advisory. Do not open a public issue.
+  - name: Artifact generation — .agents/workspace.json missing or wrong
+    url: https://github.com/workspacejson/cli/issues
+    about: This repository defines the format. Producing the file belongs to workspacejson/cli.
+  - name: MCP, Codex or editor integration
+    url: https://github.com/workspacejson/integrations/issues
+    about: Host adapters live in workspacejson/integrations.
+  - name: Documentation on workspacejson.dev
+    url: https://github.com/workspacejson/site/issues
+    about: The published website is assembled in workspacejson/site.
+  - name: Questions and support
+    url: https://github.com/workspacejson/standard/blob/main/SUPPORT.md
+    about: Where to ask, what to include, and what response to expect.
