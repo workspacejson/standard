@@ -88,7 +88,7 @@ tsconfig.base.json                   shared TypeScript configuration
 pnpm-workspace.yaml                  workspace definition
 package.json                         root manifest
 .changeset/**                        release configuration
-.github/**                           CI, release workflow, templates
+.github/**                           CI and templates (the release workflow is REMOVED — see below)
 .npmrc  .gitignore
 CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
 ```
@@ -167,7 +167,7 @@ Each is recorded because the migration must not hide changes.
 | `scripts/verify-package-tarball.mjs` now `JSON.parse`s the packed manifest | **defect fix** — the source returned raw text, so `assertNoWorkspaceProtocol`, `assertFixedGroupDependencies` and the bin check were silently no-ops |
 | Root `LICENSE` added | the source had none; copied byte-identically from `packages/spec/LICENSE` |
 | `README.md`, `CHANGELOG.md`, `AGENTS.md`, `OWNERSHIP.md` rebuilt | repository-specific ownership text per the migration ledger |
-| Release workflow made trigger-less and publish-step-free | authority has not transferred; META-243 |
+| Release workflow **removed entirely**; `.github/RELEASE-AUTHORITY.md` added | authority has not transferred; META-243. `on: {}` produced a GitHub startup-failure run (0 jobs, 0 billable time) on every push, so absence was chosen over a disabled file |
 
 **Not changed:** package names, versions (`0.4.4`), `bin`, `main`/`module`/`types`,
 `exports`, `files`, Node engine range, runtime dependencies, schema bytes, and the

@@ -21,8 +21,9 @@ merely asserted here.
 | `@workspacejson/rules` | published — **authority still held by `workspace-json/agents-audit`** |
 
 This repository is currently **incapable** of publishing: it has no npm secret
-and its release workflow has no trigger and no publish step. Authority transfer
-is META-243.
+and ships no release workflow. See
+[`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md). Authority
+transfer is META-243.
 
 ## Consumes
 

@@ -185,20 +185,23 @@ for (const file of files.filter((f) => /^packages\/[^/]+\/package\.json$/.test(f
   }
 }
 
-// ---- Release workflow must be incapable of publishing ---------------------
-{
-  const releaseWorkflow = ".github/workflows/release.yml";
-  if (files.includes(releaseWorkflow)) {
-    const content = stripComments(releaseWorkflow, read(releaseWorkflow));
-    if (/^\s*(workflow_dispatch|push|release|schedule)\s*:/m.test(content) && !/^on:\s*\{\}\s*$/m.test(content)) {
-      report("publish-authority", releaseWorkflow, "release workflow has an enabled trigger; publish authority has not transferred (META-243)");
-    }
-    if (/changeset\s+publish|npm\s+publish|pnpm\s+publish/.test(content)) {
-      report("publish-authority", releaseWorkflow, "release workflow contains a publish step; this repository must be incapable of publishing until META-243");
-    }
-    if (/agents-audit/.test(content)) {
-      report("foreign-publish", releaseWorkflow, "release workflow references agents-audit, which is published by workspacejson/cli");
-    }
+// ---- No workflow may be capable of publishing ------------------------------
+// Publish authority for standard-owned packages still belongs to
+// workspace-json/agents-audit until META-243. This repository ships NO release
+// workflow at all — see .github/RELEASE-AUTHORITY.md for why absence was chosen
+// over a disabled file. These checks scan EVERY workflow, so publication cannot
+// reappear under a different filename.
+for (const workflow of files.filter((f) => /^\.github\/workflows\/.+\.ya?ml$/.test(f))) {
+  const content = stripComments(workflow, read(workflow));
+
+  if (/changeset\s+publish|npm\s+publish|pnpm\s+publish/.test(content)) {
+    report("publish-authority", workflow, "workflow contains a publish step; this repository must be incapable of publishing until META-243");
+  }
+  if (/secrets\.NPM_TOKEN|NODE_AUTH_TOKEN/.test(content)) {
+    report("publish-authority", workflow, "workflow references a publish credential; no npm credential may exist here until META-243");
+  }
+  if (/\bagents-audit\b/.test(content)) {
+    report("foreign-publish", workflow, "workflow references agents-audit, which is published by workspacejson/cli");
   }
 }
 

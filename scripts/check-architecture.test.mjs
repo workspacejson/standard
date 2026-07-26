@@ -117,14 +117,20 @@ red("foreign-package: a package this repo does not own", "foreign-package", (d) 
 red("unpinned-standard-dependency: floating range on a standard package", "unpinned-standard-dependency", (d) =>
   patchJson(d, "packages/rules/package.json", (m) => { m.dependencies["@workspacejson/spec"] = "^0.4.0"; }));
 
-red("publish-authority: release workflow gains an enabled trigger", "publish-authority", (d) =>
-  write(d, ".github/workflows/release.yml", `name: Release\non:\n  workflow_dispatch:\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hi\n`));
+red("publish-authority: a release workflow reappears with a publish step", "publish-authority", (d) =>
+  write(d, ".github/workflows/release.yml", `name: Release\non:\n  workflow_dispatch:\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: pnpm changeset publish\n`));
 
-red("publish-authority: release workflow gains a publish step", "publish-authority", (d) =>
-  write(d, ".github/workflows/release.yml", `name: Release\non: {}\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: pnpm changeset publish\n`));
+red("publish-authority: publishing hidden under a different workflow filename", "publish-authority", (d) =>
+  write(d, ".github/workflows/deploy.yml", `name: Deploy\non:\n  push:\njobs:\n  ship:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm publish --access public\n`));
+
+red("publish-authority: a workflow gains an npm credential", "publish-authority", (d) =>
+  write(d, ".github/workflows/ci.yml", `${readFileSync(join(d, ".github/workflows/ci.yml"), "utf8")}\n      - name: leak\n        env:\n          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}\n        run: echo x\n`));
 
 red("foreign-publish: fixed group reintroduces agents-audit", "foreign-publish", (d) =>
   patchJson(d, ".changeset/config.json", (m) => { m.fixed = [["@workspacejson/spec", "@workspacejson/rules", "agents-audit"]]; }));
+
+red("foreign-publish: a workflow references agents-audit", "foreign-publish", (d) =>
+  write(d, ".github/workflows/audit.yml", `name: Audit\non:\n  push:\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npx agents-audit scan .\n`));
 
 // ------------------------------------------------------ descriptive-only
 red("prescriptive-policy: schema gains an enforcement field", "prescriptive-policy", (d) => {

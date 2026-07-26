@@ -52,4 +52,5 @@ pnpm run release:verify-packs
 
 This repository **cannot publish**. Authority for `@workspacejson/spec` and
 `@workspacejson/rules` still belongs to `workspace-json/agents-audit` until
-META-243. Do not add an npm secret or a publish step.
+META-243. Do not add an npm secret, a publish step, or a release workflow — see
+`.github/RELEASE-AUTHORITY.md`.

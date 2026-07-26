@@ -57,8 +57,8 @@ It never encodes what a team must do, and never assumes a daemon is running.
 
 This repository is currently **incapable of publishing** and that is deliberate.
 Authority for both packages still belongs to `workspace-json/agents-audit` until
-the coordinated cutover. Do not add an npm secret, a publish step, or a trigger
-to `.github/workflows/release.yml`.
+the coordinated cutover. Do not add an npm secret, a publish step, or a release
+workflow. See [`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md).
 
 ## Reporting issues
 

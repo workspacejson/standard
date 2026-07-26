@@ -14,10 +14,12 @@ PASS  rejected — repository-boundary: copied CLI package source
 PASS  rejected — copied-schema: a second normative schema copy
 PASS  rejected — foreign-package: a package this repo does not own
 PASS  rejected — unpinned-standard-dependency: floating range on a standard package
-PASS  rejected — publish-authority: release workflow gains an enabled trigger
-PASS  rejected — publish-authority: release workflow gains a publish step
+PASS  rejected — publish-authority: a release workflow reappears with a publish step
+PASS  rejected — publish-authority: publishing hidden under a different workflow filename
+PASS  rejected — publish-authority: a workflow gains an npm credential
 PASS  rejected — foreign-publish: fixed group reintroduces agents-audit
+PASS  rejected — foreign-publish: a workflow references agents-audit
 PASS  rejected — prescriptive-policy: schema gains an enforcement field
 PASS  rejected — stable-read-path: fileIndex removed from the schema
 
-21 passed, 0 failed
+23 passed, 0 failed

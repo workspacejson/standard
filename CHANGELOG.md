@@ -46,6 +46,8 @@ release family, including releases published from `workspace-json/agents-audit`.
 
 - `scripts/check-architecture.mjs` — dependency-direction and clean-room guards,
   with deliberate-violation red tests in `scripts/check-architecture.test.mjs`.
+- `.github/RELEASE-AUTHORITY.md` — records why this repository ships no release
+  workflow, and what META-243 must create.
 - `scripts/verify-schema-provenance.mjs` — proves a single canonical schema that
   is exported, packed and complete.
 - `scripts/validate-examples.mjs` — every shipped example must validate against

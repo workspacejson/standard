@@ -106,9 +106,10 @@ proves no `workspace:` protocol ever reaches a packed manifest.
 
 `@workspacejson/spec` and `@workspacejson/rules` are still published from
 `workspace-json/agents-audit`, which holds the credential. This repository has
-no npm secret, and `.github/workflows/release.yml` has no trigger and no publish
-step. Transferring authority is tracked as META-243 and must revoke the old
-authority in the same change.
+no npm secret and **no release workflow at all** — see
+[`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md). Transferring
+authority is tracked as META-243 and must revoke the old authority in the same
+change.
 
 ## Provenance
 
