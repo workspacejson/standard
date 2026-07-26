@@ -25,6 +25,8 @@
     "check:architecture:test": "node scripts/check-architecture.test.mjs",
     "check:schema": "node scripts/verify-schema-provenance.mjs",
     "check:examples": "node scripts/validate-examples.mjs",
+    "check:conformance": "node scripts/check-producer-conformance.mjs",
+    "check:conformance:test": "node scripts/check-producer-conformance.test.mjs",
     "check:docs": "node scripts/check-docs.mjs",
     "release:verify-packs": "pnpm --filter @workspacejson/spec exec node ../../scripts/verify-package-tarball.mjs && pnpm --filter @workspacejson/rules exec node ../../scripts/verify-package-tarball.mjs",
     "release:verify-published": "node scripts/verify-published.mjs"

@@ -113,3 +113,71 @@ jobs:
             echo "spec binary should exit non-zero when invoked without a command"
             exit 1
           fi
+
+  # ---------------------------------------------------------------------------
+  # Four-path producer conformance.
+  #
+  # This repository owns the neutral contract; the producer under test lives in
+  # workspacejson/cli. The suite therefore needs a CLI candidate, which is why
+  # this is a separate job: it checks out a second repository and builds it,
+  # which the unit-test matrix should not pay for, and it does not need the
+  # Node matrix.
+  #
+  # The suite does NOT skip when the candidate is missing — it exits non-zero
+  # with instructions. A conformance gate that goes green because it could not
+  # find the implementation reports conformance it never measured.
+  #
+  # workspacejson/cli is public, so the checkout needs no token and no secret.
+  # The job therefore runs on forks and on first-time contributors' pull
+  # requests, which a secret-dependent gate could not.
+  #
+  # It tracks the producer's `main` rather than a pinned SHA on purpose: the
+  # point of a conformance gate is to notice when the implementation drifts
+  # from the contract. A pin would only ever re-prove a known-good pairing.
+  # ---------------------------------------------------------------------------
+  producer-conformance:
+    name: Four-path producer conformance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the standard
+        uses: actions/checkout@v7
+
+      - name: Check out the producer under test
+        uses: actions/checkout@v7
+        with:
+          repository: workspacejson/cli
+          ref: main
+          path: .candidate
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install and build the standard
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @workspacejson/spec build
+
+      - name: Build the producer candidate
+        working-directory: .candidate
+        run: |
+          pnpm install --no-frozen-lockfile
+          pnpm -r build
+
+      # Green: the candidate satisfies the contract.
+      - name: Producer conformance
+        env:
+          WORKSPACEJSON_CLI_CANDIDATE: ${{ github.workspace }}/.candidate/packages/cli
+        run: pnpm run check:conformance
+
+      # Red: each protected behavior, when broken, makes the suite fail. Runs
+      # after the green gate so the receipts appear in that order in the log.
+      - name: Producer conformance red tests
+        env:
+          WORKSPACEJSON_CLI_CANDIDATE: ${{ github.workspace }}/.candidate/packages/cli
+        run: pnpm run check:conformance:test
