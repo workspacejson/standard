@@ -2,7 +2,7 @@ node_modules/
 dist/
 packages/*/dist/
 packages/*/node_modules/
-packages/agents-audit/.tmp-*/
+packages/*/.tmp-*/
 .DS_Store
 coverage/
 *.log

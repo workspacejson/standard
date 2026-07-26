@@ -7,10 +7,14 @@ import { spawnSync } from "node:child_process";
 
 const version = process.env.WORKSPACEJSON_RELEASE_VERSION
   ?? JSON.parse(readFileSync(new URL("../packages/spec/package.json", import.meta.url), "utf8")).version;
+// Only packages this repository publishes are verified here. `agents-audit` is
+// published by workspacejson/cli and was deliberately removed during the
+// META-239 migration: per the four-repository ledger, no target repository
+// verifies a package it does not publish.
 const packages = [
   { name: "@workspacejson/spec", check: ["npx", "--no-install", "workspacejson-spec", "--help"] },
   { name: "@workspacejson/rules", check: ["node", "--input-type=module", "-e", "import('@workspacejson/rules')"] },
-  { name: "agents-audit", check: ["npx", "--no-install", "agents-audit", "--help"] },
+  { name: "@workspacejson/rules", check: ["node", "--input-type=module", "-e", "import('@workspacejson/rules/testing')"] },
 ];
 
 // npm registry propagation lags publish by seconds to low minutes. A single

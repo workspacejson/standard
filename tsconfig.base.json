@@ -4,11 +4,6 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "baseUrl": ".",
-    "paths": {
-      "@workspacejson/rules": [
-        "packages/rules/src/index.ts"
-      ]
-    },
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,

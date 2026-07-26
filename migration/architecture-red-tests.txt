@@ -1,0 +1,25 @@
+PASS  baseline: the unmodified repository is ACCEPTED
+PASS  rejected — clean-room: @marcelle-labs import
+PASS  rejected — clean-room: workspace.vreko.json assumption
+PASS  rejected — clean-room: private Vreko swarm source import
+PASS  rejected — dependency-direction: imports agents-audit (workspacejson/cli)
+PASS  rejected — dependency-direction: imports @workspacejson/cli
+PASS  rejected — dependency-direction: imports @workspacejson/codex-mcp (integrations)
+PASS  rejected — local-dependency: committed sibling-checkout path
+PASS  rejected — duplicate-contract: ambient declare module '@workspacejson/spec' returns
+PASS  rejected — repository-boundary: producer implementation in standard
+PASS  rejected — repository-boundary: MCP host-integration code in standard
+PASS  rejected — repository-boundary: site rendering code in standard
+PASS  rejected — repository-boundary: copied CLI package source
+PASS  rejected — copied-schema: a second normative schema copy
+PASS  rejected — foreign-package: a package this repo does not own
+PASS  rejected — unpinned-standard-dependency: floating range on a standard package
+PASS  rejected — publish-authority: a release workflow reappears with a publish step
+PASS  rejected — publish-authority: publishing hidden under a different workflow filename
+PASS  rejected — publish-authority: a workflow gains an npm credential
+PASS  rejected — foreign-publish: fixed group reintroduces agents-audit
+PASS  rejected — foreign-publish: a workflow references agents-audit
+PASS  rejected — prescriptive-policy: schema gains an enforcement field
+PASS  rejected — stable-read-path: fileIndex removed from the schema
+
+23 passed, 0 failed

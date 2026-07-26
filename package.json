@@ -1,26 +1,31 @@
 {
-  "name": "agents-audit-workspace",
+  "name": "workspacejson-standard",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.0.0",
+  "description": "Specification, schema and deterministic reference behavior for workspace.json",
   "homepage": "https://workspacejson.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/workspace-json/agents-audit.git"
+    "url": "git+https://github.com/workspacejson/standard.git"
   },
   "bugs": {
-    "url": "https://github.com/workspace-json/agents-audit/issues"
+    "url": "https://github.com/workspacejson/standard/issues"
   },
+  "license": "Apache-2.0",
   "dependencies": {
     "@workspacejson/rules": "workspace:*",
-    "@workspacejson/spec": "workspace:*",
-    "agents-audit": "workspace:*"
+    "@workspacejson/spec": "workspace:*"
   },
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck",
-    "release:verify-packs": "pnpm --filter @workspacejson/spec exec node ../../scripts/verify-package-tarball.mjs && pnpm --filter @workspacejson/rules exec node ../../scripts/verify-package-tarball.mjs && pnpm --filter agents-audit exec node ../../scripts/verify-package-tarball.mjs",
+    "typecheck": "pnpm --filter @workspacejson/spec build && pnpm -r typecheck",
+    "check:architecture": "node scripts/check-architecture.mjs",
+    "check:architecture:test": "node scripts/check-architecture.test.mjs",
+    "check:schema": "node scripts/verify-schema-provenance.mjs",
+    "check:examples": "node scripts/validate-examples.mjs",
+    "release:verify-packs": "pnpm --filter @workspacejson/spec exec node ../../scripts/verify-package-tarball.mjs && pnpm --filter @workspacejson/rules exec node ../../scripts/verify-package-tarball.mjs",
     "release:verify-published": "node scripts/verify-published.mjs"
   },
   "devDependencies": {
