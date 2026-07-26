@@ -127,9 +127,13 @@ jobs:
   # with instructions. A conformance gate that goes green because it could not
   # find the implementation reports conformance it never measured.
   #
-  # workspacejson/cli is a private repository, so this job requires a read
-  # token: WORKSPACEJSON_CLI_READ_TOKEN, a fine-grained PAT scoped to
-  # `contents: read` on workspacejson/cli and nothing else.
+  # workspacejson/cli is public, so the checkout needs no token and no secret.
+  # The job therefore runs on forks and on first-time contributors' pull
+  # requests, which a secret-dependent gate could not.
+  #
+  # It tracks the producer's `main` rather than a pinned SHA on purpose: the
+  # point of a conformance gate is to notice when the implementation drifts
+  # from the contract. A pin would only ever re-prove a known-good pairing.
   # ---------------------------------------------------------------------------
   producer-conformance:
     name: Four-path producer conformance
@@ -146,7 +150,6 @@ jobs:
           repository: workspacejson/cli
           ref: main
           path: .candidate
-          token: ${{ secrets.WORKSPACEJSON_CLI_READ_TOKEN }}
 
       - uses: pnpm/action-setup@v6
 

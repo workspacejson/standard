@@ -18,6 +18,12 @@ audit-output/
 # Local swarm system — not for public repo
 .vreko-swarm/
 
+# Producer candidate for the conformance suite — a checkout of another
+# repository, never content this one owns. Ignored so a local run leaves no
+# untracked noise, and so a vendored copy cannot be committed by accident:
+# `packages/cli` under a tracked path would trip the repository-boundary guard.
+.candidate/
+
 # Local artifacts
 agents-workspace-cannon-repo/
 audit-findings/
