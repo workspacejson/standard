@@ -70,6 +70,22 @@ npm view @workspacejson/rules version
 Both packages are released as a fixed group, so they always carry the same
 version number.
 
+### Package version and spec version are different numbers
+
+Confusing them produces real bugs, so the distinction is worth stating before
+you install anything.
+
+`@workspacejson/spec@0.4.4` identifies a release of **this tooling**. A
+document's `generated.specVersion` identifies the profile of the format **that
+document** conforms to. Neither implies the other: an artifact written by an
+older producer keeps its own `specVersion` no matter which package version reads
+it, and upgrading the package does not migrate a document.
+
+Each producer declares the specification versions it supports. Producer and
+algorithm identity live in the artifact's own basis metadata, not in the package
+number. See [`docs/versioning.md`](./docs/versioning.md) for the full profile
+table and the compatibility floor.
+
 ## Quickstart
 
 Validate a `workspace.json` document without cloning anything:
