@@ -221,6 +221,32 @@ records the new revision and digest.
 A full rewritten copy of this document produced elsewhere is not an amendment and
 carries no authority regardless of its merit.
 
+## Boundaries
+
+This record covers the rules by which a field crosses the normative surface. It
+does **not** cover:
+
+- **Any specific field's disposition.** Those are numbered amendments. A record
+  that both sets the rule and applies it to a contested field lets the field's
+  merits argue against the rule, which is the procedural failure described in
+  the context above.
+- **What belongs in the standard at all.** [`GOVERNANCE.md`](../../GOVERNANCE.md)
+  defines the normative surface and the descriptive-not-prescriptive charter.
+  This record governs movement across that surface, not its extent.
+- **Producer implementation quality.** Whether a given emitter is correct is
+  measured by the producer profile and the conformance suite. §2's
+  producer-supported tier requires that a conformant emitter exist; it does not
+  define conformance.
+- **Release mechanics.** How packages are versioned, tagged and published is
+  [`docs/versioning.md`](../versioning.md). §9 asserts only that the two version
+  numbers are independent.
+- **The donation or governance home.** Who eventually stewards the standard is a
+  separate decision, and §11's amendment mechanism assumes the current
+  sole-steward model.
+- **Retroactive judgment of the grandfathered paths.** §10 requires that each of
+  the four carry a disposition. It does not presume what any disposition should
+  be, and *keep* is one of them.
+
 ## Consequences
 
 Admission becomes slower and falsifiable. Some fields will sit at
@@ -232,6 +258,43 @@ against should not be the only ones never tested against the rules.
 Fields that cannot answer a criterion are recorded as *not currently
 determinable*. Several will be, and that is the honest state rather than a gap in
 the model.
+
+## Supersession
+
+Replace this record when the standard acquires a governance body other than sole
+stewardship. §11's amendment mechanism assumes one owner who updates the file and
+records the new revision and digest, and that assumption does not survive shared
+authority. Replace it also if an external standards process adopts the format and
+brings its own admission procedure.
+
+Any replacement must state what happens to amendments still open against this
+record, and whether the §10 interlock carries forward or is discharged. An
+interlock that lapses silently across a supersession would let the four
+grandfathered paths escape the disposition requirement without anyone having
+decided that they should.
+
+## Provenance
+
+Written 2026-07-27 in `workspacejson/standard`. Unlike [ADR-001](./001-canonical-artifact-path.md)
+and [ADR-002](./002-bounded-enrichment-program.md), this record was not
+transcribed from an earlier internal document; it was drafted directly against
+the repository. The evidence snapshot in the metadata table records the registry
+and schema state observed at drafting.
+
+The ratification ledger is the internal issue named in the metadata table, which
+holds amendment dispositions, rationale, authority and decision dates per §11.
+Two conflicts with an existing internal governance record are logged there and
+are unresolved as of this writing: whether a provisional field requires a dated
+gate, which §10 answers no, and whether `generated.hygiene` was already settled
+on charter grounds, which A-002 reopens.
+
+A-007 and A-008 were added on 2026-07-27, after the initial six, during a
+reconciliation of the record against its own §10 interlock. That reconciliation
+found the interlock unsatisfiable as drafted: it requires a disposition for all
+four grandfathered paths, while only `generated.fileIndex` and
+`manual.coChangePatterns` carried amendments. A-002 and A-003 concern
+`generated.hygiene` and `generated.topology`, neither of which is a grandfathered
+path.
 
 ## Amendments against revision 1
 
