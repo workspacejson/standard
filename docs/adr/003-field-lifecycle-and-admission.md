@@ -12,7 +12,7 @@
 | **Canonical path** | `docs/adr/003-field-lifecycle-and-admission.md` |
 | **Canonical revision** | *filled at merge* |
 | **Content digest** | *filled at merge* — `shasum -a 256 docs/adr/003-field-lifecycle-and-admission.md` |
-| **Ratification issue** | [META-264](https://linear.app/marcelle-labs/issue/META-264) |
+| **Ratification issue** | META-264 (internal tracker) |
 | **Evidence snapshot** | Registry sweep 2026-07-27T13:23Z; `@workspacejson/spec@0.4.4` schema `sha256:7f1635bb…` |
 | **Supersedes** | Nothing |
 | **Superseded by** | Nothing |
