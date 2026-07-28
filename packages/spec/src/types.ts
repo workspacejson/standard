@@ -64,6 +64,16 @@ export interface FileIndexEntry {
 export type IntelligenceState = 'INSUFFICIENT_DATA' | 'OBSERVING' | 'CONFIDENT';
 
 export interface WorkspaceJsonV3 {
+  /**
+   * Optional mirror of `generated.specVersion` (ADR-004). When present it must
+   * equal `generated.specVersion`; a document where the two disagree is invalid
+   * and `validate()` rejects it. Absence means the producer predates this
+   * profile — it is not a signal, and consumers must not branch on it.
+   *
+   * Read the profile from `generated.specVersion`, which remains the primary
+   * declaration and stays required.
+   */
+  version?: '0.3';
   manual: {
     fragileFiles?: Array<{ path: string; reason?: string }>;
     coChangePatterns?: Array<{ files: string[]; note?: string }>;
@@ -118,6 +128,8 @@ export interface FragilityEntry {
 }
 
 export interface WorkspaceJsonV4 {
+  /** Optional mirror of `generated.specVersion` (ADR-004). See {@link WorkspaceJsonV3.version}. */
+  version?: '0.4';
   manual: WorkspaceJsonV3['manual'];
   generated: Omit<WorkspaceJsonV3['generated'], 'specVersion'> & {
     specVersion: '0.4';

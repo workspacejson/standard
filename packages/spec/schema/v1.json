@@ -5,7 +5,21 @@
   "type": "object",
   "required": ["manual", "generated", "agents", "health"],
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "required": ["version"], "properties": { "version": { "const": "0.3" } } },
+      "then": { "properties": { "generated": { "properties": { "specVersion": { "const": "0.3" } } } } }
+    },
+    {
+      "if": { "required": ["version"], "properties": { "version": { "const": "0.4" } } },
+      "then": { "properties": { "generated": { "properties": { "specVersion": { "const": "0.4" } } } } }
+    }
+  ],
   "properties": {
+    "version": {
+      "enum": ["0.3", "0.4"],
+      "description": "Optional mirror of generated.specVersion. When present it MUST equal generated.specVersion; a document where the two disagree is invalid. Absence carries no meaning beyond \"written by a producer predating this profile\" and must not be read as a signal. See ADR-004."
+    },
     "manual": {
       "type": "object",
       "description": "Human-authored content preserved across regenerations.",

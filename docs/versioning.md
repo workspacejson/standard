@@ -38,6 +38,12 @@ released with no changes of its own, purely to stay aligned with its partner.
 | **v0.3** | Four required sections: `manual`, `generated`, `agents`, `health` | `validate(doc)` |
 | **v0.1 / v0.2** | Legacy flat top-level shape | `validateLegacy(doc)` |
 
+A root `version` key no longer distinguishes the legacy shape on its own, since
+v0.3/v0.4 documents may now carry it as a mirror. `validateLegacy()` identifies
+the legacy shape by the **absence of `generated.specVersion`**, so a document
+whose two profile declarations disagree is rejected by both `validate()` and
+`validateLegacy()` rather than being misreported as legacy.
+
 **v0.4 is a strict superset of v0.3.** Every valid v0.3 document is a valid v0.4
 document. `validate()` accepts both; use `validateV4()` when you intend to read
 the v0.4-only fields, or check `generated.specVersion === "0.4"` before touching
@@ -68,6 +74,36 @@ absent from the canonical schema.
 The floor covers *presence and shape*, not contents. A producer emitting more
 entries in `generated.fileIndex` than it did last month has not broken anything.
 
+## The validator acceptance floor
+
+There is a second floor, and it moves independently of the four read paths: what
+the shipped validator *accepts*. It is worth stating separately because a change
+can move this floor while leaving every read path untouched.
+
+`0.4.5` widens acceptance to allow an optional root `version` mirroring
+`generated.specVersion`, per [ADR-004](./adr/004-root-version-compatibility.md).
+Reading is unaffected — `generated.specVersion` remains the primary profile
+declaration and remains required, and a reader that ignores the root key is
+unaffected by its presence. No new profile name is introduced; the document
+profile is still v0.4.
+
+**Widening acceptance is not permission to emit.** No producer writes the root
+key, and ADR-004 §8 sequences emission behind evidence that known
+validate-before-read consumers accept it. The two steps must not be collapsed.
+
+## An optional field is not automatically additive
+
+The root object is `additionalProperties: false`. A consumer validating a
+document against a published schema rejects any root key that schema does not
+declare — so adding one is additive to the schema *as a document* and breaking
+for every already-deployed validator.
+
+This is the trap ADR-004 was written to record: the general rule below that
+"adding a new optional field" is not breaking holds inside `manual`, `generated`
+and `health`, which are all `additionalProperties: true`. It does **not** hold at
+the root. Anything added there requires the acceptance-then-emission sequence,
+not a patch release.
+
 ## What counts as a breaking change
 
 Breaking, regardless of version arithmetic:
@@ -80,7 +116,9 @@ Breaking, regardless of version arithmetic:
 
 Not breaking:
 
-- adding a new optional field;
+- adding a new optional field **to a section that permits additional properties**
+  (`manual`, `generated`, `health`) — see the root-object caveat above, which is
+  the one place this rule does not hold;
 - adding a new profile that is a strict superset of the current one, as v0.4 was
   over v0.3;
 - widening an accepted type;
