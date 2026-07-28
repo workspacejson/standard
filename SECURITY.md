@@ -7,15 +7,6 @@ or the workspace.json specification itself, report it privately through
 Do not open a public issue for a sensitive vulnerability before coordinated
 disclosure.
 
-> **Maintainer note — this channel is not live yet.** GitHub private
-> vulnerability reporting cannot be enabled while this repository is private on
-> its current plan, so the link above does not resolve today. Nobody outside the
-> organization can read this file yet either, so no report is currently being
-> dropped. **Enabling private vulnerability reporting is a required step of
-> making this repository public** — see
-> [`docs/repository-settings.md`](./docs/repository-settings.md). This note is
-> removed when that is done.
-
 ## Supported versions
 
 | Version | Supported |
