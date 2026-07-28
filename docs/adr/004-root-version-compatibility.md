@@ -2,8 +2,8 @@
 
 | Field | Value |
 | -- | -- |
-| **Status** | Proposed |
-| **Decision date** | — (unratified) |
+| **Status** | Accepted |
+| **Decision date** | 2026-07-28 — ratified; not yet implemented, emission sequenced behind §8 |
 | **Record written** | 2026-07-27 |
 | **Author** | Qwynn Marcelle ([@qmarcelle](https://github.com/qmarcelle)) |
 | **Decider** | Qwynn Marcelle |
@@ -170,6 +170,19 @@ not one, and they must not land together:
 
 Step 1 widens acceptance and is safe. Step 3 produces artifacts that fail older
 validators. Collapsing them is the failure this sequence exists to prevent.
+
+Step 2 is an evidence requirement, not a waiting period. Before step 3, a census
+of known validate-before-read consumers must exist, recording for each: the
+consumer, the validator version it runs, and whether that version accepts the
+optional root key. Emission is permitted only when every entry accepts it, and
+an entry whose validator version cannot be determined counts as not accepting.
+
+A census cannot enumerate consumers nobody knows about, and this record does not
+pretend otherwise. It bounds the claim to what is checkable: the standard may
+not emit while a *known* consumer is known to break. Publishing the widened
+validator and then waiting a fixed interval does not discharge this — an
+interval measures elapsed time, not adoption, and the two are only related by
+assumption.
 
 ### 9. The 1.0 constraint
 
