@@ -152,6 +152,101 @@ describe('validate() backward compat — v0.4 documents', () => {
   });
 });
 
+// ─── ADR-004: optional root `version` transition fixtures ────────────────────
+// The six cases ADR-004 §7 requires before the profile may be published, plus
+// the perturbation pair that turns the §2 equality invariant into a test rather
+// than prose.
+//
+// Acceptance only. No producer in this repository emits a root `version`, and
+// ADR-004 §8 sequences emission behind adoption — widening what a reader accepts
+// is deliberately not permission to start writing the field.
+describe('ADR-004 root `version` — acceptance transition fixtures', () => {
+  const withRoot = <T extends object>(doc: T, version: string) => ({ version, ...doc });
+
+  it('§3 root absent, specVersion present — the pre-existing shape stays valid', () => {
+    expect(validate(minimalV3)).toBe(true);
+    expect(validate(minimalV4)).toBe(true);
+  });
+
+  it('§3 both present and equal — the new shape validates', () => {
+    expect(validate(withRoot(minimalV3, '0.3'))).toBe(true);
+    expect(validate(withRoot(minimalV4, '0.4'))).toBe(true);
+  });
+
+  it('§4 both present and disagreeing — rejected, never silently reconciled', () => {
+    expect(validate(withRoot(minimalV3, '0.4'))).toBe(false);
+    expect(validate(withRoot(minimalV4, '0.3'))).toBe(false);
+  });
+
+  it('§5 root present, specVersion absent — rejected; specVersion stays required', () => {
+    const { specVersion: _dropped, ...generatedWithoutSpecVersion } = minimalV4.generated;
+    expect(validate({ ...minimalV4, version: '0.4', generated: generatedWithoutSpecVersion })).toBe(false);
+  });
+
+  it('§3 neither present — rejected; do not guess at the shape', () => {
+    const { specVersion: _dropped, ...generatedWithoutSpecVersion } = minimalV4.generated;
+    expect(validate({ ...minimalV4, generated: generatedWithoutSpecVersion })).toBe(false);
+  });
+
+  it('§1 root value outside the enum is rejected, including the 1.0 boundary of §9', () => {
+    expect(validate(withRoot(minimalV4, '0.2'))).toBe(false);
+    expect(validate(withRoot(minimalV4, '1.0'))).toBe(false);
+    expect(validate(withRoot(minimalV4, '0.4.4'))).toBe(false);
+  });
+
+  it('§2 perturbation pair — moving specVersion alone breaks the document', () => {
+    // Both keys move together: valid. Only one moves: invalid. This is what
+    // makes the equality invariant mechanically checkable rather than advisory.
+    const bothAt3 = { ...withRoot(minimalV3, '0.3') };
+    const bothAt4 = { ...withRoot(minimalV4, '0.4') };
+    expect(validate(bothAt3)).toBe(true);
+    expect(validate(bothAt4)).toBe(true);
+
+    const onlySpecVersionMoved = {
+      ...withRoot(minimalV3, '0.3'),
+      generated: { ...minimalV3.generated, specVersion: '0.4' },
+    };
+    const onlyRootMoved = { ...withRoot(minimalV3, '0.4') };
+    expect(validate(onlySpecVersionMoved)).toBe(false);
+    expect(validate(onlyRootMoved)).toBe(false);
+  });
+
+  it('validateV4 accepts the mirrored v0.4 shape and still rejects v0.3', () => {
+    expect(validateV4(withRoot(minimalV4, '0.4'))).toBe(true);
+    expect(validateV4(withRoot(minimalV3, '0.3'))).toBe(false);
+  });
+
+  it('the root key is optional, so widening changes no existing document outcome', () => {
+    // ADR-004 §8 step 1: no document in existence carries the key, so publishing
+    // the widened validator changes no validation result. This is the assertion
+    // behind calling step 1 safe.
+    expect(validate(minimalV3)).toBe(true);
+    expect(validate(minimalV4)).toBe(true);
+    expect(validate({ ...minimalV3, unsupported: true })).toBe(false);
+  });
+});
+
+describe('ADR-004 — a disagreeing document is not mistaken for a legacy one', () => {
+  it('validateLegacy rejects a disagreeing v0.4 document', () => {
+    // Before ADR-004 a root `version` string uniquely marked the pre-v0.3 shape.
+    // It no longer does. Without the `generated.specVersion` guard in
+    // validateLegacy, this document — invalid under §4 — would be reported as a
+    // legacy v0.1/v0.2 document, and scripts/validate-examples.mjs (which accepts
+    // on `strict || legacy`) would pass it.
+    const disagreeing = { version: '0.3', ...minimalV4 };
+    expect(validate(disagreeing)).toBe(false);
+    expect(validateLegacy(disagreeing)).toBe(false);
+  });
+
+  it('validateLegacy still accepts a genuine v0.1 document', () => {
+    expect(validateLegacy({ version: '1', generatedAt: '2026-01-01T00:00:00Z' })).toBe(true);
+  });
+
+  it('validateLegacy rejects a valid mirrored v0.4 document', () => {
+    expect(validateLegacy({ version: '0.4', ...minimalV4 })).toBe(false);
+  });
+});
+
 // ─── Schema identity invariants ──────────────────────────────────────────────
 // These tests are the single source of truth for the canonical $id URL.
 // If any of them fail, you have a $id drift problem — fix the source, not the test.
