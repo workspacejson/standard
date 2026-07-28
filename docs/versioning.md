@@ -174,17 +174,15 @@ hash-check it. They must not maintain an editable second copy; that is how the
 copies drift. `pnpm run check:schema` prints the path, byte length and SHA-256
 for pinning.
 
-**Known inconsistency, deliberately not fixed here.** The schema's `$id`
-declares the `www.` host while the package manifests use the bare canonical
-domain. Both hosts serve the schema, so nothing is broken, but the two strings
-disagree. Reconciling them changes schema bytes, which is a normative change and
-is tracked separately from documentation work. It is recorded here rather than
-quietly normalized.
+The schema's `$id` is `https://workspacejson.dev/schema/v1.json`, matching the
+bare canonical domain used in package manifests and documentation. Both the
+`www.` and bare hosts serve the schema, but the `$id` declares the bare domain
+as canonical. See [ADR-005](./adr/005-schema-id-host-reconciliation.md) for the
+reconciliation record.
 
 The `v1` in the filename is a legacy artifact of the schema file's original
-naming, not a claim that the format is at version 1.0. Whether to rename it is
-open, and it is entangled with the `$id` question above because both change
-schema bytes.
+naming, not a claim that the format is at version 1.0. The filename is unchanged
+for v0.4.x; whether to rename it is deferred to v0.5.
 
 ## Deprecation policy
 

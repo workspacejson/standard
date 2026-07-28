@@ -111,18 +111,14 @@ Measured on the current `main`:
 
 ```text
 path        packages/spec/schema/v1.json
-bytes       6220
-sha256      7f1635bbeff47b103566866d1b66c47a604f91bb3948ad2b59a3ba9369a41e36
-$id         https://www.workspacejson.dev/schema/v1.json
+bytes       6994
+sha256      a32149fa2d0ae08412b97b8fde1c3d2a7887adbefcee99014ce143a6d525b0ca
+$id         https://workspacejson.dev/schema/v1.json
 $schema     https://json-schema.org/draft/2020-12/schema
 ```
 
 Those values are a snapshot, not a guarantee. Re-run the command against the
 version you actually installed — that is what pinning means.
-
-Note the `$id` host disagrees with the bare canonical domain used in the package
-manifests. Both hosts serve the schema. Reconciliation changes schema bytes and
-is tracked separately; see [`docs/versioning.md`](./versioning.md).
 
 ## What this repository verifies about itself
 

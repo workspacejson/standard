@@ -17,6 +17,7 @@ repository under version control.
 | [001](./001-canonical-artifact-path.md) | Canonical artifact path | Accepted | 2026-07-26 |
 | [002](./002-bounded-enrichment-program.md) | Bounded enrichment program | Proposed | 2026-07-25 |
 | [004](./004-root-version-compatibility.md) | Root `version` compatibility profile for v0.4.x | Accepted | 2026-07-28 |
+| [005](./005-schema-id-host-reconciliation.md) | Schema `$id` host reconciliation | Accepted | 2026-07-28 |
 
 ## When an ADR is required
 
