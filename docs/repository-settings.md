@@ -10,7 +10,7 @@ what makes drift detectable.
 
 ## Current state
 
-Measured 2026-07-26. Re-measure rather than trusting this table:
+Measured 2026-07-28. Re-measure rather than trusting this table:
 
 ```bash
 gh repo view workspacejson/standard \
@@ -25,7 +25,7 @@ squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,defaultBranchRef
 | Description | set | Yes |
 | Homepage | `https://workspacejson.dev` | Yes |
 | Topics | 10, listed below | Yes |
-| Visibility | private | **No — see below** |
+| Visibility | public | Yes |
 | Issues | enabled | Yes — the single intake channel |
 | Discussions | disabled | Yes — see [`SUPPORT.md`](../SUPPORT.md) |
 | Wiki | disabled | Yes — documentation is version-controlled in `docs/` |
@@ -33,11 +33,10 @@ squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,defaultBranchRef
 | Merge commit | disabled | Yes |
 | Rebase merge | disabled | Yes |
 | Delete branch on merge | enabled | Yes |
-| Branch protection | none | **No — see the constraint below** |
+| Branch protection | enabled (PR + 1 review + CI + conversation resolution + codeowner) | Yes |
 
-Everything above except visibility and branch protection was applied through the
-GitHub API during the public-readiness pass. The two exceptions are not
-oversights: one is an authority decision, the other is blocked by the plan.
+All settings above were applied through the GitHub API during the public-readiness
+pass and the subsequent security hardening on 2026-07-28.
 
 ## Merge policy
 
@@ -52,91 +51,39 @@ one question that matters here — *which commit changed the contract?*
 Automatic head-branch deletion is enabled so stale branches do not accumulate
 alongside a repository whose value is its clarity.
 
-## The visibility and plan constraint
+## Security posture
 
-Two facts constrain everything below, and neither is fixable by a documentation
-pass:
+The repository is public on the GitHub free plan. The following controls are
+now enabled:
 
-1. **The repository is private.** The specification it contains is meant to be
-   public, and the historical repository it was extracted from *is* public.
-   Flipping visibility is an authority action outside the scope of polish work
-   and is deliberately not done here.
-2. **The organization is on the GitHub free plan**, and this repository has no
-   Advanced Security (`security_and_analysis` is `null`).
-
-Together those mean several controls that would otherwise be routine are simply
-unavailable right now:
-
-| Control | Status | Why |
+| Control | Status | Notes |
 | -- | -- | -- |
-| Branch protection / rulesets | **unavailable** | Requires a paid plan for private repositories. Becomes free once public. |
-| CodeQL code scanning | **unavailable** | Free for public repositories; needs Advanced Security while private. |
-| Dependency review action | **unavailable** | Same constraint — it needs the dependency graph. |
-| Secret scanning / push protection | **unavailable** | Free for public repositories; needs Advanced Security while private. |
-| Private vulnerability reporting | **unavailable** | `PUT /repos/.../private-vulnerability-reporting` returns 404 on this plan while private. |
-| Dependabot version updates | **enabled** | Works on the free plan. See [`.github/dependabot.yml`](../.github/dependabot.yml). |
+| Branch protection | **enabled** | PR + 1 approving review + CI on Node 20/22 + conversation resolution + codeowner review + block force-push/deletion. See below. |
+| Secret scanning | **enabled** | Free for public repositories. |
+| Secret scanning push protection | **enabled** | Blocks commits containing detected secrets. |
+| Private vulnerability reporting | **enabled** | The advisory form at [`SECURITY.md`](../SECURITY.md) now resolves. |
+| Dependabot version updates | **enabled** | See [`.github/dependabot.yml`](../.github/dependabot.yml). |
+| CodeQL code scanning | **deferred** | Free for public repositories; not yet configured. |
+| Dependency review action | **deferred** | Needs the dependency graph; not yet configured. |
 
-The private-vulnerability-reporting gap is the one with a live consequence:
-[`SECURITY.md`](../SECURITY.md), [`CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md)
-and the issue-template configuration all direct reporters to the advisory form,
-and that form does not resolve today. It is harmless only because nobody outside
-the organization can read those files while the repository is private. **The
-moment visibility changes, that stops being true.**
+## Branch protection
 
-Adding a CodeQL or dependency-review workflow today would produce a workflow that
-cannot succeed. A permanently red check is worse than a missing one: it trains
-reviewers to ignore red, which is the precise failure that makes every other
-check worthless. They are therefore evaluated and deferred, not silently
-skipped.
+Branch protection is **enabled** on `main` as of 2026-07-28. The protection
+requires:
 
-## What to enable when the repository becomes public
-
-In this order, because the later items depend on the earlier ones:
-
-1. **Enable private vulnerability reporting.** Do this *before* announcing the
-   repository, not after. Three committed files already point reporters at the
-   advisory form; until it is enabled, the project's only disclosure channel is a
-   dead link. Then remove the maintainer note at the top of
-   [`SECURITY.md`](../SECURITY.md).
-
-   ```bash
-   gh api -X PUT /repos/workspacejson/standard/private-vulnerability-reporting
-   ```
-
-2. **Enable secret scanning and push protection.** Free for public repositories,
-   and the cheapest control by a wide margin.
-3. **Add CodeQL** on a `javascript-typescript` matrix, scheduled weekly plus on
-   pull requests, with `security-events: write` scoped to that job only.
-4. **Add the dependency review action** to pull requests, failing on high
-   severity.
-5. **Establish a ruleset on `main`** — see the next section.
-
-## Required branch protection before publication authority
-
-This is a hard gate, not a recommendation.
-
-This repository does not currently hold publication authority for either package,
-and the architecture guard fails the build if a publish step or credential
-appears in any workflow. That arrangement is what currently makes unreviewed
-pushes to `main` merely untidy rather than dangerous.
-
-**The moment this repository can publish, an unprotected `main` becomes a supply
-chain problem.** A push to `main` would become a path to the npm registry with no
-review in between.
-
-Therefore, before any npm credential is added:
-
-- a ruleset on `main` requiring a pull request with at least one approving review;
-- required status checks: the CI job on both Node 20 and 22;
+- a pull request with at least one approving review;
+- required status checks: `test (20)`, `test (22)`, and `Four-path producer
+  conformance`;
 - dismiss stale approvals on new commits;
 - require conversation resolution;
 - block force pushes and branch deletion;
 - require review from code owners, so changes to the schema, the guards and the
   release documents reach a maintainer — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
+- enforce on admins.
 
-The authority transfer and the protection ruleset belong in the same coordinated
-change. Doing the first without the second creates exactly the window this
-paragraph exists to prevent.
+This was a hard gate before publication authority. The protection is now in
+place, so the authority transfer in `.github/RELEASE-AUTHORITY.md` can proceed
+without creating a supply-chain window.
 
 ## Repository metadata
 
