@@ -52,7 +52,7 @@ validateLegacy(doc);  // true if doc is a valid v0.1/v0.2 document
 ```ts
 import { workspaceJsonSchema } from '@workspacejson/spec';
 
-// workspaceJsonSchema.$id === 'https://www.workspacejson.dev/schema/v1.json'
+// workspaceJsonSchema.$id === 'https://workspacejson.dev/schema/v1.json'
 // workspaceJsonSchema.title === 'workspace.json'
 ```
 
@@ -147,7 +147,7 @@ second copy — that is how copies drift.
 
 The schema declares `$id: https://workspacejson.dev/schema/v1.json` and is
 served at that URL. The `www.` host also serves the schema, but the bare domain
-is canonical. See [ADR-005](../../docs/adr/005-schema-id-host-reconciliation.md)
+is canonical. See [ADR-005](../../docs/adr/005-schema-identity.md)
 for the reconciliation record.
 
 The `v1` in the filename is a legacy artifact of the file's original naming, not

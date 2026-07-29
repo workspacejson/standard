@@ -177,7 +177,7 @@ for pinning.
 The schema's `$id` is `https://workspacejson.dev/schema/v1.json`, matching the
 bare canonical domain used in package manifests and documentation. Both the
 `www.` and bare hosts serve the schema, but the `$id` declares the bare domain
-as canonical. See [ADR-005](./adr/005-schema-id-host-reconciliation.md) for the
+as canonical. See [ADR-005](./adr/005-schema-identity.md) for the
 reconciliation record.
 
 The `v1` in the filename is a legacy artifact of the schema file's original
