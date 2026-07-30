@@ -250,7 +250,7 @@ describe('ADR-004 — a disagreeing document is not mistaken for a legacy one', 
 // ─── Schema identity invariants ──────────────────────────────────────────────
 // These tests are the single source of truth for the canonical $id URL.
 // If any of them fail, you have a $id drift problem — fix the source, not the test.
-const CANONICAL_ID = 'https://www.workspacejson.dev/schema/v1.json';
+const CANONICAL_ID = 'https://workspacejson.dev/schema/v1.json';
 
 describe('schema identity invariants', () => {
   it('TypeScript const $id matches canonical URL', () => {

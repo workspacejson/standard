@@ -52,7 +52,7 @@ validateLegacy(doc);  // true if doc is a valid v0.1/v0.2 document
 ```ts
 import { workspaceJsonSchema } from '@workspacejson/spec';
 
-// workspaceJsonSchema.$id === 'https://www.workspacejson.dev/schema/v1.json'
+// workspaceJsonSchema.$id === 'https://workspacejson.dev/schema/v1.json'
 // workspaceJsonSchema.title === 'workspace.json'
 ```
 
@@ -145,11 +145,10 @@ import schema from '@workspacejson/spec/schema' with { type: 'json' };
 Materialize it from this package and hash-check it. Do not maintain an editable
 second copy — that is how copies drift.
 
-The schema declares `$id: https://www.workspacejson.dev/schema/v1.json` and is
-also served at that URL. Note that the `$id` host carries the `www.` prefix while
-this package's `homepage` uses the bare domain; both hosts serve the schema, but
-the two strings disagree. Reconciling them changes schema bytes and is tracked as
-a normative change rather than a documentation fix.
+The schema declares `$id: https://workspacejson.dev/schema/v1.json` and is
+served at that URL. The `www.` host also serves the schema, but the bare domain
+is canonical. See [ADR-005](../../docs/adr/005-schema-identity.md)
+for the reconciliation record.
 
 The `v1` in the filename is a legacy artifact of the file's original naming, not
 a claim that the format is at version 1.0. The current document profile is v0.4.
