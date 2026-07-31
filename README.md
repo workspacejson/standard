@@ -1,4 +1,12 @@
-# workspace.json — the standard
+<p align="center">
+  <a href="https://github.com/workspace-json">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png">
+      <img src="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png" alt="workspace.json — Portable Repository Intelligence" width="760">
+    </picture>
+  </a>
+</p>
 
 **workspace.json** is an open specification for committed repository
 intelligence. A portable JSON artifact at **`.agents/workspace.json`** combines
