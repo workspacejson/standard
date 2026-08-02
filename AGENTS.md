@@ -42,8 +42,9 @@ This repository owns contracts, not implementations. Before adding anything, che
 
 ```bash
 pnpm install
-pnpm -r typecheck && pnpm -r build && pnpm -r test
+pnpm -r build && pnpm -r typecheck && pnpm -r test
 pnpm run check:architecture && pnpm run check:architecture:test
+pnpm run check:docs
 pnpm run check:schema && pnpm run check:examples
 pnpm run release:verify-packs
 ```

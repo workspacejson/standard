@@ -4,13 +4,17 @@
 //
 // Polish decays. A README that was accurate when it was written drifts as files
 // move, and a "cold reader can follow this" claim is worthless if nothing checks
-// it. This gate makes three properties of the public surface mechanically
+// it. This gate makes four properties of the public surface mechanically
 // verifiable instead of merely asserted:
 //
 //   1. Every relative Markdown link and image resolves to a file that exists.
 //   2. Public prose does not carry internal tracker identifiers, which a public
 //      reader cannot resolve. Provenance records are exempt — see PROVENANCE_FILES.
 //   3. Every documented pnpm script actually exists in package.json.
+//   4. Every prose enumeration of the four stable read paths is complete and
+//      matches the schema. The paths are restated in several documents and the
+//      architecture guard reads only source and config, so nothing else would
+//      notice a prose copy going stale.
 //
 // External links are NOT fetched. A network check in CI fails on someone else's
 // outage and trains everyone to ignore red. They are syntax-checked here and
@@ -156,12 +160,76 @@ for (const file of markdown) {
   }
 }
 
+// ---- 4: enumerated stable read paths match the schema -----------------------
+
+// The four stable read paths are a compatibility surface, so they are restated
+// in several places a reader might arrive at first — AGENTS.md, GOVERNANCE.md,
+// the Copilot instructions. The architecture guard only scans source and config,
+// so none of those prose copies is checked by anything else: a path could be
+// renamed in the schema and go on being documented under its old name.
+//
+// Two properties, both mechanical:
+//   a. each path this repository calls stable still exists in the schema;
+//   b. any prose that starts enumerating them enumerates all four, so a partial
+//      list cannot drift into looking authoritative.
+//
+// Prose that merely refers to "the four stable read paths" without naming any is
+// left alone — it carries no list that can rot.
+
+const STABLE_READ_PATHS = [
+  ["manual", "fragileFiles"],
+  ["manual", "coChangePatterns"],
+  ["generated", "fileIndex"],
+  ["generated", "frameworkManifest"],
+];
+
+const schemaRelPath = "packages/spec/schema/v1.json";
+const schema = JSON.parse(readFileSync(join(repoRoot, schemaRelPath), "utf8"));
+
+for (const [parent, leaf] of STABLE_READ_PATHS) {
+  const present = schema?.properties?.[parent]?.properties?.[leaf] !== undefined;
+  if (!present) {
+    fail(
+      schemaRelPath,
+      0,
+      `stable read path '${parent}.${leaf}' is documented as a compatibility surface but is absent from the schema — ` +
+        `remove it from the prose that enumerates it, or restore it`,
+    );
+  }
+}
+
+const MENTIONS_STABLE_PATHS = /stable read path/i;
+let enumerationsChecked = 0;
+
+for (const file of markdown) {
+  const content = readFileSync(join(repoRoot, file), "utf8");
+  if (!MENTIONS_STABLE_PATHS.test(content)) continue;
+
+  const named = STABLE_READ_PATHS.filter(([parent, leaf]) =>
+    content.includes(`${parent}.${leaf}`),
+  );
+  if (named.length === 0) continue; // refers to them without listing them
+
+  enumerationsChecked++;
+  if (named.length !== STABLE_READ_PATHS.length) {
+    const missing = STABLE_READ_PATHS.filter(([p, l]) => !content.includes(`${p}.${l}`))
+      .map(([p, l]) => `${p}.${l}`)
+      .join(", ");
+    fail(
+      file,
+      0,
+      `enumerates stable read paths but omits ${missing} — a partial list reads as authoritative`,
+    );
+  }
+}
+
 // ---- report ----------------------------------------------------------------
 
 console.log("Documentation integrity");
 console.log(`  markdown files      ${markdown.length}`);
 console.log(`  links checked       ${linksChecked}  (${relativeLinks} relative, resolved on disk; ${externalLinks} external, syntax only)`);
 console.log(`  pnpm commands       ${commandsChecked} documented references verified against package.json`);
+console.log(`  stable read paths   ${STABLE_READ_PATHS.length} confirmed in the schema; ${enumerationsChecked} prose enumerations complete`);
 console.log(`  provenance files    ${PROVENANCE_FILES.size} exempt from the tracker-identifier rule`);
 
 if (failures.length) {
@@ -171,4 +239,7 @@ if (failures.length) {
   }
   process.exit(1);
 }
-console.log("\nOK — every relative link resolves, no internal tracker identifiers in public prose, every documented command exists.");
+console.log(
+  "\nOK — every relative link resolves, no internal tracker identifiers in public prose, " +
+    "every documented command exists, every enumerated stable read path matches the schema.",
+);
