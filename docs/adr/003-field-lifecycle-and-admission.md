@@ -10,7 +10,7 @@
 | **Ratifying authority** | Qwynn Marcelle, sole steward ([OWNERSHIP.md](../../OWNERSHIP.md)) |
 | **Canonical repository** | `workspacejson/standard` |
 | **Canonical path** | `docs/adr/003-field-lifecycle-and-admission.md` |
-| **Canonical revision** | *filled at merge — Git commit SHA* |
+| **Revision index** | [`index.json`](./index.json) — generated; see [README](./README.md#the-revision-index) |
 | **Ratification issue** | META-264 (internal tracker) |
 | **Evidence snapshot** | Registry sweep 2026-07-27T13:23Z; `@workspacejson/spec@0.4.4` schema `sha256:7f1635bb…` |
 | **Supersedes** | Nothing |
@@ -211,10 +211,18 @@ to change the path's status.
 
 ### 11. Amendments
 
-This record is amended, never forked. Reviewers fetch the canonical revision,
-review against it, and submit numbered amendments. Each amendment is recorded in
-the ratification issue with proposal, disposition, rationale, authority, decision
-date, effective revision, and supersession. One owner updates this file and records the new revision.
+This record is amended, never forked. Reviewers fetch the revision this record
+was published at, review against it, and submit numbered amendments. Each
+amendment is recorded in the ratification issue with proposal, disposition,
+rationale, authority, decision date, effective revision, and supersession. One
+owner updates this file.
+
+The revision itself is **not** recorded in this file. A record cannot carry the
+identity of the commit that publishes it — the value would have to be written
+before the commit it names exists, and any digest of the file would change the
+moment it was written into the file. That bookkeeping lives in
+[`index.json`](./index.json), which is generated from Git and regenerated after
+merge. `pnpm run check:adr` fails if it is stale, so the pin cannot silently rot.
 
 A full rewritten copy of this document produced elsewhere is not an amendment and
 carries no authority regardless of its merit.
@@ -260,9 +268,9 @@ the model.
 ## Supersession
 
 Replace this record when the standard acquires a governance body other than sole
-stewardship. §11's amendment mechanism assumes one owner who updates the file and
-records the new revision and digest, and that assumption does not survive shared
-authority. Replace it also if an external standards process adopts the format and
+stewardship. §11's amendment mechanism assumes one owner who updates the file,
+and that assumption does not survive shared authority. Replace it also if an
+external standards process adopts the format and
 brings its own admission procedure.
 
 Any replacement must state what happens to amendments still open against this
@@ -317,9 +325,11 @@ path.
 
 ### Ratification record
 
-Each amendment carries its disposition, rationale, authority, decision date,
-and effective revision. The effective revision is the Git commit SHA of the
-merge that ratifies this record.
+Each amendment carries its disposition, rationale, authority, and decision date
+below. Its **effective revision** is the revision recorded for this record in
+[`index.json`](./index.json) — all eight took effect together at ratification, so
+one pin serves all eight and none of them can drift apart from the file they
+amend. Amendments ratified later carry their own dated entry.
 
 **A-001 — `health`**
 
@@ -330,7 +340,6 @@ merge that ratifies this record.
   META-103's consumer census.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 **A-002 — `generated.hygiene`**
 
@@ -341,7 +350,6 @@ merge that ratifies this record.
   admission test. Resolves C-2.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 **A-003 — `generated.topology`**
 
@@ -351,7 +359,6 @@ merge that ratifies this record.
   for stable-surface promotion under §4.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 **A-004 — `generated.fileIndex`**
 
@@ -361,7 +368,6 @@ merge that ratifies this record.
   Specify is a disposition in its own right per §10.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 **A-005 — `manual.coChangePatterns`**
 
@@ -372,7 +378,6 @@ merge that ratifies this record.
   own right per §10.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 **A-006 — Named consumers in normative descriptions**
 
@@ -381,7 +386,6 @@ merge that ratifies this record.
   The standard is consumer-neutral.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 **A-007 — `manual.fragileFiles`**
 
@@ -391,7 +395,6 @@ merge that ratifies this record.
   path with no demonstrated benefit. The v0.5 relocation proposal is declined.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 **A-008 — `generated.frameworkManifest`**
 
@@ -400,7 +403,6 @@ merge that ratifies this record.
   its contract needs specification.
 - Authority: Qwynn Marcelle, sole steward
 - Decision date: 2026-08-03
-- Effective revision: *filled at merge*
 
 A-002 and A-003 concern `hygiene` and `topology`, neither of which is a §10
 grandfathered path. Of the four paths the interlock names, all four now carry

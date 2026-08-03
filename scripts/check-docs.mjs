@@ -49,6 +49,7 @@ const PROVENANCE_FILES = new Set([
   "migration/parity-packed.mjs",
   "migration/parity-runtime.mjs",
   "docs/adr/README.md",
+  "docs/adr/index.json",
   "docs/adr/001-canonical-artifact-path.md",
   "docs/adr/002-bounded-enrichment-program.md",
   "docs/adr/003-field-lifecycle-and-admission.md",
