@@ -133,6 +133,19 @@ So *absent* is always fine and *wrong* never is. A present `revision` must be a
 commit on the baseline, must contain that record's exact blob, and must name the
 recorded PR; any of those failing is an error.
 
+Two consequences of "optional" that are easy to get wrong:
+
+- **Absent together, or present together.** A `pullRequest` recorded with a null
+  `revision` is rejected. The revision is the only thing that makes a PR number
+  checkable, so a PR reference without one is an unverifiable claim rather than
+  partial data.
+- **Unverifiable is not verified.** In a shallow clone or a checkout with no
+  remote, no baseline is reachable and a recorded revision cannot be judged. It
+  is preserved and the check still exits 0 — but it is reported as `UNVERIFIED`,
+  and `adr:index` says the values were preserved rather than proven. A check
+  that reports "could not check" as "checked" is worse than one that does not
+  run.
+
 Three commands:
 
 ```

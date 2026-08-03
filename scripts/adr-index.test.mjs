@@ -56,6 +56,17 @@ const put = (dir, rel, content) => writeFileSync(join(dir, rel), content);
 const cases = [];
 const baseline = (name, fn) => cases.push({ name, expectReject: false, match: null, mutate: fn });
 const red = (name, match, fn) => cases.push({ name, expectReject: true, match, mutate: fn });
+// Accepted, but the output must say a specific thing. Exit 0 is not evidence on
+// its own — a check that passes while reporting the wrong thing still misleads.
+const green = (name, match, fn) => cases.push({ name, expectReject: false, match, mutate: fn });
+
+// Rewrite one entry of the committed index in place.
+const patchIndex = (dir, path, fields) => {
+  const p = join(dir, "docs/adr/index.json");
+  const idx = JSON.parse(readFileSync(p, "utf8"));
+  Object.assign(idx.records.find((e) => e.path === path), fields);
+  writeFileSync(p, `${JSON.stringify(idx, null, 2)}\n`);
+};
 
 // ---------------------------------------------------------------- baseline
 baseline("baseline: the unmodified repository is ACCEPTED", () => {});
@@ -118,6 +129,32 @@ red(
 
 red("metadata: an Accepted record loses its decision date", "no decision date", (d) =>
   put(d, ACCEPTED_ADR, read(d, ACCEPTED_ADR).replace(/^\| \*\*Decision date\*\* \|.*$/m, "")));
+
+// ------------------------------------------------- orphan publication metadata
+// `revision` is the only thing that makes a PR number checkable. A PR with no
+// commit is an unverifiable claim, so the two are absent together or present
+// together — "optional" is not "half-present".
+red(
+  "orphan reference: a pullRequest recorded with a null revision is REJECTED",
+  "names nothing that can be checked",
+  (d) => patchIndex(d, ACCEPTED_ADR, { revision: null, pullRequest: 18 }),
+);
+
+// --------------------------------------------- unverifiable is not verified
+// withScratchRepo has no commits and no remote, so no baseline is reachable. A
+// recorded revision is preserved and the command still exits 0 — but it must
+// not claim the value was checked.
+green(
+  "no baseline: a present revision is reported UNVERIFIED, not verified",
+  "UNVERIFIED",
+  (d) => patchIndex(d, ACCEPTED_ADR, { revision: "a".repeat(40), pullRequest: 7 }),
+);
+
+green(
+  "no baseline: the report says values are preserved, not proven truthful",
+  "preserved, not proven truthful",
+  (d) => patchIndex(d, ACCEPTED_ADR, { revision: "a".repeat(40), pullRequest: 7 }),
+);
 
 // ---------------------------------------------------------- lifecycle
 //
@@ -244,8 +281,10 @@ for (const c of cases) {
     failed.push(`${c.name}\n      expected ${c.expectReject ? "REJECT" : "ACCEPT"}, got ${rejected ? "REJECT" : "ACCEPT"}\n${out.split("\n").map((l) => `      | ${l}`).join("\n")}`);
     continue;
   }
-  if (c.expectReject && !out.includes(c.match)) {
-    failed.push(`${c.name}\n      rejected, but not for '${c.match}'\n${out.split("\n").map((l) => `      | ${l}`).join("\n")}`);
+  // Exit code alone is not evidence: a check can pass while reporting something
+  // false. Where a case names expected output, that text must actually appear.
+  if (c.match && !out.includes(c.match)) {
+    failed.push(`${c.name}\n      ${rejected ? "rejected" : "accepted"}, but output does not contain '${c.match}'\n${out.split("\n").map((l) => `      | ${l}`).join("\n")}`);
     continue;
   }
   passed++;

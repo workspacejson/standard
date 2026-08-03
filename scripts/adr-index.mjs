@@ -158,8 +158,25 @@ const project = (o, keys) => Object.fromEntries(keys.map((k) => [k, o[k] ?? null
 // recorded value is only kept if it survives this; a wrong one is never
 // tolerated just because it was already in the file.
 function revisionIsTruthful(entry, record) {
-  if (entry.revision == null) return { ok: true };
-  if (!baseline) return { ok: true, unverified: true }; // shallow clone: cannot judge
+  if (entry.revision == null) {
+    // An orphan PR reference. `revision` is the only thing that makes a PR
+    // number checkable — without it there is no commit to compare against, so
+    // the number is an unverifiable claim rather than partial data. Optional
+    // means "may be absent together", not "may be half-present".
+    if (entry.pullRequest != null) {
+      return {
+        ok: false,
+        why:
+          `pullRequest ${entry.pullRequest} is recorded with a null revision — a PR reference ` +
+          `with no commit names nothing that can be checked. Record both or neither.`,
+      };
+    }
+    return { ok: true };
+  }
+  // No baseline (shallow clone, no remote): the value is PRESERVED but cannot be
+  // judged. It is reported as unverified rather than counted as proven — the
+  // whole point of verifying is lost if "could not check" reads as "checked".
+  if (!baseline) return { ok: true, unverified: true };
   const reachable =
     spawnSync("git", ["merge-base", "--is-ancestor", entry.revision, baseline], { cwd: repoRoot })
       .status === 0;
@@ -233,6 +250,12 @@ const expected = serialize(records.map(entryFor));
 if (write) {
   writeFileSync(join(repoRoot, indexRelPath), expected);
   console.log(`ADR revision index written — ${records.length} records`);
+  if (!baseline) {
+    console.log(
+      "  no baseline reachable: existing publication metadata was PRESERVED as-is, " +
+        "not derived and not proven truthful",
+    );
+  }
 } else if (committed === null) {
   failures.push(`${indexRelPath} is missing or unparseable — run \`pnpm run adr:index\``);
 } else {
@@ -294,16 +317,25 @@ for (const r of records) {
 }
 
 const recorded = records.filter((r) => committedFor(r.path).revision != null);
+const unverified = recorded.filter((r) => revisionIsTruthful(committedFor(r.path), r).unverified);
 const enrichable = records.filter((r) => committedFor(r.path).revision == null && r.revision != null);
 
 console.log("ADR revision index");
-console.log(`  baseline            ${baseline ?? "none reachable — publication metadata cannot be derived"}`);
+console.log(`  baseline            ${baseline ?? "NONE REACHABLE — publication metadata cannot be derived or checked"}`);
 console.log(`  records             ${records.length} (${records.filter((r) => r.status === "Accepted").length} Accepted)`);
 console.log(`  content pins        ${records.filter((r) => r.blob).length}/${records.length} blob SHAs resolved  [required]`);
-console.log(`  publication         ${recorded.length}/${records.length} revisions recorded and verified  [optional]` +
-  (enrichable.length
-    ? `\n                      ${enrichable.length} now derivable — \`pnpm run adr:index\` will enrich; not required, not stale`
-    : ""));
+
+// Never report an unchecked value as verified. With no baseline the recorded
+// revisions are carried forward untouched, and saying so is the honest form.
+if (unverified.length) {
+  console.log(`  publication         ${recorded.length}/${records.length} revisions recorded, ${unverified.length} UNVERIFIED  [optional]`);
+  console.log(`                      no baseline reachable — recorded values are preserved, not proven truthful`);
+} else {
+  console.log(`  publication         ${recorded.length}/${records.length} revisions recorded and verified  [optional]`);
+}
+if (enrichable.length) {
+  console.log(`                      ${enrichable.length} now derivable — \`pnpm run adr:index\` will enrich; not required, not stale`);
+}
 
 if (failures.length) {
   console.error(`\nadr-index: ${failures.length} failure(s)\n`);
