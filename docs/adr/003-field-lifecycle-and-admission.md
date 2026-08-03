@@ -2,16 +2,15 @@
 
 | Field | Value |
 | -- | -- |
-| **Status** | Proposed |
-| **Decision date** | — (unratified) |
+| **Status** | Accepted |
+| **Decision date** | 2026-08-03 |
 | **Record written** | 2026-07-27 |
 | **Author** | Qwynn Marcelle ([@qmarcelle](https://github.com/qmarcelle)) |
 | **Decider** | Qwynn Marcelle |
 | **Ratifying authority** | Qwynn Marcelle, sole steward ([OWNERSHIP.md](../../OWNERSHIP.md)) |
 | **Canonical repository** | `workspacejson/standard` |
 | **Canonical path** | `docs/adr/003-field-lifecycle-and-admission.md` |
-| **Canonical revision** | *filled at merge* |
-| **Content digest** | *filled at merge* — `shasum -a 256 docs/adr/003-field-lifecycle-and-admission.md` |
+| **Canonical revision** | *filled at merge — Git commit SHA* |
 | **Ratification issue** | META-264 (internal tracker) |
 | **Evidence snapshot** | Registry sweep 2026-07-27T13:23Z; `@workspacejson/spec@0.4.4` schema `sha256:7f1635bb…` |
 | **Supersedes** | Nothing |
@@ -215,8 +214,7 @@ to change the path's status.
 This record is amended, never forked. Reviewers fetch the canonical revision,
 review against it, and submit numbered amendments. Each amendment is recorded in
 the ratification issue with proposal, disposition, rationale, authority, decision
-date, effective revision, and supersession. One owner updates this file and
-records the new revision and digest.
+date, effective revision, and supersession. One owner updates this file and records the new revision.
 
 A full rewritten copy of this document produced elsewhere is not an amendment and
 carries no authority regardless of its merit.
@@ -283,10 +281,18 @@ and schema state observed at drafting.
 
 The ratification ledger is the internal issue named in the metadata table, which
 holds amendment dispositions, rationale, authority and decision dates per §11.
-Two conflicts with an existing internal governance record are logged there and
-are unresolved as of this writing: whether a provisional field requires a dated
-gate, which §10 answers no, and whether `generated.hygiene` was already settled
-on charter grounds, which A-002 reopens.
+Two conflicts with an existing internal governance record were logged in the
+ratification issue and are resolved by this ratification:
+
+- **C-1 — Dated gates.** §10 states the interlock is the only gate and no
+  calendar date or release anchor applies. This supersedes the contrary
+  assertion in the internal governance record. No universal calendar-based
+  admission gate is required for grandfathered paths.
+
+- **C-2 — Hygiene framing.** `generated.hygiene` is already published on two
+  normative surfaces (the schema and the rules export). The operative question
+  is a §5 removal class, not an admission test. A-002's disposition (deprecate
+  and remove) follows from this framing.
 
 A-007 and A-008 were added on 2026-07-27, after the initial six, during a
 reconciliation of the record against its own §10 interlock. That reconciliation
@@ -298,18 +304,106 @@ path.
 
 ## Amendments against revision 1
 
-| ID | Proposal | Disposition |
-| -- | -- | -- |
-| A-001 | Decompose `health` removal into three sequenced changes per §5; land the `required` relaxation independently of emission cessation, which follows META-103's census | Proposed |
-| A-002 | `generated.hygiene` disposition — decide whether it fails on charter grounds or on portability and reproducibility grounds; the framings differ in whether a documented algorithm could rescue it | Proposed |
-| A-003 | `generated.topology` disposition — the emitter's contract is now observable; ratify as written, scope as a producer extension, reshape, or remove | Proposed |
-| A-004 | `generated.fileIndex` profile packaging — separate the stable inventory contract from unresolved per-file value semantics per §7 | Proposed |
-| A-005 | `manual.coChangePatterns` item contract — the weakest of the four; currently bare objects | Proposed |
-| A-006 | Remove named consumers from normative field descriptions | Proposed |
-| A-007 | `manual.fragileFiles` disposition — required by the §10 interlock and absent from the initial six. The v0.5 relocation to `generated` is a stable-surface move on a grandfathered path | Proposed |
-| A-008 | `generated.frameworkManifest` disposition — required by the §10 interlock and absent from the initial six | Proposed |
+| ID | Proposal | Disposition | Decision date |
+| -- | -- | -- | -- |
+| A-001 | Decompose `health` removal into three sequenced changes per §5; land the `required` relaxation independently of emission cessation, which follows META-103's census | **Remove** — staged deprecation via META-103 | 2026-08-03 |
+| A-002 | `generated.hygiene` disposition — decide whether it fails on charter grounds or on portability and reproducibility grounds; the framings differ in whether a documented algorithm could rescue it | **Remove** — deprecate and remove from neutral standard | 2026-08-03 |
+| A-003 | `generated.topology` disposition — the emitter's contract is now observable; ratify as written, scope as a producer extension, reshape, or remove | **Keep** — normative-optional and producer-supported; not stable | 2026-08-03 |
+| A-004 | `generated.fileIndex` profile packaging — separate the stable inventory contract from unresolved per-file value semantics per §7 | **Keep and specify** — stable inventory contract; inner values not stable | 2026-08-03 |
+| A-005 | `manual.coChangePatterns` item contract — the weakest of the four; currently bare objects | **Keep and specify** — stable; specify canonical item profile with tolerant v0.4.x reading | 2026-08-03 |
+| A-006 | Remove named consumers from normative field descriptions | **Remove** — consumer names removed from normative descriptions | 2026-08-03 |
+| A-007 | `manual.fragileFiles` disposition — required by the §10 interlock and absent from the initial six. The v0.5 relocation to `generated` is a stable-surface move on a grandfathered path | **Keep** — remain in `manual`; do not relocate to `generated` | 2026-08-03 |
+| A-008 | `generated.frameworkManifest` disposition — required by the §10 interlock and absent from the initial six | **Keep and specify** — stable; specify its contract | 2026-08-03 |
+
+### Ratification record
+
+Each amendment carries its disposition, rationale, authority, decision date,
+and effective revision. The effective revision is the Git commit SHA of the
+merge that ratifies this record.
+
+**A-001 — `health`**
+
+- Disposition: Remove
+- Rationale: `health` is not one of the four demonstrated stable read paths.
+  Its aggregate fields are fabricated constants. Removal follows the §5
+  sequence (relax `required`, cease emission, remove from `properties`) via
+  META-103's consumer census.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
+
+**A-002 — `generated.hygiene`**
+
+- Disposition: Remove
+- Rationale: `computeHygieneScore([], 0)` returns A/100 over zero coverage. A
+  prescriptive letter grade is a charter violation per GOVERNANCE.md. This is
+  a §5 removal question about an exported function and schema property, not an
+  admission test. Resolves C-2.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
+
+**A-003 — `generated.topology`**
+
+- Disposition: Keep normative-optional and producer-supported; not stable
+- Rationale: The emitter's contract is now observable. The concept belongs in
+  the specification but has not demonstrated behavioral consumer use sufficient
+  for stable-surface promotion under §4.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
+
+**A-004 — `generated.fileIndex`**
+
+- Disposition: Keep and specify
+- Rationale: The stable inventory contract is sound and demonstrated. Per-file
+  value semantics are underdetermined and remain outside the stable surface.
+  Specify is a disposition in its own right per §10.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
+
+**A-005 — `manual.coChangePatterns`**
+
+- Disposition: Keep and specify
+- Rationale: The path is a demonstrated stable read path. Items are currently
+  bare objects and need a canonical item profile. Tolerant v0.4.x reading
+  applies during the specification transition. Specify is a disposition in its
+  own right per §10.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
+
+**A-006 — Named consumers in normative descriptions**
+
+- Disposition: Remove
+- Rationale: Normative field descriptions must not name specific consumers.
+  The standard is consumer-neutral.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
+
+**A-007 — `manual.fragileFiles`**
+
+- Disposition: Keep in `manual`
+- Rationale: The path is a demonstrated stable read path under `manual`.
+  Relocating to `generated` would be a stable-surface move on a grandfathered
+  path with no demonstrated benefit. The v0.5 relocation proposal is declined.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
+
+**A-008 — `generated.frameworkManifest`**
+
+- Disposition: Keep and specify
+- Rationale: HAC-113 adjudicated the disposition. The path is demonstrated and
+  its contract needs specification.
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-03
+- Effective revision: *filled at merge*
 
 A-002 and A-003 concern `hygiene` and `topology`, neither of which is a §10
-grandfathered path. Of the four paths the interlock names, only `fileIndex`
-(A-004) and `coChangePatterns` (A-005) carried an amendment; A-007 and A-008
-close that gap so the interlock is satisfiable.
+grandfathered path. Of the four paths the interlock names, all four now carry
+recorded dispositions: `fileIndex` (A-004), `coChangePatterns` (A-005),
+`fragileFiles` (A-007), and `frameworkManifest` (A-008). The §10 interlock is
+satisfied.
