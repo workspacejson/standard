@@ -221,8 +221,13 @@ The revision itself is **not** recorded in this file. A record cannot carry the
 identity of the commit that publishes it — the value would have to be written
 before the commit it names exists, and any digest of the file would change the
 moment it was written into the file. That bookkeeping lives in
-[`index.json`](./index.json), which is generated from Git and regenerated after
-merge. `pnpm run check:adr` fails if it is stale, so the pin cannot silently rot.
+[`index.json`](./index.json), which is generated from Git.
+
+What an amendment pins to is the **blob SHA** of the text it was written
+against: knowable before merge, immutable after, and required by
+`pnpm run check:adr`. The publishing commit and PR are recorded there too, but
+as optional metadata — verified when present, never demanded — because a record
+that has just merged cannot yet name its own merge commit.
 
 A full rewritten copy of this document produced elsewhere is not an amendment and
 carries no authority regardless of its merit.

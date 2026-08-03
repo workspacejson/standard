@@ -119,6 +119,119 @@ red(
 red("metadata: an Accepted record loses its decision date", "no decision date", (d) =>
   put(d, ACCEPTED_ADR, read(d, ACCEPTED_ADR).replace(/^\| \*\*Decision date\*\* \|.*$/m, "")));
 
+// ---------------------------------------------------------- lifecycle
+//
+// The regression this suite exists for. An earlier version of the check derived
+// `revision` and compared the FULL serialization, so the moment a record's bytes
+// reached the baseline the committed index — still holding null — was declared
+// stale. Every ADR merge would have turned `main` red until a bookkeeping-only
+// follow-up commit landed.
+//
+// This walks the real lifecycle: index before publication, publish, then assert
+// the UNCHANGED index still passes. The `after baseline advances` case is the
+// one that fails against the old implementation.
+
+function lifecycle() {
+  const dir = mkdtempSync(join(tmpdir(), "wsjson-adr-life-"));
+  const results = [];
+  const check = (dirArg = dir) => {
+    const r = spawnSync("node", [guard, dirArg], { cwd: dirArg, encoding: "utf8" });
+    return { status: r.status, out: `${r.stdout}${r.stderr}` };
+  };
+  const assert = (name, cond, out) => results.push({ name, ok: cond, out });
+
+  try {
+    for (const f of trackedFiles()) {
+      const dest = join(dir, f);
+      mkdirSync(dirname(dest), { recursive: true });
+      cpSync(join(repoRoot, f), dest);
+    }
+    // The real repository's index names commits from the real repository, which
+    // mean nothing here. Start with no index so this scratch history is the only
+    // thing under test.
+    rmSync(join(dir, "docs/adr/index.json"), { force: true });
+
+    // Commit on a branch that is NOT the baseline, so the record's bytes exist
+    // but are not yet published.
+    spawnSync("git", ["init", "-q"], { cwd: dir });
+    spawnSync("git", ["checkout", "-q", "-b", "work"], { cwd: dir });
+    spawnSync("git", ["add", "-A"], { cwd: dir });
+    spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "records (#42)"], { cwd: dir });
+
+    // 1. Index before publication. No baseline exists, so revision must be null.
+    spawnSync("node", [guard, "--write", dir], { cwd: dir, encoding: "utf8" });
+    const beforeText = readFileSync(join(dir, "docs/adr/index.json"), "utf8");
+    const before = JSON.parse(beforeText).records;
+    assert(
+      "lifecycle: an unpublished record is indexed with a null revision",
+      before.every((e) => e.revision === null && e.pullRequest === null) && before.every((e) => e.blob),
+      beforeText.slice(0, 200),
+    );
+    const pre = check();
+    assert("lifecycle: that index passes before publication", pre.status === 0, pre.out);
+
+    // 2. Publish: the baseline now contains the exact blob, unchanged.
+    spawnSync("git", ["branch", "main", "work"], { cwd: dir });
+
+    // 3. THE REGRESSION. The index is byte-identical; only the baseline moved.
+    const after = check();
+    const unchanged = readFileSync(join(dir, "docs/adr/index.json"), "utf8") === beforeText;
+    assert(
+      "lifecycle: the UNCHANGED index still passes after the baseline advances",
+      after.status === 0 && unchanged,
+      after.out,
+    );
+    assert(
+      "lifecycle: newly derivable metadata is reported as enrichment, not staleness",
+      !/is stale/.test(after.out) && /not required, not stale/.test(after.out),
+      after.out,
+    );
+
+    // 4. Enrichment is available but never demanded.
+    spawnSync("node", [guard, "--write", dir], { cwd: dir, encoding: "utf8" });
+    const enriched = JSON.parse(readFileSync(join(dir, "docs/adr/index.json"), "utf8")).records;
+    const enrichedOk = check();
+    assert(
+      "lifecycle: --write enriches the revision, and the enriched index passes",
+      enriched.every((e) => /^[0-9a-f]{40}$/.test(e.revision ?? "")) &&
+        enriched.every((e) => e.pullRequest === 42) &&
+        enrichedOk.status === 0,
+      enrichedOk.out,
+    );
+
+    // 5. A WRONG non-null revision is still caught. Real commit, wrong bytes:
+    //    point the pin at a later commit in which the record differs.
+    writeFileSync(join(dir, ACCEPTED_ADR), `${readFileSync(join(dir, ACCEPTED_ADR), "utf8")}\nedit\n`);
+    spawnSync("git", ["add", "-A"], { cwd: dir });
+    spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "later (#43)"], { cwd: dir });
+    spawnSync("git", ["branch", "-f", "main", "work"], { cwd: dir });
+    const older = spawnSync("git", ["rev-parse", "main~1"], { cwd: dir, encoding: "utf8" }).stdout.trim();
+    spawnSync("node", [guard, "--write", dir], { cwd: dir, encoding: "utf8" });
+    const idx = JSON.parse(readFileSync(join(dir, "docs/adr/index.json"), "utf8"));
+    idx.records.find((e) => e.path === ACCEPTED_ADR).revision = older;
+    writeFileSync(join(dir, "docs/adr/index.json"), `${JSON.stringify(idx, null, 2)}\n`);
+    const wrong = check();
+    assert(
+      "lifecycle: a non-null revision naming the wrong bytes is REJECTED",
+      wrong.status !== 0 && /does not contain the record's current bytes/.test(wrong.out),
+      wrong.out,
+    );
+
+    // 6. A non-null revision that is not on the baseline at all is REJECTED.
+    idx.records.find((e) => e.path === ACCEPTED_ADR).revision = "0".repeat(40);
+    writeFileSync(join(dir, "docs/adr/index.json"), `${JSON.stringify(idx, null, 2)}\n`);
+    const absent = check();
+    assert(
+      "lifecycle: a revision absent from the baseline is REJECTED",
+      absent.status !== 0 && /is not a commit on/.test(absent.out),
+      absent.out,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+  return results;
+}
+
 // ---------------------------------------------------------------- run
 let passed = 0;
 const failed = [];
@@ -137,6 +250,15 @@ for (const c of cases) {
   }
   passed++;
   console.log(`PASS  ${c.expectReject ? "rejected — " : ""}${c.name}`);
+}
+
+for (const r of lifecycle()) {
+  if (r.ok) {
+    passed++;
+    console.log(`PASS  ${r.name}`);
+  } else {
+    failed.push(`${r.name}\n${String(r.out).split("\n").map((l) => `      | ${l}`).join("\n")}`);
+  }
 }
 
 if (failed.length) {
