@@ -254,20 +254,45 @@ link/a.ts is tracked:  false
 ```
 
 `link` is a symlinked directory and `real/a.ts` is the real file. **`link/a.ts`
-is not a tracked entry and therefore has no stored key.** Four cases:
+is not a tracked entry and therefore has no stored key of its own.**
+
+That does not make it unanswerable. Resolving a host query through a symlink is
+`canonicalizeHostQuery`'s job, and §2 grants that function the filesystem access
+required to establish identity. What is forbidden is *repairing stored evidence*
+— and no stored key is being repaired here, because the input is a host path, not
+an artifact key. **Canonicalizing a host query into an existing tracked identity
+is not the same operation as rewriting a malformed stored key, and this record
+must not conflate them.**
+
+**Traversal is permitted only against proof.** For a query that passes through a
+symlink, all of the following must succeed:
+
+1. resolve the target;
+2. prove the resolved target is still within the repository root;
+3. prove its exact tracked entry;
+4. return **that tracked entry** as the key.
+
+If any step fails — the target escapes the repository, is untracked, or the
+identity is ambiguous — the result is `unsupported`. There is no fallback and no
+nearest-match.
 
 | Case | Behavior |
 | -- | -- |
-| Query names a tracked symlink entry (`alias.ts`) | key is `alias.ts` |
-| Query traverses a symlinked directory (`link/a.ts`) | **unsupported** — no tracked entry names it; rewriting to `real/a.ts` answers a different question |
-| Tracked symlink whose target escapes the repository (`escape.ts`) | key is `escape.ts`; the target is irrelevant and is not followed |
-| `realpath()` differs from the lexical tracked entry | the tracked entry wins |
+| Query names a tracked symlink entry (`alias.ts`) | key is `alias.ts` — the entry itself, never its target |
+| Query traverses an internal symlink (`link/a.ts`) | key is `real/a.ts` **if and only if** all four proofs succeed; otherwise `unsupported` |
+| Tracked symlink whose target escapes the repository (`escape.ts`) | key is `escape.ts`; the target is not followed |
+| Query traverses a symlink whose target escapes, or is untracked | **`unsupported`** |
+| `realpath()` differs from a lexical path that is *itself* tracked | the tracked entry wins — never rewrite a tracked alias to its target |
+
+The last row is the load-bearing constraint. **A lexical alias is never replaced
+by its target when the alias is itself tracked**, because then two tracked
+entries would collapse to one key and the artifact could no longer distinguish
+them. Resolution applies only where the lexical path has no tracked entry of its
+own and therefore no identity to preserve.
 
 Confirmed in the run: for `link/a.ts`, lexical and `realpath()` disagree, and the
-escaping symlink's `realpath()` leaves the repository entirely.
-
-A traversal that cannot prove both containment and tracked identity is explicitly
-`ambiguous` or `unsupported`. It is never resolved to a nearby key.
+escaping symlink's `realpath()` leaves the repository entirely. Both are exactly
+the conditions the proofs above test.
 
 ### 7. Repository roots
 
@@ -462,7 +487,14 @@ named in the metadata table.
 
 Every empirical claim comes from
 [`experiments/006-path-identity/run.mjs`](./experiments/006-path-identity/run.mjs),
-whose raw output is committed alongside it as `receipts-darwin.json`. The harness
+whose raw output is committed alongside it as **`receipts-darwin.json` and
+`receipts-linux.json`**. Both are load-bearing: the darwin run answers the
+symlink, repository-root, malformed-key and display-quoting questions, and the
+Linux run answers case distinction, NFC/NFD distinction and non-UTF-8 decoding,
+which APFS cannot express. Neither alone supports §4 and §5. The Linux run is
+reproducible from
+[`.github/workflows/adr-006-evidence.yml`](../../.github/workflows/adr-006-evidence.yml).
+The harness
 builds throwaway Git repositories and records what Git, Node and JSON do; it
 asserts nothing and gates nothing.
 
