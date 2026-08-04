@@ -1,0 +1,255 @@
+{
+  "platform": "linux 6.17.0-1020-azure",
+  "node": "v22.23.1",
+  "receipts": [
+    {
+      "question": "case-identity",
+      "finding": "filesystem is case-SENSITIVE: A.ts and a.ts are two tracked entries",
+      "platform": "linux 6.17.0-1020-azure",
+      "secondWriteSucceeded": true,
+      "trackedEntries": [
+        "A.ts",
+        "a.ts"
+      ],
+      "gitIndexCount": 2,
+      "hostLookupCollides": false,
+      "note": "Stored-key comparison is a string operation and is unaffected by this. What varies is whether a HOST QUERY can name a file whose stored key differs only by case."
+    },
+    {
+      "question": "unicode-normalization",
+      "finding": "NFC and NFD are DISTINCT tracked entries on this filesystem",
+      "platform": "linux 6.17.0-1020-azure",
+      "nfcWritten": "\"café.ts\"",
+      "nfdWriteSucceeded": true,
+      "trackedCount": 2,
+      "trackedViaLsFilesZ": [
+        "café.ts",
+        "café.ts"
+      ],
+      "trackedCodePoints": [
+        "63 61 66 65 301 2e 74 73",
+        "63 61 66 e9 2e 74 73"
+      ],
+      "lsFilesDefaultQuoted": [
+        "\"cafe\\314\\201.ts\"",
+        "\"caf\\303\\251.ts\""
+      ],
+      "quotingObserved": true,
+      "note": "If `git ls-files` (no -z) quotes a name and `-z` does not, then display quoting would become artifact identity for any producer using the default form."
+    },
+    {
+      "question": "json-representability",
+      "finding": "a non-UTF-8 tracked path DECODES LOSSILY: U+FFFD appears, and the original bytes are unrecoverable from the JSON key",
+      "platform": "linux 6.17.0-1020-azure",
+      "created": true,
+      "attemptedBytesHex": "626164ff2e7473",
+      "entry": {
+        "rawBytesHex": "626164ff2e7473",
+        "decodedAsUtf8": "bad�.ts",
+        "decodedCodePoints": "62 61 64 fffd 2e 74 73",
+        "containsReplacementChar": true
+      },
+      "roundTrip": {
+        "serialized": "{\"bad�.ts\":{}}",
+        "reparsedKey": "bad�.ts",
+        "reparsedEqualsOriginalBytes": false
+      },
+      "surrogateProbe": {
+        "key": "lone high surrogate U+D800",
+        "survivesJsonRoundTrip": true,
+        "jsonEncodesIt": "\"\\ud800\"",
+        "reEncodedHex": "efbfbd",
+        "reEncodeIsLossless": false,
+        "isWellFormed": false
+      },
+      "note": "Lossy decode means silent identity mutation: two distinct tracked paths could serialize to the same JSON key. That is the case the rule must reject explicitly rather than absorb."
+    },
+    {
+      "question": "symlinks",
+      "finding": "tracked symlink ENTRIES are stored; Git does not store their targets as entries",
+      "platform": "linux 6.17.0-1020-azure",
+      "trackedEntries": [
+        "alias.ts",
+        "escape.ts",
+        "link",
+        "real/a.ts"
+      ],
+      "symlinkEntriesTracked": [
+        "alias.ts",
+        "escape.ts",
+        "link"
+      ],
+      "directoryNotWalkedThrough": true,
+      "queryThroughSymlinkedDir": {
+        "lexical": "link/a.ts",
+        "realpath": "real/a.ts",
+        "lexicalEqualsRealpath": false
+      },
+      "escapingSymlink": {
+        "entry": "escape.ts",
+        "realpathEscapesRepo": true
+      },
+      "note": "`link/a.ts` is NOT a tracked entry — Git records the symlink `link`, not a second path to `real/a.ts`. A host query arriving as `link/a.ts` therefore has no stored key, and realpath() would silently rewrite it to `real/a.ts`."
+    },
+    {
+      "question": "repository-roots",
+      "finding": "a linked worktree and a submodule are SEPARATE artifact roots",
+      "platform": "linux 6.17.0-1020-azure",
+      "linkedWorktree": {
+        "toplevel": "/tmp/adr006-wt-hfA6Uz/linked",
+        "gitCommonDir": "/tmp/adr006-8FzGuk/.git",
+        "isSeparateToplevel": true,
+        "tracked": [
+          "a.ts"
+        ]
+      },
+      "submodule": {
+        "added": true,
+        "hostTracked": [
+          ".gitmodules",
+          "h.ts",
+          "vendor"
+        ],
+        "hostSeesSubmoduleFiles": false,
+        "submoduleToplevel": "/tmp/adr006-qNhHtA/vendor",
+        "hostToplevel": "/tmp/adr006-qNhHtA"
+      },
+      "note": "The host repo tracks `vendor` as a gitlink, NOT `vendor/s.ts`. A reader that walked upward from inside the submodule and selected the host's artifact would resolve keys against the wrong root."
+    },
+    {
+      "question": "malformed-stored-keys",
+      "finding": "every entry is non-canonical; normalization would REPAIR several into a different, valid-looking key",
+      "platform": "linux 6.17.0-1020-azure",
+      "corpus": [
+        {
+          "key": "\"../x\"",
+          "nodeNormalize": "\"../x\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"src/../x\"",
+          "nodeNormalize": "\"x\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": true,
+          "containsNul": false
+        },
+        {
+          "key": "\"a/b/../b/c.ts\"",
+          "nodeNormalize": "\"a/b/c.ts\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": true,
+          "containsNul": false
+        },
+        {
+          "key": "\"/abs/posix/x.ts\"",
+          "nodeNormalize": "\"/abs/posix/x.ts\"",
+          "isAbsolute": true,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"C:\\\\drive\\\\x.ts\"",
+          "nodeNormalize": "\"C:\\\\drive\\\\x.ts\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"\\\\\\\\unc\\\\share\\\\x.ts\"",
+          "nodeNormalize": "\"\\\\\\\\unc\\\\share\\\\x.ts\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"back\\\\slash.ts\"",
+          "nodeNormalize": "\"back\\\\slash.ts\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"./leading.ts\"",
+          "nodeNormalize": "\"leading.ts\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": true,
+          "containsNul": false
+        },
+        {
+          "key": "\"double//sep.ts\"",
+          "nodeNormalize": "\"double/sep.ts\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": true,
+          "containsNul": false
+        },
+        {
+          "key": "\"trailing/\"",
+          "nodeNormalize": "\"trailing/\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"\"",
+          "nodeNormalize": "\".\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\".\"",
+          "nodeNormalize": "\".\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"..\"",
+          "nodeNormalize": "\"..\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": false
+        },
+        {
+          "key": "\"a\\u0000b.ts\"",
+          "nodeNormalize": "\"a\\u0000b.ts\"",
+          "isAbsolute": false,
+          "silentlyRepairedToCanonical": false,
+          "containsNul": true
+        }
+      ],
+      "note": "`src/../x` -> `x` and `a/b/../b/c.ts` -> `a/b/c.ts` are the reject-don't-resolve cases: a reader that normalizes cannot report the artifact as invalid, because after normalization there is nothing left to report."
+    },
+    {
+      "question": "silent-redirect",
+      "finding": "node:path.normalize collapses traversal, so a query naming a path that is not the stored key compares EQUAL to it",
+      "platform": "linux 6.17.0-1020-azure",
+      "storedKey": "a.ts",
+      "probes": [
+        {
+          "query": "\"src/../a.ts\"",
+          "normalized": "\"a.ts\"",
+          "wouldMatchStoredKey": true
+        },
+        {
+          "query": "\"a/b/../../a.ts\"",
+          "normalized": "\"a.ts\"",
+          "wouldMatchStoredKey": true
+        },
+        {
+          "query": "\"./a.ts\"",
+          "normalized": "\"a.ts\"",
+          "wouldMatchStoredKey": true
+        },
+        {
+          "query": "\"../a.ts\"",
+          "normalized": "\"../a.ts\"",
+          "wouldMatchStoredKey": false
+        }
+      ],
+      "note": "Measured on node:path only. Consumer behavior is cited in the ADR by file:line and was reproduced separately by executing the consumers read-only; importing them here would create the cross-repository coupling the architecture guard forbids."
+    }
+  ]
+}

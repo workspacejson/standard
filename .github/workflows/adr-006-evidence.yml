@@ -1,0 +1,59 @@
+name: ADR-006 path identity evidence
+
+# Runs the ADR-006 experiment harness on Linux.
+#
+# Three of its questions are unanswerable on darwin: APFS is case-insensitive,
+# collapses NFC and NFD to one tracked entry, and refuses a non-UTF-8 pathname.
+# ext4 answers all three. Rather than assert what Linux "would" do, this runs the
+# same harness there and publishes the receipts, so the claim is reproducible by
+# anyone with a fork.
+#
+# This workflow only reads and reports. It publishes no package, holds no
+# credential, and writes nothing back to the repository.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "docs/adr/experiments/006-path-identity/**"
+      - ".github/workflows/adr-006-evidence.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    name: Path identity evidence (linux)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Filesystem under test
+        run: |
+          echo "kernel:     $(uname -srm)"
+          echo "filesystem: $(stat -f -c %T .)"
+          echo "git:        $(git --version)"
+          echo "locale:     ${LANG:-unset}"
+
+      - name: Run the harness
+        run: node docs/adr/experiments/006-path-identity/run.mjs
+
+      # Printed to the log as well as uploaded: the log is the citable receipt,
+      # the artifact is what gets committed alongside the darwin run.
+      - name: Raw receipts
+        run: |
+          node docs/adr/experiments/006-path-identity/run.mjs --json \
+            | tee "$RUNNER_TEMP/receipts-linux.json"
+
+      - name: Upload receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: adr-006-receipts-linux
+          path: ${{ runner.temp }}/receipts-linux.json
+          if-no-files-found: error

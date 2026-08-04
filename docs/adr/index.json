@@ -31,8 +31,8 @@
       "decisionDate": "2026-08-03",
       "ratifyingIssue": "META-264 (internal tracker)",
       "blob": "e7874b9cc4d27eea3a6c661d3ccc1e151cacf5fa",
-      "revision": null,
-      "pullRequest": null
+      "revision": "bd14f3954e9c359978fc691784b11561b2288ef0",
+      "pullRequest": 21
     },
     {
       "adr": 4,
@@ -55,6 +55,17 @@
       "blob": "43645ce5ef512706e6e3ebccdf121f5e93740873",
       "revision": "77392605f46e9c26799ee3f66039e650ec8150fe",
       "pullRequest": 14
+    },
+    {
+      "adr": 6,
+      "title": "Canonical path identity — stored keys are data, not commands",
+      "path": "docs/adr/006-canonical-path-identity.md",
+      "status": "Proposed",
+      "decisionDate": "*not yet decided — this record is under review*",
+      "ratifyingIssue": "META-278 (internal tracker)",
+      "blob": "76dd4405f36e923676beaf9ade11f14514a8fbfa",
+      "revision": null,
+      "pullRequest": null
     }
   ]
 }
