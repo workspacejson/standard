@@ -28,6 +28,9 @@
     "check:conformance": "node scripts/check-producer-conformance.mjs",
     "check:conformance:test": "node scripts/check-producer-conformance.test.mjs",
     "check:docs": "node scripts/check-docs.mjs",
+    "check:adr": "node scripts/adr-index.mjs",
+    "check:adr:test": "node scripts/adr-index.test.mjs",
+    "adr:index": "node scripts/adr-index.mjs --write",
     "release:verify-packs": "pnpm --filter @workspacejson/spec exec node ../../scripts/verify-package-tarball.mjs && pnpm --filter @workspacejson/rules exec node ../../scripts/verify-package-tarball.mjs",
     "release:verify-published": "node scripts/verify-published.mjs"
   },

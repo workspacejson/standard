@@ -45,6 +45,7 @@ pnpm install
 pnpm -r build && pnpm -r typecheck && pnpm -r test
 pnpm run check:architecture && pnpm run check:architecture:test
 pnpm run check:docs
+pnpm run check:adr && pnpm run check:adr:test
 pnpm run check:schema && pnpm run check:examples
 pnpm run release:verify-packs
 ```

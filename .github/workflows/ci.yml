@@ -28,7 +28,13 @@ jobs:
         node-version: [20, 22]
 
     steps:
+      # Full history. The ADR revision index resolves each record's published
+      # commit by walking the baseline branch for the commit whose blob matches
+      # the record's bytes. A shallow clone has no such history, so the check
+      # would silently report every record as unpublished.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v6
 
@@ -54,6 +60,15 @@ jobs:
       # outage and trains everyone to ignore red.
       - name: Documentation integrity
         run: pnpm run check:docs
+
+      # An Accepted ADR must not depend on a value nobody filled in. This proves
+      # the generated revision index still matches the records on disk, and that
+      # no accepted record carries an unresolved `filled at merge` placeholder.
+      - name: ADR revision index
+        run: pnpm run check:adr
+
+      - name: ADR revision index red tests
+        run: pnpm run check:adr:test
 
       # Build precedes typecheck deliberately. @workspacejson/rules typechecks
       # against @workspacejson/spec's EMITTED declarations, which `tsc --noEmit`
