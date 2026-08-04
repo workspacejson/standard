@@ -201,19 +201,55 @@ contract.
 
 Stated plainly, because a conformance document that hides them is misleading:
 
-- **There is no external conformance suite.** An independent implementation
-  cannot currently run a standard battery to claim conformance. What exists is
-  this repository's own examples and its reference validator.
+- **There is no self-service conformance battery for an unaided implementer.**
+  A producer suite exists and is described below, but running it requires a
+  candidate path supplied by the caller. An independent implementation cannot
+  yet point at a single published battery and claim conformance without that
+  step. What ships otherwise is this repository's own examples and its
+  reference validator.
 - **`validateLegacy()` has no shipped example.** All four examples are v0.3 or
   v0.4, so the legacy path is covered by unit tests but not by an executable
   fixture a third party can point at.
 - **There are no negative examples.** The examples prove that valid documents
   validate. They do not prove that invalid documents are rejected — that is
   covered only by unit tests inside the package.
-- **Producer conformance is not mechanically checked here.** The obligations
-  listed at the top of this document — `manual` preservation, material-change
-  write semantics — are stated in the contract and tested by producers, not
-  verified by a fixture in this repository.
+
+### Producer conformance IS mechanically checked here
+
+This bullet previously said the opposite. That was true when written and became
+false when the executable contract landed; it is corrected rather than quietly
+dropped.
+
+`scripts/check-producer-conformance.mjs` is the standard's assertion about what
+any conforming producer must do. It measures an external candidate — the
+producer does not grade itself:
+
+```bash
+WORKSPACEJSON_CLI_CANDIDATE=/path/to/cli/packages/cli \
+  pnpm run check:conformance
+
+pnpm run check:conformance:test   # the mutation red tests
+```
+
+It asserts five groups: `generated.fileIndex` populated from repository
+evidence, `generated.frameworkManifest` populated from repository evidence,
+`manual.*` preserved verbatim and never fabricated, invalid artifacts failing
+safely without destroying human evidence, and producer identity plus
+determinism plus direct/mediated parity. It imports this repository's own
+validator rather than re-implementing it, so there is no second source of truth
+to drift.
+
+The mutation tests assert that each mutation actually changed bytes and that
+the suite goes red *on the expected check* rather than on any failure, with a
+baseline case asserting the unmutated candidate is accepted — so the suite
+cannot pass by rejecting everything.
+
+**What it deliberately does not assert.** Nothing about per-file values inside
+`generated.fileIndex`. `FileIndexEntry` declares every value field optional, so
+`{}` is conformant. Those values are behavioral and git-derived, and whether
+they may enter the stable contract is an open determination this repository
+does not own — recorded as ADR-003 amendment A-004. Requiring them here would
+pre-empt that ruling and fail a producer that is behaving correctly.
 
 Closing these gaps is real work with real design questions, and none of it is
 claimed as done.

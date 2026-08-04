@@ -58,7 +58,7 @@ now enabled:
 
 | Control | Status | Notes |
 | -- | -- | -- |
-| Branch protection | **enabled** | PR + 1 approving review + CI on Node 20/22 + conversation resolution + codeowner review + block force-push/deletion. See below. |
+| Branch protection | **enabled, with one gap** | PR + CI on Node 20/22 + conversation resolution + codeowner review + block force-push/deletion. **Required approving reviews is `0`, and admin enforcement is off.** See below. |
 | Secret scanning | **enabled** | Free for public repositories. |
 | Secret scanning push protection | **enabled** | Blocks commits containing detected secrets. |
 | Private vulnerability reporting | **enabled** | The advisory form at [`SECURITY.md`](../SECURITY.md) now resolves. |
@@ -68,22 +68,35 @@ now enabled:
 
 ## Branch protection
 
-Branch protection is **enabled** on `main` as of 2026-07-28. The protection
-requires:
+Branch protection is **enabled** on `main` as of 2026-07-28. Measured against the
+GitHub API on 2026-08-04, it requires:
 
-- a pull request with at least one approving review;
-- required status checks: `test (20)`, `test (22)`, and `Four-path producer
-  conformance`;
+- a pull request;
+- required status checks, strict: `test (20)`, `test (22)`, and `Four-path
+  producer conformance`;
 - dismiss stale approvals on new commits;
 - require conversation resolution;
 - block force pushes and branch deletion;
-- require review from code owners, so changes to the schema, the guards and the
-  release documents reach a maintainer — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
-- enforce on admins.
+- require review from code owners — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
 
-This was a hard gate before publication authority. The protection is now in
-place, so the authority transfer in `.github/RELEASE-AUTHORITY.md` can proceed
-without creating a supply-chain window.
+Two controls this document previously claimed are **not** in place:
+
+| Claimed | Measured | Consequence |
+| -- | -- | -- |
+| a pull request with at least one approving review | `required_approving_review_count: 0` | A pull request can merge with no human approval once CI is green. The code-owner requirement above cannot bind either — with a required count of `0`, GitHub requests code-owner review but does not block on it. |
+| enforce on admins | `enforce_admins: false` | An administrator can bypass every control above. |
+
+No ruleset supplies these separately; `GET /repos/workspacejson/standard/rulesets`
+returns `[]`.
+
+**This is a real gap against the publication-authority gate, not a formality.**
+`.github/RELEASE-AUTHORITY.md` and the migration plan both treat protected,
+reviewed release paths as a precondition for holding a credential. A repository
+that can merge unreviewed and be bypassed by an admin does not meet that bar. The
+gap is currently harmless here — this repository holds no npm credential and
+ships no release workflow — but it must be closed *before* authority transfers,
+not after. Setting `required_approving_review_count` to at least `1` is what makes
+the existing code-owner requirement load-bearing.
 
 ## Repository metadata
 

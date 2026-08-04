@@ -20,7 +20,7 @@ This repository owns contracts, not implementations. Before adding anything, che
 
 - **No producer code.** Generation lives in `workspacejson/cli`.
 - **No host integrations.** MCP, Codex and VS Code live in `workspacejson/integrations`.
-- **No site rendering.** Documentation assembly lives in `workspacejson/site`.
+- **No site rendering.** Documentation assembly lives in `workspacejson/workspacejson.dev`.
 - **No proprietary references.** `@marcelle-labs/*`, private Vreko source and
   `workspace.vreko.json` are prohibited.
 - **Descriptive, never prescriptive.** No enforcement, approval-gate or

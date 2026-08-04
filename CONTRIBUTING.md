@@ -8,7 +8,7 @@ and its deterministic reference behavior. It publishes `@workspacejson/spec` and
 
 - Read [`OWNERSHIP.md`](./OWNERSHIP.md) — it states what belongs here and what
   belongs in `workspacejson/cli`, `workspacejson/integrations` or
-  `workspacejson/site`.
+  `workspacejson/workspacejson.dev`.
 - Read [`GOVERNANCE.md`](./GOVERNANCE.md) — changes to the normative surface need
   an architecture decision record **merged before** implementation. Finding that
   out after writing the code is the expensive way.

@@ -28,7 +28,7 @@ what a coordinated authority transfer must do.
 ## Consumes
 
 - no implementation-repository internals
-- no `workspacejson/cli`, `workspacejson/integrations` or `workspacejson/site` code
+- no `workspacejson/cli`, `workspacejson/integrations` or `workspacejson/workspacejson.dev` code
 - no `@marcelle-labs/*` package, no private Vreko source, no `workspace.vreko.json`
 
 `@workspacejson/rules` depends on `@workspacejson/spec` through the shared pnpm
@@ -40,7 +40,7 @@ rewrites it to an exact version before publication.
 
 - producer or generation orchestration — that is `workspacejson/cli`
 - host integrations (MCP, Codex, VS Code) — that is `workspacejson/integrations`
-- site rendering or documentation assembly — that is `workspacejson/site`
+- site rendering or documentation assembly — that is `workspacejson/workspacejson.dev`
 - private Vreko behavior or any proprietary sidecar
 - **prescriptive policy** — enforcement rules, approval gates, merge blocking.
   The standard describes what a repository is; it does not dictate what a team
@@ -55,7 +55,7 @@ workspacejson/standard      <- depends on NONE of the others
         ↓
 workspacejson/cli       workspacejson/integrations
         \                    /
-              workspacejson/site
+   workspacejson/workspacejson.dev
 ```
 
 Proprietary repositories may consume released Apache-2.0 `@workspacejson/*`

@@ -36,7 +36,7 @@ This is one of four, with one-way ownership:
 | **`workspacejson/standard`** *(this repo)* | specification, JSON Schema, standard types, validation semantics, deterministic rules, compatibility profiles, conformance fixtures, ADRs and governance |
 | `workspacejson/cli` | production and generation — the producer, repository scanning, deterministic reconciliation, CLI distribution |
 | `workspacejson/integrations` | host adapters — MCP, Codex, VS Code, skills and plugins |
-| `workspacejson/site` | assembled, published documentation at `workspacejson.dev` |
+| `workspacejson/workspacejson.dev` | assembled, published documentation at `workspacejson.dev` |
 
 Dependency direction is one-way:
 
@@ -45,7 +45,7 @@ workspacejson/standard
         ↓
 workspacejson/cli       workspacejson/integrations
         \                    /
-              workspacejson/site
+   workspacejson/workspacejson.dev
 ```
 
 **This repository depends on none of the other three.** That is enforced
@@ -231,17 +231,22 @@ Stated here rather than discovered later:
 - **This repository cannot publish.** Both packages are released from the
   historical repository, which holds the only credential. That is deliberate and
   enforced in CI.
-- **The schema `$id` host disagrees with the canonical domain.** The schema
-  declares the `www.` host while the package manifests use the bare domain. Both
-  serve the schema, so nothing is broken, but the strings differ. Reconciling
-  them changes schema bytes and is tracked as a normative change.
+- **The schema `$id` is reconciled on `main` but not in the released bytes.**
+  `main` declares the bare domain, matching the package manifests. The published
+  `@workspacejson/spec@0.4.4` still serves the `www.` host, because the fix
+  changes schema bytes and has not been released. Both hosts serve the schema,
+  so nothing is broken — but do not read `main` as released truth here.
 - **`v1.json` is a legacy filename**, not a claim that the format is at 1.0.
 - **Four ambient interop shims are retained** in `types/ambient.d.ts` for
   `simple-git`, `remark` and `ajv`. They are real CJS/ESM mismatches in
   third-party packages, tracked as their own work rather than papered over.
-- **The repository is private and on a plan without branch protection.** Both
-  constraints and the gate they create before any publication authority are
-  recorded in [`docs/repository-settings.md`](./docs/repository-settings.md).
+- **`main` requires passing CI but no approving review.** Branch protection is
+  enabled — required checks on Node 20/22 plus four-path producer conformance,
+  dismissed stale reviews, code-owner review, conversation resolution, and no
+  force-push or deletion — but `required_approving_review_count` is `0`. That is
+  a real gap against the gate this repository must satisfy before it holds
+  publication authority. Recorded in
+  [`docs/repository-settings.md`](./docs/repository-settings.md).
 
 ## License
 
