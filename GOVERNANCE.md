@@ -17,7 +17,7 @@ This repository decides:
 
 It does not decide how artifacts are produced, how hosts integrate, or how the
 website presents any of it. Those live in `workspacejson/cli`,
-`workspacejson/integrations` and `workspacejson/site` respectively.
+`workspacejson/integrations` and `workspacejson/workspacejson.dev` respectively.
 [`OWNERSHIP.md`](./OWNERSHIP.md) states the full boundary; it is enforced by
 `scripts/check-architecture.mjs` in CI rather than by convention.
 

@@ -58,7 +58,7 @@ now enabled:
 
 | Control | Status | Notes |
 | -- | -- | -- |
-| Branch protection | **enabled** | PR + 1 approving review + CI on Node 20/22 + conversation resolution + codeowner review + block force-push/deletion. See below. |
+| Branch protection | **enabled; no independent-review path** | PR + CI on Node 20/22 + conversation resolution + codeowner review + block force-push/deletion. **General approving-review count is `0`, the sole code owner authors the changes, and admin enforcement is off.** See below. |
 | Secret scanning | **enabled** | Free for public repositories. |
 | Secret scanning push protection | **enabled** | Blocks commits containing detected secrets. |
 | Private vulnerability reporting | **enabled** | The advisory form at [`SECURITY.md`](../SECURITY.md) now resolves. |
@@ -68,22 +68,74 @@ now enabled:
 
 ## Branch protection
 
-Branch protection is **enabled** on `main` as of 2026-07-28. The protection
-requires:
+Branch protection is **enabled** on `main` as of 2026-07-28. Measured against the
+GitHub API on 2026-08-04, it requires:
 
-- a pull request with at least one approving review;
-- required status checks: `test (20)`, `test (22)`, and `Four-path producer
-  conformance`;
+- a pull request;
+- required status checks, strict: `test (20)`, `test (22)`, and `Four-path
+  producer conformance`;
 - dismiss stale approvals on new commits;
 - require conversation resolution;
 - block force pushes and branch deletion;
-- require review from code owners, so changes to the schema, the guards and the
-  release documents reach a maintainer — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
-- enforce on admins.
+- require review from code owners — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
 
-This was a hard gate before publication authority. The protection is now in
-place, so the authority transfer in `.github/RELEASE-AUTHORITY.md` can proceed
-without creating a supply-chain window.
+Two controls this document previously claimed are **not** in place:
+
+| Claimed | Measured |
+| -- | -- |
+| a pull request with at least one approving review | `required_approving_review_count: 0` |
+| enforce on admins | `enforce_admins: false` |
+
+No ruleset supplies these separately; `GET /repos/workspacejson/standard/rulesets`
+returns `[]`.
+
+### The actual defect: no enforceable independent-review path
+
+These are four separate facts, and the defect is what they produce together —
+not any one of them alone.
+
+1. **The general approving-review count is `0`.** No count-based approval is
+   required, so paths a code-owner rule does not reach are unprotected by review.
+2. **Code-owner review is enabled and does bind.** `require_code_owner_reviews`
+   is an independent control: it blocks an affected pull request until a code
+   owner approves it, regardless of the general count. Nothing here should be
+   read as saying that control is inert — it is not.
+3. **Every path has exactly one code owner, and that owner authors the changes.**
+   [`.github/CODEOWNERS`](../.github/CODEOWNERS) assigns `*` and every specific
+   path to `@qmarcelle`. GitHub does not permit a pull-request author to approve
+   their own pull request, so a self-authored change cannot satisfy the
+   code-owner requirement from within.
+4. **Administrator enforcement is off.** `enforce_admins: false` means the
+   administrator — the same account — can bypass the protection entirely.
+
+The controls are configured. What is missing is a *second person*: no combination
+of the above currently results in a change being reviewed by someone other than
+its author.
+
+**This is not currently a credentialed package-publication risk**, because this
+repository holds no npm credential and ships no release workflow. It is not
+harmless in general — `main` here is the public canonical source of the standard,
+and unreviewed changes to the schema, the guards, or the governance documents
+land the same way.
+
+### Remediation
+
+Raising the approval count alone does not fix this. All four are required:
+
+1. **At least one independent maintainer or code owner** able to review
+   `@qmarcelle`-authored changes. Without this, nobody can satisfy point 3 above.
+2. **At least one required approval** (`required_approving_review_count >= 1`),
+   so review is required on paths no code-owner rule reaches.
+3. **Administrator enforcement**, or a no-bypass ruleset carrying a deliberately
+   bounded and documented release exception — bypass should be an explicit,
+   narrow act rather than the default posture.
+4. **Continued protection of `.github/CODEOWNERS` itself**, so the ownership map
+   cannot be edited to route around the requirement. This is already in place at
+   `.github/CODEOWNERS:29` and must survive any change made for points 1–3.
+
+`.github/RELEASE-AUTHORITY.md` and the migration plan both treat protected,
+reviewed release paths as a precondition for holding a credential. This must be
+closed *before* publication authority transfers, not after.
 
 ## Repository metadata
 

@@ -9,7 +9,7 @@ This repository is the canonical source of the workspace.json specification, JSO
 - Define contracts and deterministic reference behavior here.
 - Producer and generation orchestration belong in `workspacejson/cli`.
 - MCP, Codex, editor, and other host integrations belong in `workspacejson/integrations`.
-- Site rendering and assembled documentation belong in `workspacejson/site`.
+- Site rendering and assembled documentation belong in `workspacejson/workspacejson.dev`.
 - Never import `@marcelle-labs/*`, private Vreko source, or depend on `workspace.vreko.json`.
 - The standard is descriptive, never prescriptive.
 - The committed `.agents/workspace.json` must remain useful without a daemon.

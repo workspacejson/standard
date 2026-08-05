@@ -37,7 +37,7 @@ This repository owns the specification, schema, types, validation semantics and
 deterministic rules. Issues in repository generation belong to
 `workspacejson/cli`; issues in host adapters belong to
 `workspacejson/integrations`; issues in the published website belong to
-`workspacejson/site`.
+`workspacejson/workspacejson.dev`.
 
 ## Publication note
 

@@ -31,7 +31,7 @@ costs you a round trip:
 | `.agents/workspace.json` is not generated, or generated wrongly | `workspacejson/cli` |
 | A repository scan produced bad or missing data | `workspacejson/cli` |
 | MCP, Codex or VS Code integration misbehaves | `workspacejson/integrations` |
-| Documentation on `workspacejson.dev` is wrong or stale | `workspacejson/site` |
+| Documentation on `workspacejson.dev` is wrong or stale | `workspacejson/workspacejson.dev` |
 
 If a validation error is *reported by* a producer but the schema itself is wrong,
 it belongs here. When in doubt, file here and it will be redirected.
