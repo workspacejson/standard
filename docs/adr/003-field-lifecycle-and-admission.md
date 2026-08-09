@@ -656,14 +656,29 @@ and classified as exactly one of:
 | **Does not consume this surface** | Verified not to read `generated.coChange` at all at the pinned revision, so the transition cannot affect it |
 | **Blocked** | Reads the surface and is not verified to accept both forms, or could not be inspected |
 
-The inventory as recorded for this amendment:
+The inventory covers the **locally available checkout universe**, defined by
+enumeration rather than by recollection: every Git checkout reachable on the
+steward's machine was listed with its `origin` remote, and every checkout whose
+remote is in the `workspacejson`, `workspace-json` or `buildomator`
+organizations was inspected. Two repositories that earlier drafts of this
+inventory omitted — `workspace-json/agents-audit` and `workspace-json/codex-mcp`
+— were found that way, which is the argument for enumerating rather than listing
+from memory. The two GitHub namespaces were **not** enumerated remotely, so a
+repository in either organization with no local checkout would not appear here;
+that is a bound on this inventory, not a claim that none exists.
+
+Each repository was searched for three things: a dependency on or import of
+`@workspacejson/spec`; a call to `validate`, `validateV4` or `validateLegacy`;
+and any read of `generated.coChange`.
 
 | Consumer | Pinned revision | Classification | Basis |
 | -- | -- | -- | -- |
 | `workspacejson/cli` | `40f477ade8581345cb1925c288db0619a0f085ae` | Does not consume this surface | Producer role; its own conformance suite asserts `generated.coChange` is not emitted, and no read path consumes it |
-| `workspacejson/integrations` | `219d3322f4fe39d21ae8a8b15b5634764b90df2c` | Does not consume this surface | Reads only the four stable read paths; `manual.coChangePatterns` is a different field |
+| `workspacejson/integrations` | `219d3322f4fe39d21ae8a8b15b5634764b90df2c` | Does not consume this surface | `src/services/workspace.ts` reads the four stable paths and carries an explicit comment that `generated.coChange` is deliberately not read |
+| `workspace-json/codex-mcp` | `ddcd7b70ac231b1d8ec559bf69eea90ad8dd615d` | Does not consume this surface | Same reader, byte-identical to the `integrations` copy; `integrations` is its successor |
 | `workspacejson/workspacejson.dev` | `0ae63b9c494ace02eec8d06ad27a0977aacdf71d` | Does not consume this surface | Documentation and fixtures only; no fixture carries `generated.coChange`, and its published prose is stale rather than executable |
-| Buildomator | not pinned | **Blocked** | Named historically as a reader of this surface. Source was not inspected and no maintainer confirmation is on record, so it cannot be classified as either of the other two |
+| `workspace-json/agents-audit` | `b6c092bdfc8447ce6c408d4e06e0f67b9578f2c7` | Does not consume this surface | No reader code touches `generated.coChange`; its only occurrences are inside its own vendored pre-extraction copy of `packages/spec` (that package's README, CHANGELOG and unit test). Caveats, neither of which affects this classification: it holds publication authority for `@workspacejson/spec`, its vendored schema copy still carries the pre-amendment `rate`-required item shape, and its working tree at this revision has uncommitted changes, so the pin names the commit rather than the tree that was read. Recorded as a release blocker below |
+| Buildomator | `6091ff20f277b5222eed57d003e436200c7e35bc` | **Blocked (held by the steward)** | Source inspected at that revision: `bin/lib/workspace-json.cjs` reads `generated.frameworkManifest`, `generated.fileIndex`, `manual.fragileFiles` and `manual.coChangePatterns` and nothing else; zero references to `generated.coChange`; no dependency on `@workspacejson/spec`; no schema validation of the artifact. On the evidence this is *does not consume this surface*. It is held blocked pending maintainer confirmation — see below |
 
 **Every actual consumer must pass both-form fixtures.** A consumer classified
 *supports both forms* demonstrates it by validating and reading
@@ -671,21 +686,54 @@ The inventory as recorded for this amendment:
 `cochange-observations-v0.4.json` at its pinned revision. Parsing without error
 is not sufficient where the consumer derives a value from `occurrences`: the two
 forms carry different denominators, so a consumer that reads them
-interchangeably passes a parse test and still produces wrong output.
+interchangeably passes a parse test and still produces wrong output. **No
+consumer currently carries this classification**, because none of the six reads
+the surface; the obligation binds the first one that does.
 
-**Buildomator specifically requires pinned source evidence or maintainer
-confirmation.** It is named in this ecosystem's history as a reader of
-`generated.coChange`, its source is not in the four repositories this record can
-inspect, and absence of a known consumer is not proof of no consumer (§5). Either
-its source is pinned and inspected, or its maintainer confirms which forms it
-accepts. Inference from silence does not discharge this.
+**Buildomator: pinned source evidence obtained, classification held.** The gate
+required pinned source evidence *or* maintainer confirmation, and the evidence
+now exists — Buildomator reads the four stable paths and never touches
+`generated.coChange`. It is nonetheless **held in the blocked class**, because
+the evidence is a local checkout of `master` with an uncommitted modification and
+a vendored `dist/` copy, which establishes what that working tree does and not
+what the published plugin its users run does. §5's rule that absence of a known
+consumer is not proof of no consumer applies to the gap between a working tree
+and a release. Maintainer confirmation, or evidence pinned to a published
+version, discharges it.
+
+#### Release blocker surfaced by this inventory
+
+Distinct from the step-2 gate, and recorded here because the inventory is what
+surfaced it.
+
+**`@workspacejson/spec@0.5.0` must not publish from `agents-audit` until that
+repository's vendored schema and its publication authority are reconciled.**
+
+`agents-audit` holds publication authority for `@workspacejson/spec` and
+`@workspacejson/rules`, and its release workflow runs `changeset publish`. It
+also vendors its own pre-extraction copy of `packages/spec`, whose schema still
+requires `rate` and knows nothing of the observation form. Publishing from there
+in that state would ship a package whose in-tree schema contradicts the amended
+normative schema in this repository — reintroducing the two-sources-of-truth
+failure the single-canonical-schema rule exists to prevent, and doing it under a
+version number consumers would reasonably read as authoritative.
+
+Scope, stated precisely so this is not read as broader than it is:
+
+- It does **not** block this record, the A-009 amendment, or the schema change
+  landing in `workspacejson/standard`.
+- It does **not** block the step-2 consumer gate, which concerns readers.
+- It **does** block publication of `@workspacejson/spec@0.5.0` to the registry.
+
+Discharged by the release-authority cutover, or by reconciling the vendored copy
+against the canonical schema before any publish — not by this amendment.
 
 **Any consumer left in the blocked class keeps emission disabled.** One blocked
 consumer is sufficient to hold step 3. The gate is not a majority and not a
 best-effort survey; an unresolved classification is a failed gate, and the
 correct outcome is that the producer keeps emitting nothing rather than that the
-inventory be rounded up. As of this record Buildomator is blocked, so **step 3
-is not open.**
+inventory be rounded up. As of this record Buildomator is held blocked, so
+**step 3 is not open.**
 
 Removal of `rate` is **step 4 and is not authorized by this amendment.** It
 happens at the next document-profile change, where a `specVersion` move is
