@@ -1,0 +1,17 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "REGRESSION FIXTURE. A legacy artifact that already carries generated.basisRevision with a symbolic ref. The object-ID pattern is scoped to the observation form, so this stays valid under bare-schema AND full validation. If this fixture ever fails, the A-009 pattern has leaked to global scope and the amendment has silently become a narrowing.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "HEAD",
+    "by": { "name": "legacy-producer", "version": "0.4.4" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      { "files": ["src/auth.ts", "src/session.ts"], "rate": 0.87, "occurrences": 9, "generated": false }
+    ]
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 9, "confidence": 0.3 }
+}

@@ -1,0 +1,43 @@
+{
+  "manual": {},
+  "generated": {
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
+    "by": { "name": "example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": {
+      "src/auth.ts": {},
+      "src/session.ts": {},
+      "src/unrelated.ts": {}
+    },
+    "coChange": [
+      {
+        "files": ["src/session.ts", "src/auth.ts"],
+        "support": 8,
+        "occurrences": 24,
+        "generated": false
+      },
+      {
+        "files": ["src/auth.ts", "src/unrelated.ts"],
+        "support": 0,
+        "occurrences": 27,
+        "generated": false
+      },
+      {
+        "files": ["package.json", "pnpm-lock.yaml"],
+        "support": 12,
+        "occurrences": 12,
+        "generated": true
+      }
+    ],
+    "fragility": [],
+    "warnings": []
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "OBSERVING",
+    "observationCount": 27,
+    "confidence": 0.4
+  }
+}

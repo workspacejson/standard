@@ -42,11 +42,35 @@ released Apache-2.0 packages from here; the reverse is prohibited. Enforced by
 
 ### Co-change
 
-A pair of files that historically change together. Reported as
-`generated.coChange` entries carrying an unordered two-file set, a rate and an
-occurrence count. The `generated: boolean` flag distinguishes tooling-coupled
-pairs — a lockfile and its manifest — from real source couplings. Consumers
-should filter on that flag rather than applying path heuristics at read time.
+A pair of files that historically change together, reported as a
+`generated.coChange` entry carrying an unordered two-file set. During the v0.4
+transition an entry takes exactly one of two forms, and a reader must establish
+which before reading the numbers.
+
+The **observation form** carries two raw commit counts: `support`, the distinct
+qualifying commits in which **both** files changed, and `occurrences`, the
+distinct qualifying commits in which **at least one** of them changed. Both count
+commits rather than file events, and both are symmetric — the pair is unordered,
+so it has no subject file whose marginal could serve as a denominator, and
+swapping the two entries changes neither count. No rate is stored: readers derive
+`support / occurrences` where `occurrences > 0`, which keeps a new commit from
+perturbing every derived value in the artifact. `generated.basisRevision` names
+the revision the counts were taken over.
+
+The **legacy form** carries `rate` and an `occurrences` whose meaning predates
+the amendment and was never normatively specified. It is deprecated, accepted so
+that already-published artifacts keep validating, and removed at the next
+document-profile change. An entry carrying both forms, or neither, is invalid,
+and an array mixing the two forms is invalid.
+
+An empty `coChange` array means different things depending on whether it carries
+a basis pin: **pinned** means the analysis ran and found no qualifying pairs;
+**unpinned** means legacy or unknown, and is not evidence of zero. An absent
+array means the producer did not analyze at all.
+
+The `generated: boolean` flag distinguishes tooling-coupled pairs — a lockfile and
+its manifest — from real source couplings. Consumers should filter on that flag
+rather than applying path heuristics at read time.
 
 Maintainer-declared couplings are a different thing and live at
 `manual.coChangePatterns`.

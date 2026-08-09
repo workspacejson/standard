@@ -1,0 +1,17 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "INVALID: an entry carrying BOTH rate and support, disguised by occurrences 0. This is the adversarial case that defeated an earlier oneOf: the legacy branch matched, the observation branch failed on its occurrences minimum, and oneOf's exactly-one-match arithmetic therefore reported success on a both-form entry. Each branch now forbids the other representation explicitly, so this is rejected on its own terms rather than by counting matches.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
+    "by": { "name": "example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      { "files": ["src/a.ts", "src/b.ts"], "rate": 0.3, "support": 3, "occurrences": 0, "generated": false }
+    ]
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 0, "confidence": 0 }
+}

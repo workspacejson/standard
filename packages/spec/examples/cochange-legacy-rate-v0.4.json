@@ -1,0 +1,32 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "The pre-amendment legacy form: rate + occurrences, and no basisRevision. Shipped as an executable proof that artifacts published before the observation form keep validating unchanged through the v0.4 transition. New producers must not emit this shape.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "by": { "name": "legacy-producer", "version": "0.4.4" },
+    "frameworkManifest": [],
+    "fileIndex": {
+      "src/auth.ts": {},
+      "src/session.ts": {}
+    },
+    "coChange": [
+      {
+        "files": ["src/auth.ts", "src/session.ts"],
+        "rate": 0.87,
+        "occurrences": 9,
+        "generated": false
+      },
+      {
+        "files": ["package.json", "pnpm-lock.yaml"],
+        "rate": 0.98,
+        "occurrences": 200,
+        "generated": true
+      }
+    ],
+    "fragility": [],
+    "warnings": []
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 9, "confidence": 0.3 }
+}

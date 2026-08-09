@@ -40,7 +40,7 @@ usage.
 ```ts
 import { validate, validateV4, validateLegacy, version } from '@workspacejson/spec';
 
-console.log(version); // '0.4.4'
+console.log(version); // derived from the packaged manifest, e.g. '0.4.4'
 
 validate(doc);        // true if doc is a valid v0.3 or v0.4 document
 validateV4(doc);      // true if doc is a valid v0.4 document
@@ -95,12 +95,14 @@ const doc: WorkspaceJsonV4 = {
   generated: {
     specVersion: '0.4',
     generatedAt: new Date().toISOString(),
+    basisRevision: '3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d',
     by: { name: 'my-tool', version: '1.0.0' },
     frameworkManifest: [],
     fileIndex: {},
     coChange: [
-      { files: ['src/auth.ts', 'src/session.ts'], rate: 0.9, occurrences: 12, generated: false },
-      { files: ['pnpm-lock.yaml', 'package.json'], rate: 0.98, occurrences: 200, generated: true },
+      // Observation form — what a new producer emits.
+      { files: ['src/auth.ts', 'src/session.ts'], support: 8, occurrences: 24, generated: false },
+      { files: ['pnpm-lock.yaml', 'package.json'], support: 196, occurrences: 204, generated: true },
     ],
     fragility: [
       { file: 'src/auth.ts', changeCount: 34, revertCount: 8, revertRate: 0.24, fragilityScore: 0.82, excluded: false },
@@ -120,6 +122,64 @@ const doc: WorkspaceJsonV4 = {
 
 **Consumer guidance for `coChange`**: filter on `generated: true` to skip tooling-coupled pairs
 (lockfiles, package manifests) and surface only real source couplings.
+
+**Two entry forms during the v0.4 transition.** Exactly one applies to any entry, and a reader
+must establish which before reading the numbers:
+
+| Form | Carries | Status |
+| -- | -- | -- |
+| Observation | `support` + `occurrences` | What new producers emit |
+| Legacy | `rate` + `occurrences` | Deprecated; accepted so published artifacts stay valid |
+
+Both in one entry is invalid; neither is invalid. Narrow with `entry.support !== undefined` — the types
+model this as a union with `?: never` members, so an entry carrying both is a compile error too.
+
+```ts
+for (const e of doc.generated.coChange ?? []) {
+  if (e.support !== undefined) {
+    const ratio = e.occurrences > 0 ? e.support / e.occurrences : undefined;
+  } // else: legacy entry — e.rate, on the older denominator
+}
+```
+
+In the **observation form**, `support` is the distinct qualifying commits in which **both** files
+changed and `occurrences` the distinct qualifying commits in which **at least one** did. Both
+count commits, not file events, and both are symmetric: `files` is an unordered pair, so swapping
+its two entries changes neither. Derive `support / occurrences` yourself where `occurrences > 0` —
+nothing derived is stored, so a new commit perturbs the counts rather than rewriting every derived
+value in the file.
+
+In the **legacy form**, `occurrences` carries the pre-amendment meaning, which was never
+normatively specified and must not be assumed symmetric. Never compare `occurrences` across the
+two forms. `rate` is removed at the next document-profile change; until then it stays valid.
+
+The array is **homogeneous** — every entry legacy, or every entry observation. A mixed array is
+rejected. Observation-form `occurrences` has a **minimum of 1**, so `support / occurrences` is
+always defined and no conforming artifact can produce `0/0`, `NaN` or infinity; a pair never
+observed changing has no entry at all. Legacy `occurrences` keeps its original minimum of 0.
+
+`generated.basisRevision` names the revision the observation-form counts were taken over: a
+full-length lowercase Git object name (40 hex characters for SHA-1, 64 for SHA-256), declared once
+for the whole section. **The requirement and the pattern apply only where an entry uses the
+observation form.** Everywhere else the key is unconstrained, so a legacy artifact already
+carrying `basisRevision: "HEAD"` stays valid — constraining it globally would have invalidated a
+document that was valid before this amendment.
+
+A producer emitting the observation form must declare it whenever `coChange` exists, **including
+when the array is empty**. That case is a producer obligation, not a schema rule, because an empty
+array carries no discriminator. For a reader the four states are:
+
+| Shape | Means |
+| -- | -- |
+| `coChange` absent | Not analyzed |
+| `coChange: []`, no pin | Legacy / unknown — **not** evidence of zero |
+| `coChange: []`, pinned | Analyzed at that revision; no qualifying pairs |
+| pin ≠ current revision | Stale observation |
+
+One invariant is not expressible in JSON Schema and is enforced by `validate()` instead:
+`support <= occurrences`, since commits where both files changed are a subset of commits where at
+least one did. An implementer validating with a bare JSON Schema validator will not catch a
+producer that violates it.
 
 **Consumer guidance for `fragility`**: filter `excluded: false` before ranking. Entries with
 `excluded: true` are generated or lock files with `fragilityScore: 0`.
@@ -169,6 +229,7 @@ v0.3 documents remain valid — v0.4 is a strict superset.
 {
   "generated": {
     "specVersion": "0.4",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
     "coChange": [],
     "fragility": []
   },

@@ -1,0 +1,31 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "INVALID: an observation-form entry is present without generated.basisRevision. A raw count that names no revision cannot be recounted. A legacy artifact without a pin remains valid through the v0.4 transition — see examples/cochange-legacy-rate-v0.4.json.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "by": {
+      "name": "example-producer",
+      "version": "1.0.0"
+    },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      {
+        "files": [
+          "src/a.ts",
+          "src/b.ts"
+        ],
+        "support": 3,
+        "occurrences": 10,
+        "generated": false
+      }
+    ]
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "OBSERVING",
+    "observationCount": 0,
+    "confidence": 0
+  }
+}

@@ -327,6 +327,7 @@ path.
 | A-006 | Remove named consumers from normative field descriptions | **Remove** — consumer names removed from normative descriptions | 2026-08-03 |
 | A-007 | `manual.fragileFiles` disposition — required by the §10 interlock and absent from the initial six. The v0.5 relocation to `generated` is a stable-surface move on a grandfathered path | **Keep** — remain in `manual`; do not relocate to `generated` | 2026-08-03 |
 | A-008 | `generated.frameworkManifest` disposition — required by the §10 interlock and absent from the initial six | **Keep and specify** — stable; specify its contract | 2026-08-03 |
+| A-009 | `generated.coChange` item shape — admit raw perturbable counts (`support`, `occurrences`) and a `generated`-level `basisRevision`; retire the derived `rate` | **Amend** — counts admitted with a symmetric union denominator, as a staged widening under an unchanged v0.4 profile; `rate` deprecated and accepted until the next profile change; not promoted to the stable surface | 2026-08-09 |
 
 ### Ratification record
 
@@ -414,3 +415,311 @@ grandfathered path. Of the four paths the interlock names, all four now carry
 recorded dispositions: `fileIndex` (A-004), `coChangePatterns` (A-005),
 `fragileFiles` (A-007), and `frameworkManifest` (A-008). The §10 interlock is
 satisfied.
+
+## Amendments ratified after the initial eight
+
+Per §11 an amendment ratified later carries its own dated entry rather than
+riding the initial pin.
+
+**A-009 — `generated.coChange` item shape**
+
+- Disposition: Amend the item definition to carry raw observations
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-09
+- Ratification ledger: **META-264** (internal tracker) — the ratification issue
+  named in this record's metadata table, and the authoritative ledger for every
+  amendment against it under §11. A-009's disposition, rationale, authority and
+  decision date are recorded there alongside A-001 through A-008, so the
+  amendment history stays in one place and is not split across the issues that
+  happened to prompt each amendment.
+- Implementation receipt: META-309 (internal tracker), which records the Option A
+  lock, the union-denominator selection this amendment implements, and the
+  landed change. It is the receipt for the work, not the ratification ledger; if
+  the two ever disagree, META-264 governs.
+- Effective revision: the revision recorded for this record in
+  [`index.json`](./index.json), as for the initial eight
+- Lifecycle state after this amendment: **normative optional**. This amendment
+  does not promote `generated.coChange` toward the stable surface, and §10's
+  interlock is untouched.
+
+*Proposal.* `generated.coChange` items required a `rate` — a continuous value in
+[0,1] — and forbade raw counts under `additionalProperties: false`. A producer
+mining the commit graph therefore had nowhere to put what it actually measures,
+and every new commit moved every rate, so a deterministic `generate --check`
+could never settle. Admit `support` and `occurrences`; pin the basis once at
+`generated` level; retire `rate`.
+
+*Rationale.* A rate is a reader's question, not a producer's observation. Storing
+it makes the artifact churn on every commit and forces one analytical
+interpretation on every consumer. Raw counts perturb when the referent changes
+(§3 criterion 3) without inviting recomputation of anything else, and readers who
+want a rate, probability, lift, confidence or ranking can derive it. This follows
+the same reasoning that removed the derived hygiene grade under A-002.
+
+*The denominator is symmetric, and this is load-bearing.* `coChange[].files` is
+an unordered pair with set semantics. An unordered pair has no subject file, so a
+denominator defined as "commits in which the subject file changed" is not
+well-defined: given A changing in 20 qualifying commits, B in 12, and both in 8,
+two otherwise conforming producers could emit `occurrences: 20` or
+`occurrences: 12` for the same observation and both be right. That defeats
+independent reproducibility, which is the entire purpose of publishing counts
+rather than a rate. The admitted definitions are therefore both symmetric:
+
+- `support` — distinct qualifying commits in which **both** files changed;
+- `occurrences` — distinct qualifying commits in which **at least one** of the
+  two files changed.
+
+Both count commits, not file events and not ordered relationships. Reversing the
+two entries of `files` changes neither, so the same observation has exactly one
+representation regardless of storage order.
+
+*What this amendment deliberately does not decide.* A *qualifying commit* is one
+inside the analysis boundary already declared by the producer — the same boundary
+governing every other observation in `generated`. History window, merge handling,
+rename following and path normalization are producer-profile concerns under §7
+and are **not** settled here; this amendment requires only that one boundary is
+applied identically to `support` and `occurrences` in every entry, and that the
+commits counted are reachable from the declared basis. Path canonicalization is
+untouched and remains the subject of its own draft record, which is not in this
+amendment's dependency chain.
+
+*The profile identifier does not move, so the two contracts must coexist.* A
+document declares which contract it obeys through `generated.specVersion`, and
+nothing else on disk carries that information. Amending the item shape while
+holding the identifier at `"0.4"` would therefore have produced two mutually
+incompatible contracts under one name: a validator could not tell which applied,
+and a package version is invisible to an artifact. Rather than spend a new
+profile identifier — which would collide with the deferred v0.5 program — this
+amendment keeps `"0.4"` and makes the two forms **coexist explicitly**, so that
+form is a property of the entry rather than a guess about the producer.
+
+An entry takes exactly one of:
+
+| Form | Carries | Status |
+| -- | -- | -- |
+| Legacy | `rate` + `occurrences` | Deprecated; accepted so published artifacts stay valid |
+| Observation | `support` + `occurrences` | The contract new producers emit |
+
+An entry carrying **both** is invalid: they are different contracts, the counts
+need not agree, and a reader cannot know which was measured. An entry carrying
+**neither** is invalid: an `occurrences` with no numerator is not an observation
+in either form. This is a `oneOf` in the schema and a `?: never` union in the
+types, so the exclusion holds at validation time and at compile time.
+
+Each `oneOf` branch states both what it requires **and** what it forbids. The
+exactly-one-match arithmetic is not sufficient on its own once one branch carries
+a constraint the other does not: an entry with `rate` and `support` and
+`occurrences: 0` matched the legacy branch, failed the observation branch on the
+minimum below, and so satisfied `oneOf` with exactly one match — admitting the
+both-form entry the rule exists to forbid, and making a mixed array containing it
+read as homogeneously legacy. "Exactly one branch passed" was true for the wrong
+reason. The explicit `not` clauses make each branch reject the other
+representation on its own terms, and both adversarial cases ship as fixtures.
+
+The array is additionally **homogeneous**: every entry is in the legacy form, or
+every entry is in the observation form. Per-entry exclusivity is not sufficient,
+because each entry of a mixed array is individually well-formed — one artifact
+would then carry two meanings of `occurrences` with nothing at the collection
+level saying so, and a reader aggregating across entries would silently combine
+them. An empty array satisfies both branches vacuously.
+
+*Zero denominators.* Observation-form `occurrences` has a **minimum of 1**. This
+follows from the producer model rather than from taste: a pair enters the
+observation set because at least one of its files appeared in at least one
+qualifying commit, so a pair whose union of qualifying commits is empty was never
+observed at all. Absence of an entry, not an entry with a zero denominator, is
+how an unobserved pair is represented, and `occurrences: 0` describes not a
+repository state but a producer that emitted a row it had no evidence for.
+
+The consequence is that `support / occurrences` is **total** on a conforming
+artifact: no reader can derive `0/0`, `NaN` or infinity from one, and no reader
+needs a guard the standard failed to specify. The rejected alternative — defining
+a zero denominator as "unavailable" — would have moved that guard into every
+consumer, where one omission produces `NaN` in a report. Legacy `occurrences`
+keeps its original minimum of 0; narrowing it would invalidate published
+artifacts.
+
+`occurrences` is present in both forms and **means different things in each** —
+the union denominator in the observation form, and the unspecified pre-amendment
+quantity in the legacy form. That is stated in the field's own description
+because a reader who takes the union reading of a legacy value would be wrong
+without any signal that they were. Values must not be compared across forms.
+
+*Basis pinning.* `generated.basisRevision` is the full-length lowercase
+hexadecimal Git object name of the commit at the tip of the analyzed history — 40
+characters for SHA-1, 64 for SHA-256. Abbreviations, branch names, tags and other
+symbolic references are rejected, because a pin that does not name exactly one
+commit permanently cannot be recounted against. It is declared once for the
+section and never per item: repeating it per item would admit a document whose
+entries were counted at different revisions. This satisfies §3 criterion 6.
+
+**The contract is scoped to the observation form, including the pattern.**
+`basisRevision` is declared at `generated` level with a description and no
+constraints. Both the requirement and the object-ID pattern live inside the
+conditional `then` branch that fires only when an observation-form entry is
+present. This is deliberate and load-bearing: `generated` is
+`additionalProperties: true`, so a legacy artifact may already carry the key with
+any value — `"HEAD"`, a branch name, an abbreviation — and a globally declared
+pattern would have made such a document newly invalid, turning this amendment
+into a narrowing by the back door. `cochange-legacy-head-basis-v0.4.json` is the
+regression fixture; the same `"HEAD"` value is rejected the moment an
+observation-form entry appears, so the scoping is enforcement rather than
+permissiveness.
+
+*Four states of `generated.coChange`, defined.* The states are distinguishable by
+a reader, and each is defined here so that none can be read as another:
+
+| State | Shape | Means |
+| -- | -- | -- |
+| Not analyzed | `coChange` absent | The producer did not look. Asserts nothing about the repository. |
+| Legacy / unknown | `coChange: []`, no pin | **Not evidence of zero.** An empty array carries no discriminator, so nothing distinguishes a legacy producer that emits `[]` from an observation producer that found nothing. A reader must treat it as unknown. |
+| Analyzed, no qualifying pairs | `coChange: []`, pinned | A positive finding: the analysis ran at that revision and produced no qualifying pairs. |
+| Stale observation | pin ≠ the repository's current revision | The observations are real but describe an earlier revision. Determined by a reader comparing the pin to the current revision; it is a relation, not a document state, which is why it has no standalone fixture. |
+
+Defining the unpinned empty array as *legacy/unknown* rather than as a
+zero-evidence claim is what makes the set distinguishable. Requiring a pin there
+was considered and rejected: it would invalidate legacy artifacts and defeat the
+transition. So the obligation is asymmetric and stated as such — a producer
+emitting the observation form declares `basisRevision` whenever
+`generated.coChange` exists **including when the array is empty**, while a reader
+encountering an unpinned empty array draws no conclusion from it. Each of the
+first three states ships as an executable fixture
+(`cochange-absent-v0.4.json`, `cochange-empty-unpinned-v0.4.json`,
+`cochange-empty-pinned-v0.4.json`).
+
+*One obligation lives outside the schema.* `support <= occurrences` holds by
+construction, since the commits `support` counts are a subset of those
+`occurrences` counts. JSON Schema draft 2020-12 cannot compare two instance
+values, so this cannot be expressed in the artifact schema and is enforced by the
+reference validator instead. Under §7 that makes it a producer-profile
+obligation, and an implementer validating with a bare JSON Schema validator
+receives a strictly weaker check than the reference implementation applies. That
+asymmetry is disclosed in [`docs/conformance.md`](../conformance.md) rather than
+left to be discovered, because §7 voids a conformance signal measured against
+obligations absent from the bundle the implementer received.
+
+*Compatibility (§3 criterion 7).* At the **document** level this is a pure
+widening: every document that validated before this amendment validates after
+it. The legacy form is still accepted, `rate` is still declared, no previously
+optional field becomes unconditionally required, no previously accepted value
+range is narrowed, and the `basisRevision` pattern is scoped so that a legacy
+artifact carrying `"HEAD"` stays valid. The four stable read paths are untouched,
+no v0.3 document is affected, and `generated.specVersion` does not move — the
+profile is still v0.4, and no new profile identifier is minted.
+
+At the **package API** level it is not free, and the cost is named rather than
+elided. `CoChangeEntry` was a single interface with `rate: number`; it is now a
+union whose members declare the other form's field as `?: never`. Reading
+`entry.rate` off the union therefore yields `number | undefined` instead of
+`number`, so a TypeScript consumer that assigns it without narrowing stops
+compiling. That is a real source-level break for readers, it is why the release
+is a package minor rather than a patch, and it is asserted in
+`src/type-invariants.ts` rather than merely described. The runtime shape of every
+existing artifact is unaffected; only the type of code reading it changes.
+
+*Sequencing (§5).* §5 requires that relaxing a `required` constraint, ceasing to
+emit a field, and removing it from `properties` be sequenced separately and
+accounted for individually. `generated.coChange` is normative-optional rather
+than stable-surface, so §5 does not compel that discipline here — it is applied
+voluntarily, because the alternative was two incompatible contracts sharing one
+profile identifier:
+
+1. **Widen the reader.** This amendment. Both forms accepted, neither required;
+   the observation form becomes expressible. No producer changes. Nothing that
+   validated stops validating.
+2. **Verify known consumer adoption.** Establish that readers which
+   validate-before-read accept the observation form, on the ADR-004 §8 pattern.
+   Widening what a reader accepts is not permission to emit, and the two steps
+   must not be collapsed. The gate is specified below.
+3. **Enable emission.** The commit-graph producer projects its counts into the
+   observation form. Only then does an artifact in the wild carry `support`.
+
+#### The step-2 gate
+
+Stated as conditions rather than as intent, because a gate whose criteria are
+written after the fact is not a gate.
+
+**Authority is split, deliberately.** META-309 authorizes **reader widening
+only** — this amendment, and nothing downstream of it. Enabling observation-form
+emission is owned **exclusively by META-297**. Neither issue may take the other's
+step: this record does not authorize a producer to emit `support`, and META-297
+does not reopen the contract decided here. A producer that begins emitting on the
+authority of this amendment alone has skipped the gate.
+
+**Known consumers are inventoried at pinned revisions.** Every consumer is
+recorded at a specific revision — a claim about a moving branch is not evidence —
+and classified as exactly one of:
+
+| Classification | Meaning |
+| -- | -- |
+| **Supports both forms** | Verified to validate and read both the legacy and observation forms without error at the pinned revision |
+| **Does not consume this surface** | Verified not to read `generated.coChange` at all at the pinned revision, so the transition cannot affect it |
+| **Blocked** | Reads the surface and is not verified to accept both forms, or could not be inspected |
+
+The inventory as recorded for this amendment:
+
+| Consumer | Pinned revision | Classification | Basis |
+| -- | -- | -- | -- |
+| `workspacejson/cli` | `40f477ade8581345cb1925c288db0619a0f085ae` | Does not consume this surface | Producer role; its own conformance suite asserts `generated.coChange` is not emitted, and no read path consumes it |
+| `workspacejson/integrations` | `219d3322f4fe39d21ae8a8b15b5634764b90df2c` | Does not consume this surface | Reads only the four stable read paths; `manual.coChangePatterns` is a different field |
+| `workspacejson/workspacejson.dev` | `0ae63b9c494ace02eec8d06ad27a0977aacdf71d` | Does not consume this surface | Documentation and fixtures only; no fixture carries `generated.coChange`, and its published prose is stale rather than executable |
+| Buildomator | not pinned | **Blocked** | Named historically as a reader of this surface. Source was not inspected and no maintainer confirmation is on record, so it cannot be classified as either of the other two |
+
+**Every actual consumer must pass both-form fixtures.** A consumer classified
+*supports both forms* demonstrates it by validating and reading
+`cochange-legacy-rate-v0.4.json`, `cochange-legacy-head-basis-v0.4.json` and
+`cochange-observations-v0.4.json` at its pinned revision. Parsing without error
+is not sufficient where the consumer derives a value from `occurrences`: the two
+forms carry different denominators, so a consumer that reads them
+interchangeably passes a parse test and still produces wrong output.
+
+**Buildomator specifically requires pinned source evidence or maintainer
+confirmation.** It is named in this ecosystem's history as a reader of
+`generated.coChange`, its source is not in the four repositories this record can
+inspect, and absence of a known consumer is not proof of no consumer (§5). Either
+its source is pinned and inspected, or its maintainer confirms which forms it
+accepts. Inference from silence does not discharge this.
+
+**Any consumer left in the blocked class keeps emission disabled.** One blocked
+consumer is sufficient to hold step 3. The gate is not a majority and not a
+best-effort survey; an unresolved classification is a failed gate, and the
+correct outcome is that the producer keeps emitting nothing rather than that the
+inventory be rounded up. As of this record Buildomator is blocked, so **step 3
+is not open.**
+
+Removal of `rate` is **step 4 and is not authorized by this amendment.** It
+happens at the next document-profile change, where a `specVersion` move is
+already occurring and the removal costs nothing additional. Until then the
+legacy form stays valid, and the transition's cost is honest: while both forms
+are accepted, the union-denominator guarantee holds only for entries that
+actually use the observation form. A reader must check the form, not assume it.
+
+*Fixtures (§6).* Valid, minimal-valid, missing-field, empty-value and invalid
+fixtures ship in `packages/spec/examples/` and the new
+`packages/spec/examples/invalid/`, executed by `pnpm run check:examples` in both
+directions. The perturbation pair required by criterion 3 is the swap-invariance
+case: the same referent stored in either pair order produces identical counts and
+identical consumer joins, while a changed referent changes the counts.
+
+The transition adds fixture obligations beyond the field itself.
+`cochange-legacy-rate-v0.4.json` and `cochange-legacy-head-basis-v0.4.json` are
+executable proofs that a pre-amendment artifact still validates — the second
+specifically that a legacy `basisRevision: "HEAD"` survives, which is the
+regression that would appear the moment the pattern leaked to global scope.
+Without them, "this is a widening" would be prose.
+`cochange-both-representations.json` and `cochange-neither-representation.json`
+pin the item `oneOf`; `cochange-mixed-forms.json` pins collection homogeneity,
+which per-entry fixtures cannot reach because each of its entries is
+individually well-formed; and `cochange-zero-denominator.json` pins the
+`occurrences >= 1` bound.
+
+| §3 criterion | How it is met |
+| -- | -- |
+| 1 Referent precisely defined | Counting semantics written into both schema mirrors: distinct qualifying commits, both files versus at least one |
+| 2 Descriptive, not evaluative | Raw counts only; no stored rate, score, grade or ranking |
+| 3 Perturbs when the referent changes | Perturbation and swap-invariance fixtures in `packages/spec/src/index.test.ts` |
+| 4 Missing, empty, unsupported and stale distinguishable | **Met.** Four states defined above and separated by shape: absent (not analyzed), unpinned empty (legacy/unknown, explicitly not evidence of zero), pinned empty (analyzed, no qualifying pairs), pin ≠ current revision (stale). The first three ship as executable fixtures; the fourth is a reader-side comparison the pin exists to enable |
+| 5 Independently implementable from the pinned bundle | Schema, both descriptions, the out-of-schema invariant and the executable fixtures ship together; the undecided boundary questions are named as producer-profile concerns rather than left silent |
+| 6 Identity and provenance rules defined | `generated.basisRevision`, defined above |
+| 7 Forward and backward compatibility specified | Compatibility paragraph above |
+| 8 Concrete consumer problem | A commit-graph producer had no conforming shape for the counts it measures, blocking every downstream diagnostic that reads the committed artifact |
