@@ -19,7 +19,7 @@ repository under version control.
 | [003](./003-field-lifecycle-and-admission.md) | Field lifecycle and admission | Accepted | 2026-08-03 |
 | [004](./004-root-version-compatibility.md) | Root `version` compatibility profile for v0.4.x | Accepted | 2026-07-28 |
 | [005](./005-schema-identity.md) | Schema identity — canonical host, filename, and single-file profile carriage | Accepted | 2026-07-28 |
-| [006](./006-canonical-path-identity.md) | Canonical path identity — stored keys are data, not commands | Proposed | — |
+| [006](./006-canonical-path-identity.md) | Canonical path identity — stored keys are data, not commands | Accepted | 2026-08-09 |
 
 ## When an ADR is required
 

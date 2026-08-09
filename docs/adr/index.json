@@ -60,10 +60,10 @@
       "adr": 6,
       "title": "Canonical path identity — stored keys are data, not commands",
       "path": "docs/adr/006-canonical-path-identity.md",
-      "status": "Proposed",
-      "decisionDate": "*not yet decided — this record is under review*",
+      "status": "Accepted",
+      "decisionDate": "2026-08-09",
       "ratifyingIssue": "META-278 (internal tracker)",
-      "blob": "b031076ec3c73092f5bd94b81f5cbc3de9876520",
+      "blob": "ea92906a9229b41cd7fa21b9280f3e840f9bf622",
       "revision": null,
       "pullRequest": null
     }

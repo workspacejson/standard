@@ -2,8 +2,8 @@
 
 | Field | Value |
 | -- | -- |
-| **Status** | Proposed |
-| **Decision date** | *not yet decided — this record is under review* |
+| **Status** | Accepted |
+| **Decision date** | 2026-08-09 |
 | **Record written** | 2026-08-03 |
 | **Author** | Qwynn Marcelle ([@qmarcelle](https://github.com/qmarcelle)) |
 | **Decider** | Qwynn Marcelle |
@@ -479,6 +479,37 @@ unnecessary rather than merely rare.
 
 Any replacement must state what happens to artifacts published under this
 record's grammar, and whether §9's tolerant reading mode carries forward.
+
+## Ratification
+
+Accepted **2026-08-09** by Qwynn Marcelle, sole steward
+([OWNERSHIP.md](../../OWNERSHIP.md)).
+
+The steward's acceptance was given explicitly and in those terms — "I explicitly
+accept ADR-006 as steward" — and authorized this ratification alone. It did not
+authorize implementation: §11's sequencing stands, and the executable corpus,
+the standard-owned validation contract, the producer and reader convergence, and
+the public-documentation sync are separate work items under the ratification
+issue.
+
+Four scope corrections were issued with the acceptance and bind the
+implementation that follows. They are recorded here because they narrow what
+this record authorizes, and a reader who has only the record should see them:
+
+1. `validateStoredKey` is standard-owned, pure, total and filesystem-free.
+2. `canonicalizeHostQuery` is **not** the schema package's to implement. Hosts
+   and integrations implement it against these semantics; placing a
+   filesystem-aware implementation in the spec package requires its own
+   architectural decision.
+3. A genuine U+FFFD in a filename is **valid**. `validateStoredKey` must not
+   reject every U+FFFD. Detecting *lossy decoding* belongs at raw-byte
+   acquisition, where the re-encoded bytes can be compared against the original
+   — not in a pure string validator, which has no bytes to compare.
+4. Acquisition repair is a separate change from stored-key validation, and needs
+   its own caller trace and watched-red evidence before it is attempted.
+
+The decision date is the date acceptance was given. It is not backdated to the
+drafting date, which remains recorded separately above.
 
 ## Provenance
 
