@@ -1,0 +1,17 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "INVALID: one entry carries both rate and support. The two are different contracts; an entry claiming both leaves a reader unable to know which was measured.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
+    "by": { "name": "example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      { "files": ["src/a.ts", "src/b.ts"], "rate": 0.3, "support": 3, "occurrences": 10, "generated": false }
+    ]
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 0, "confidence": 0 }
+}

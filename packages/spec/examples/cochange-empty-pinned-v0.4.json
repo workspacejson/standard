@@ -1,0 +1,15 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "STATE: ANALYZED, NO QUALIFYING PAIRS. An empty coChange array WITH a basisRevision. This is a positive finding: the analysis ran at that revision and produced no qualifying pairs. Contrast cochange-empty-unpinned-v0.4.json, which asserts nothing.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
+    "by": { "name": "example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": { "src/auth.ts": {} },
+    "coChange": []
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 0, "confidence": 0 }
+}

@@ -91,6 +91,54 @@ profile is still v0.4.
 key, and ADR-004 §8 sequences emission behind evidence that known
 validate-before-read consumers accept it. The two steps must not be collapsed.
 
+The same floor moves again for `generated.coChange`, and outward. A co-change
+entry now takes **exactly one of two forms**:
+
+| Form | Carries | Status |
+| -- | -- | -- |
+| Legacy | `rate` + `occurrences` | Deprecated; still accepted |
+| Observation | `support` + `occurrences` | What new producers emit |
+
+Both, or neither, in one entry is invalid. The array is also **homogeneous**:
+every entry legacy, or every entry observation. A mixed array is rejected, because
+each of its entries is individually well-formed and nothing else would catch it.
+An empty array satisfies both branches.
+
+Observation-form `occurrences` has a **minimum of 1**, so `support / occurrences`
+is total on a conforming artifact and no reader can derive `0/0`, `NaN` or
+infinity. A pair never observed changing has **no entry** — absence, not a zero
+denominator. Legacy `occurrences` keeps its original minimum of 0.
+
+`generated.basisRevision` is required, and constrained to a full-length Git
+object name, **only where an entry uses the observation form**. Everywhere else
+the key is unconstrained, so a legacy artifact already carrying
+`basisRevision: "HEAD"` stays valid;
+`packages/spec/examples/cochange-legacy-head-basis-v0.4.json` is the regression
+guard for that.
+
+**At the document level this is a pure widening.** Every document that validated
+before validates after — no narrowing at all, including on `basisRevision` —
+and `packages/spec/examples/cochange-legacy-rate-v0.4.json` proves it executably
+rather than by assertion.
+
+**At the package API level it is not free.** `CoChangeEntry` becomes a union, so
+`entry.rate` is `number | undefined` rather than `number`; a TypeScript consumer
+reading it without narrowing stops compiling. That is a source-level break for
+readers, and it is why the package release is a minor rather than a patch.
+
+`occurrences` appears in both forms and **means different things in each** — the
+symmetric union denominator in the observation form, the unspecified
+pre-amendment quantity in the legacy form. Establish the form before reading it,
+and never compare the two across forms.
+
+The document profile does **not** move: `generated.specVersion` stays `"0.4"`,
+and no new profile identifier is minted. Removing `rate` is deferred to the next
+document-profile change, where a `specVersion` move is already happening.
+Recorded as [ADR-003](./adr/003-field-lifecycle-and-admission.md) amendment
+A-009, which also carries the release sequence: **widen the reader → verify known
+consumer adoption → enable producer emission**, with removal a separate fourth
+step that this amendment does not authorize.
+
 ## An optional field is not automatically additive
 
 The root object is `additionalProperties: false`. A consumer validating a
@@ -153,7 +201,23 @@ wrong:
 
 - **`generated.coChange`** — filter on `generated: true` to skip tooling-coupled
   pairs such as a lockfile and its manifest, and surface only real source
-  couplings. Do not apply path heuristics at read time.
+  couplings. Do not apply path heuristics at read time. **Check the entry form
+  before reading the counts**, because during the v0.4 transition both are
+  legal: an entry with `support` is the observation form, where `occurrences` is
+  the symmetric union denominator and you derive `support / occurrences`
+  yourself wherever `occurrences > 0`; an entry with `rate` is the deprecated
+  legacy form, whose `occurrences` carries the older, unspecified meaning. Do not
+  compare the two across forms, and do not assume the legacy denominator is
+  symmetric. `generated.basisRevision` names the revision the observation-form
+  counts were taken over.
+
+  ```ts
+  for (const e of doc.generated.coChange ?? []) {
+    if (e.support !== undefined) {
+      const ratio = e.occurrences > 0 ? e.support / e.occurrences : undefined;
+    } // else: legacy entry — e.rate, on the older denominator
+  }
+  ```
 - **`generated.fragility`** — filter `excluded: false` before ranking. Entries
   with `excluded: true` are generated or lock files carrying
   `fragilityScore: 0`.

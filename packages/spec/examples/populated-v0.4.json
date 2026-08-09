@@ -13,6 +13,7 @@
   "generated": {
     "specVersion": "0.4",
     "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "9f2c1d5b8a3e47c06d1b2f8e4a7c9013d5e6f8a2",
     "by": { "name": "vrekod", "version": "3.0.0" },
     "frameworkManifest": [
       { "name": "turborepo", "confidence": 0.95 },
@@ -33,20 +34,20 @@
     "coChange": [
       {
         "files": ["pnpm-lock.yaml", "package.json"],
-        "rate": 0.98,
-        "occurrences": 200,
+        "support": 196,
+        "occurrences": 204,
         "generated": true
       },
       {
         "files": ["apps/cli/src/commands/check.ts", "apps/cli/src/commands/interactive.ts"],
-        "rate": 1.0,
+        "support": 15,
         "occurrences": 15,
         "generated": false
       },
       {
         "files": ["apps/api/src/auth.ts", "packages/contracts/src/auth.ts"],
-        "rate": 0.87,
-        "occurrences": 9,
+        "support": 9,
+        "occurrences": 21,
         "generated": false
       }
     ],

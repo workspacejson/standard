@@ -1,0 +1,32 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "INVALID: basisRevision is an abbreviated object name. Abbreviations and symbolic references do not name exactly one commit permanently.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f1",
+    "by": {
+      "name": "example-producer",
+      "version": "1.0.0"
+    },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      {
+        "files": [
+          "src/a.ts",
+          "src/b.ts"
+        ],
+        "support": 3,
+        "occurrences": 10,
+        "generated": false
+      }
+    ]
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "OBSERVING",
+    "observationCount": 0,
+    "confidence": 0
+  }
+}

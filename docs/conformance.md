@@ -32,6 +32,16 @@ That last point is the one implementations most often get wrong. An absent
 `manual.fragileFiles` means the maintainer declared nothing, not that no file is
 fragile.
 
+`generated.coChange` makes the same distinction in four states, and a consumer
+that collapses them reports a producer gap as a repository fact:
+
+| Shape | Means |
+| -- | -- |
+| `coChange` absent | Not analyzed. Asserts nothing. |
+| `coChange: []`, no `basisRevision` | Legacy / unknown. **Not** evidence that the repository has no co-changing pairs. |
+| `coChange: []`, with `basisRevision` | Analyzed at that revision; no qualifying pairs. A positive finding. |
+| `basisRevision` ≠ the repository's current revision | The observations are real but describe an earlier revision. Stale, not absent. |
+
 ## Checking a document
 
 The packaged validator is the reference implementation. Do not re-implement it —
@@ -65,24 +75,75 @@ import schema from '@workspacejson/spec/schema' with { type: 'json' };
 
 ## Fixtures shipped by this repository
 
-Four executable examples live in
+Ten executable examples live in
 [`packages/spec/examples/`](../packages/spec/examples/):
 
-| Example | Profile |
-| -- | -- |
-| `minimal-v0.3.json` | v0.3 |
-| `populated-v0.3.json` | v0.3 |
-| `with-manual-block-v0.3.json` | v0.3 |
-| `populated-v0.4.json` | v0.4 |
+| Example | Profile | Demonstrates |
+| -- | -- | -- |
+| `minimal-v0.3.json` | v0.3 | The smallest conforming document |
+| `populated-v0.3.json` | v0.3 | Every v0.3 section populated |
+| `with-manual-block-v0.3.json` | v0.3 | Human-authored `manual` evidence |
+| `populated-v0.4.json` | v0.4 | Every v0.4 section populated |
+| `cochange-observations-v0.4.json` | v0.4 | Observation form: raw counts, a pair stored in reversed order, a zero-support observation, and `support == occurrences` |
+| `cochange-legacy-rate-v0.4.json` | v0.4 | Legacy form with no basis pin — executable proof that the A-009 widening invalidates no published artifact |
+| `cochange-legacy-head-basis-v0.4.json` | v0.4 | Legacy artifact carrying `basisRevision: "HEAD"` — the regression guard proving the object-ID pattern is scoped to the observation form and not global |
+| `cochange-absent-v0.4.json` | v0.4 | State: **not analyzed** — `coChange` absent |
+| `cochange-empty-unpinned-v0.4.json` | v0.4 | State: **legacy / unknown** — empty array, no pin; not evidence of zero |
+| `cochange-empty-pinned-v0.4.json` | v0.4 | State: **analyzed, no qualifying pairs** — empty array with a pin |
 
-Every one of them is validated against the package-owned schema in CI by
+Eleven **negative** fixtures live alongside them in
+[`packages/spec/examples/invalid/`](../packages/spec/examples/invalid/), each
+carrying a `generated.$comment` naming the single defect it exhibits:
+
+| Fixture | Must be rejected because | Rejected by |
+| -- | -- | -- |
+| `cochange-negative-support.json` | A count of commits cannot be below zero | schema and validator |
+| `cochange-non-integer-occurrences.json` | Counts are distinct commits, not a continuous measure | schema and validator |
+| `cochange-missing-basis-revision.json` | An observation-form entry that names no revision cannot be recounted | schema and validator |
+| `cochange-abbreviated-basis-revision.json` | An abbreviated object name does not name one commit permanently | schema and validator |
+| `cochange-both-representations.json` | One entry carrying `rate` *and* `support` leaves a reader unable to know which was measured | schema and validator |
+| `cochange-neither-representation.json` | An `occurrences` with no numerator is not an observation in either form | schema and validator |
+| `cochange-mixed-forms.json` | The array mixes forms; each entry is individually well-formed, so only collection homogeneity catches it | schema and validator |
+| `cochange-zero-denominator.json` | Observation-form `occurrences: 0` — a pair never observed has no entry, not a zero denominator | schema and validator |
+| `cochange-both-forms-zero-occurrences.json` | Both `rate` and `support`, disguised by `occurrences: 0` — the adversarial case that defeated an earlier `oneOf` | schema and validator |
+| `cochange-mixed-forms-disguised.json` | A mixed array whose second entry is a disguised both-form entry, which the earlier rule read as homogeneously legacy | schema and validator |
+| `cochange-support-exceeds-occurrences.json` | `support` counts a subset of what `occurrences` counts | **validator only** — see below |
+
+That last row is the one asymmetry in the bundle, and it is stated here rather
+than left to be discovered. The **bare packaged schema accepts** that document;
+only the **reference validator rejects** it. Both directions are pinned by test
+in `packages/spec/src/index.test.ts`, which also asserts that every *other*
+negative fixture is rejected by the bare schema as well — so the asymmetry
+cannot silently widen to a second obligation.
+
+Every one of them is checked against the package-owned schema in CI by
 `pnpm run check:examples`, using the package's own validator rather than a
-re-implementation. The gate fails if the examples directory is empty, so it
-cannot pass vacuously.
+re-implementation. Positives must validate. Negatives must be rejected by both
+`validate()` and `validateLegacy()` — but **the two checks are not equally
+informative, and only the first is evidence about the named defect**:
+
+| Check | What a rejection proves |
+| -- | -- |
+| `validate()` | **Substantive.** The current schema rejects the named defect. |
+| `validateLegacy()` | **Structural only.** It never inspects the defect. It keys on the *absence* of `generated.specVersion`, so it rejects every one of these fixtures for declaring a v0.4 profile — defect or no defect. What it covers is that a rejected v0.4 document cannot be re-admitted through the legacy path. |
+
+Both are required, because a fixture accepted by either would reach a consumer.
+Reading the second as independent confirmation of the defect would overstate what
+the gate measures. The gate fails if either directory is empty, so it cannot pass
+vacuously in either direction.
+
+Reason-specificity is what makes a negative fixture worth shipping — a document
+rejected for an unrelated defect proves nothing about the one it is named for.
+The fixtures put their comment inside `generated`, which is
+`additionalProperties: true`, so the comment is never itself the reason. The
+attribution itself is pinned by the one-field perturbation tests in
+`packages/spec/src/index.test.ts`, which change exactly one field of a valid
+document per case.
 
 If an example contradicts the schema, the fix is to the example. Weakening the
 schema to make an example pass is explicitly prohibited in the gate's own
-failure message.
+failure message — as is deleting a negative fixture the validator has stopped
+rejecting, which is the regression it exists to catch.
 
 The rule engine additionally ships fixtures under
 [`packages/rules/src/testing/fixtures/`](../packages/rules/src/testing/fixtures/):
@@ -107,12 +168,12 @@ resolved `./schema` export, then asserts that:
 3. the packed tarball includes it — `files` covers `schema`;
 4. all four stable read paths are present.
 
-Measured on the current `main`:
+Measured on the current branch, after the A-009 amendment:
 
 ```text
 path        packages/spec/schema/v1.json
-bytes       6994
-sha256      a32149fa2d0ae08412b97b8fde1c3d2a7887adbefcee99014ce143a6d525b0ca
+bytes       14184
+sha256      6ff46cb520c3bff5cf6f453e3fbb7d149b61c0e81d5442ed99218f869b451853
 $id         https://workspacejson.dev/schema/v1.json
 $schema     https://json-schema.org/draft/2020-12/schema
 ```
@@ -133,7 +194,7 @@ CI runs on Node 20 and 22. In order:
 | Tests | `pnpm -r test` | Unit and integration suites |
 | Tarball verification | `release:verify-packs` | No `workspace:` protocol reaches a packed manifest |
 | Schema provenance | `check:schema` | The four assertions above |
-| Executable examples | `check:examples` | Every shipped example validates |
+| Executable examples | `check:examples` | Every shipped example validates, and every negative fixture is rejected by both validators |
 | Export validation | inline in CI | Each declared export resolves and imports |
 | Binary behavior | inline in CI | `validate` succeeds on a valid document; a bare invocation exits non-zero |
 | Producer conformance | `check:conformance` | A producer candidate satisfies the four-path contract |
@@ -207,12 +268,54 @@ Stated plainly, because a conformance document that hides them is misleading:
   yet point at a single published battery and claim conformance without that
   step. What ships otherwise is this repository's own examples and its
   reference validator.
-- **`validateLegacy()` has no shipped example.** All four examples are v0.3 or
-  v0.4, so the legacy path is covered by unit tests but not by an executable
-  fixture a third party can point at.
-- **There are no negative examples.** The examples prove that valid documents
-  validate. They do not prove that invalid documents are rejected — that is
-  covered only by unit tests inside the package.
+- **`validateLegacy()` has no shipped example.** All ten positive examples are
+  v0.3 or v0.4, so the legacy path is covered by unit tests but not by an
+  executable fixture a third party can point at. Its appearance in the negative
+  gate is not coverage of the legacy path either — see the note under the
+  negative-fixture table.
+- **The negative fixtures cover one field group.** `examples/invalid/` exists as
+  of the A-009 amendment and covers `generated.coChange` and
+  `generated.basisRevision` only. Every other field's rejection behavior is
+  still covered by unit tests inside the package rather than by a fixture a
+  third party can point at. The directory is the mechanism; populating it for
+  the rest of the schema has not been done.
+- **An unpinned empty `coChange` is producer-non-conforming but schema-valid,
+  and a reader must draw no conclusion from it.** A producer emitting the
+  observation form declares `generated.basisRevision` whenever
+  `generated.coChange` exists, including when the array is empty. Schema
+  validation cannot check that case: an empty array carries no discriminator, so
+  a validator cannot tell one written by a legacy producer from one written by
+  an observation producer, and requiring a pin would invalidate legacy artifacts
+  and break the transition. The obligation is therefore carried by the producer
+  profile alone, and a producer can violate it while passing every automated
+  gate here. The reader-side consequence is the one that matters and is defined
+  normatively in A-009: an unpinned empty array means **legacy / unknown**, not
+  zero — only a *pinned* empty array asserts that the analysis ran and found
+  nothing. Both states ship as fixtures and are asserted by test.
+- **The union-denominator guarantee is conditional while both forms are legal.**
+  It holds for entries in the observation form. A legacy entry's `occurrences`
+  carries the pre-amendment meaning, which was never normatively specified and
+  may not be symmetric. A consumer that reads `occurrences` without first
+  checking which form the entry takes will be wrong on legacy data, with no
+  signal that it was.
+- **One co-change invariant is outside the schema, so the two checks disagree.**
+  `support <= occurrences` cannot be expressed in JSON Schema draft 2020-12,
+  which has no way to compare two instance values. The consequence is precise
+  and worth stating as two separate facts rather than one hedge:
+
+  | Check | On a document where `support > occurrences` |
+  | -- | -- |
+  | Bare packaged schema, any conforming JSON Schema validator | **accepts** |
+  | `validate()` / `validateV4()`, the reference validator | **rejects** |
+
+  So an implementer who materializes `@workspacejson/spec/schema` and validates
+  with their own tooling receives a strictly weaker check than this repository
+  applies, and a producer that passes their gate can still be non-conforming. It
+  is a **producer obligation carried by the profile, not by the schema** —
+  recorded as such in ADR-003 A-009, disclosed here because §7 of that record
+  voids a conformance signal measured against obligations absent from the bundle
+  the implementer received, and pinned in both directions by test so this
+  paragraph cannot drift away from the behavior.
 
 ### Producer conformance IS mechanically checked here
 

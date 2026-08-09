@@ -1,0 +1,18 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "INVALID: a mixed array whose second entry is a disguised both-form entry with occurrences 0. Under the earlier oneOf that entry read as legacy-form, which made the array look homogeneously legacy and let collection homogeneity pass as well. Both the item rule and the homogeneity rule must reject this; neither may rely on the other.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
+    "by": { "name": "example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      { "files": ["src/a.ts", "src/b.ts"], "rate": 0.3, "occurrences": 10, "generated": false },
+      { "files": ["src/c.ts", "src/d.ts"], "rate": 0.4, "support": 4, "occurrences": 0, "generated": false }
+    ]
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 0, "confidence": 0 }
+}

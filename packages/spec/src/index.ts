@@ -15,6 +15,9 @@ export type {
   FileIndexEntry,
   IntelligenceState,
   CoChangeEntry,
+  CoChangeEntryCommon,
+  LegacyCoChangeEntry,
+  ObservationCoChangeEntry,
   FragilityEntry,
   WorkspaceJsonV4,
 } from './types.js';
@@ -30,10 +33,64 @@ const packagedSchema = JSON.parse(
 ) as object;
 const validateSchema = compileSchemaValidator<WorkspaceJsonDocument>(packagedSchema);
 
-export const version = '0.4.4';
+/**
+ * The package version, read from the packaged manifest rather than duplicated
+ * here.
+ *
+ * It used to be a hardcoded literal, with a unit test asserting the literal.
+ * That pair passes only while someone remembers to edit both during a release —
+ * and Changesets rewrites `package.json` and `CHANGELOG.md`, never a constant in
+ * source. The first release to move the number would have shipped a package
+ * reporting the previous version, or gone red on a test asserting a string
+ * nobody updated. Deriving it removes the second source of truth; the test now
+ * asserts parity with the manifest instead of a literal.
+ *
+ * `package.json` is always present in an npm tarball, so this resolves in a
+ * consumer's `node_modules` exactly as it does here.
+ */
+const packagedManifest = JSON.parse(
+  readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'),
+) as { version: string };
+
+export const version: string = packagedManifest.version;
+
+/**
+ * The one co-change counting invariant JSON Schema cannot express.
+ *
+ * `support` counts the qualifying commits in which BOTH files changed;
+ * `occurrences` counts those in which AT LEAST ONE did. The first set is a
+ * subset of the second, so `support > occurrences` is not a debatable value —
+ * it is arithmetically impossible, and it marks a producer that counted file
+ * events, ordered relationships or two different analysis boundaries.
+ *
+ * Draft 2020-12 has no way to compare two instance values, so this lives beside
+ * the schema rather than inside it. It is declared as an out-of-schema producer
+ * obligation in ADR-003 amendment A-009, because an implementer validating with
+ * a bare JSON Schema validator will not catch it and must be told so.
+ *
+ * OBSERVATION-FORM ONLY. A legacy entry has no `support`, and its `occurrences`
+ * carries the pre-amendment meaning — never specified, not necessarily a union,
+ * and therefore not something this invariant can be applied to. Skipping those
+ * entries is what keeps this release a widening: no artifact that validated
+ * before now fails here.
+ *
+ * Shape is not re-checked: this runs only after the schema has accepted the
+ * document, so both fields are known to be integers when an entry is
+ * well-formed. Anything that is not an entry-shaped object is left alone.
+ */
+function coChangeCountsAreCoherent(data: unknown): boolean {
+  const generated = (data as { generated?: { coChange?: unknown } })?.generated;
+  const entries = generated?.coChange;
+  if (!Array.isArray(entries)) return true;
+  return entries.every((entry) => {
+    const { support, occurrences } = (entry ?? {}) as { support?: unknown; occurrences?: unknown };
+    if (typeof support !== 'number' || typeof occurrences !== 'number') return true;
+    return support <= occurrences;
+  });
+}
 
 export function validate(data: unknown): data is WorkspaceJsonV3 | WorkspaceJsonV4 {
-  return validateSchema(data);
+  return validateSchema(data) && coChangeCountsAreCoherent(data);
 }
 
 export function validateV4(data: unknown): data is WorkspaceJsonV4 {

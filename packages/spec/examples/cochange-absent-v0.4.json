@@ -1,0 +1,14 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "STATE: NOT ANALYZED. generated.coChange is absent entirely. This asserts nothing about whether the repository has co-changing files — the producer did not look.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "by": { "name": "example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": { "src/auth.ts": {} },
+    "fragility": []
+  },
+  "agents": {},
+  "health": { "intelligenceState": "INSUFFICIENT_DATA", "observationCount": 0, "confidence": 0 }
+}

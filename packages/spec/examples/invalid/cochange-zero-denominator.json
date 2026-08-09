@@ -1,0 +1,17 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "INVALID: an observation-form entry with occurrences 0. A pair whose union of qualifying commits is empty was never observed changing at all, so no entry may be emitted for it — absence of an entry, not a zero denominator, represents an unobserved pair. Accepting this would let a reader derive 0/0.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
+    "by": { "name": "example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      { "files": ["src/a.ts", "src/b.ts"], "support": 0, "occurrences": 0, "generated": false }
+    ]
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 0, "confidence": 0 }
+}

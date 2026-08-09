@@ -1,0 +1,14 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "STATE: LEGACY / UNKNOWN. An empty coChange array with no basisRevision. This is NOT evidence that the repository has no co-changing pairs: an empty array carries no discriminator, so nothing distinguishes a legacy producer that emits [] from an observation producer that found nothing. A reader must treat it as unknown.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "by": { "name": "legacy-producer", "version": "0.4.4" },
+    "frameworkManifest": [],
+    "fileIndex": { "src/auth.ts": {} },
+    "coChange": []
+  },
+  "agents": {},
+  "health": { "intelligenceState": "OBSERVING", "observationCount": 0, "confidence": 0 }
+}
