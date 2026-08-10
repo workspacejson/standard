@@ -5,6 +5,12 @@ import { compileSchemaValidator } from './validator.js';
 export { workspaceJsonSchema } from './schema.js';
 export { validateStoredKey } from './path-identity.js';
 export type { StoredKeyResult, StoredKeyRejection } from './path-identity.js';
+export { inspectStoredKeys } from './stored-key-inspection.js';
+export type {
+  StoredKeyDocument,
+  StoredKeySurface,
+  StoredKeyFinding,
+} from './stored-key-inspection.js';
 export type {
   WorkspaceJson,
   WorkspacePackage,

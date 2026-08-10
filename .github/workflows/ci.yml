@@ -108,8 +108,10 @@ jobs:
       # Source tests prove the logic; they do not prove a consumer receives it.
       # `files`, the exports map and the emitted declarations all sit between
       # src/ and an installed package. This packs, installs and imports the
-      # tarball, then runs the corpus through the export that actually ships.
-      - name: Prove validateStoredKey from the packed artifact
+      # tarball, then runs the corpus through the exports that actually ship —
+      # every vector through `validateStoredKey`, and every vector again through
+      # `inspectStoredKeys` embedded on all four ratified path-bearing surfaces.
+      - name: Prove validateStoredKey and inspectStoredKeys from the packed artifact
         run: pnpm run check:packed
 
       # Only packages this repository publishes are verified here.
