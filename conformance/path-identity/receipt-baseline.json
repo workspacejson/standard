@@ -1,0 +1,155 @@
+{
+  "$comment": "WATCHED-RED EVIDENCE. Produced by run-baseline.mjs against the matcher behavior shipping today. Every entry under `disagreements` is a case where the current consumers depart from ADR-006. This file records the defect; it is not a target.",
+  "corpusVersion": 1,
+  "totals": {
+    "cases": 59,
+    "runnable": 45,
+    "notRunnable": 14,
+    "agrees": 31,
+    "disagrees": 14,
+    "silentlyRepairedIntoAValidLookingKey": 5
+  },
+  "silentRepairs": [
+    {
+      "id": "stored/invalid/interior-dotdot",
+      "storedAs": "x"
+    },
+    {
+      "id": "stored/invalid/interior-dotdot-roundtrip",
+      "storedAs": "a/b/c.ts"
+    },
+    {
+      "id": "stored/invalid/leading-dot-slash",
+      "storedAs": "leading.ts"
+    },
+    {
+      "id": "stored/invalid/repeated-separator",
+      "storedAs": "double/sep.ts"
+    },
+    {
+      "id": "stored/invalid/trailing-separator",
+      "storedAs": "trailing"
+    }
+  ],
+  "disagreements": [
+    {
+      "id": "stored/invalid/interior-dotdot",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "x",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/interior-dotdot-roundtrip",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "a/b/c.ts",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/drive-letter",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "C:/drive/x.ts",
+      "mutated": true,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/drive-letter-forward",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "C:/drive/x.ts",
+      "mutated": false,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/backslash",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "back/slash.ts",
+      "mutated": true,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/leading-dot-slash",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "leading.ts",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/repeated-separator",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "double/sep.ts",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/trailing-separator",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "trailing",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/nul",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "a\u0000b.ts",
+      "mutated": false,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/unpaired-surrogate",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "lone\ud800.ts",
+      "mutated": false,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "matching/malformed-never-matches-repaired-value",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    },
+    {
+      "id": "matching/malformed-never-matches-itself",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    },
+    {
+      "id": "matching/no-suffix-fallback-absolute",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    },
+    {
+      "id": "matching/no-suffix-fallback-absolute-deep",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    }
+  ],
+  "notRunnable": {
+    "hostQuery": 8,
+    "discovery": 3,
+    "acquisition": 3
+  }
+}

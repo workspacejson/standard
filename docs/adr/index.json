@@ -64,8 +64,8 @@
       "decisionDate": "2026-08-09",
       "ratifyingIssue": "META-278 (internal tracker)",
       "blob": "ea92906a9229b41cd7fa21b9280f3e840f9bf622",
-      "revision": null,
-      "pullRequest": null
+      "revision": "4fb0ede3c3ec0b2ed56e70cc6e90e8f67efb7b6e",
+      "pullRequest": 19
     }
   ]
 }
