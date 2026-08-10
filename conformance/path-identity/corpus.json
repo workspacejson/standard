@@ -469,9 +469,10 @@
     {
       "id": "hostQuery/traversal-escapes-repository",
       "kind": "hostQuery",
-      "scenario": "query resolves outside the repository root",
-      "expect": "unsupported",
-      "note": "\u00a76: traversal must never turn into evidence about an external target.",
+      "scenario": "query NAMES a tracked symlink entry whose target lies outside the repository root",
+      "expect": "key",
+      "expectedKey": "escape",
+      "note": "\u00a76 rows 1, 3 and 5. The query names the tracked entry; it does not traverse it \u2014 there is no path component after `escape`. The key is the entry itself and the target is NOT followed, which is what makes this case safe rather than permissive: no evidence about /outside/secret.ts is produced or implied. Corrected from a prior `unsupported`/`escapes-root` expectation that read the boundary as 'where does the target point' rather than \u00a76's 'does the query traverse'. Containment of what a host then DOES with a tracked symlink is the consumer's decision, not an identity question. The traversal case that does expect `unsupported` is hostQuery/traversal-unprovable.",
       "fixture": {
         "repositoryRoot": "/repo",
         "trackedEntries": [
@@ -490,8 +491,7 @@
           }
         ],
         "inputPath": "/repo/escape"
-      },
-      "expectedReason": "escapes-root"
+      }
     },
     {
       "id": "hostQuery/absolute-inside-root",
