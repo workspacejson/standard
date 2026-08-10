@@ -13,17 +13,26 @@
 //      explicitly, because a corpus silently missing a class is worse than one
 //      that is obviously short: it reports coverage it does not have.
 //
-//   3. THE WATCHED-RED RECEIPT IS CURRENT. A fresh baseline run must reproduce
-//      the committed receipt byte for byte. This is what makes the receipt
-//      evidence rather than decoration: if the reproduced consumer behavior
-//      changes, or someone quietly "fixes" the baseline copy, the receipt stops
-//      matching and this fails.
+//   3. DELEGATED CASES ARE PORTABLE. Every `hostQuery`, `discovery` and
+//      `acquisition` case carries a complete machine-readable fixture. These
+//      cases are not executed here — they are executed by their ADR-006 §10
+//      owners — and a downstream harness that has to invent inputs after seeing
+//      its own implementation is not consuming one normative corpus.
 //
-// It deliberately does NOT check the corpus against a reference implementation.
-// There is none yet — `validateStoredKey` is Phase 3. When it lands, its own
-// tests consume this corpus and the disagreement count in the receipt is
-// expected to fall to zero for the pure kinds. Until then the receipt records a
-// defect that is real and unfixed, and this gate keeps it accurate.
+//   4. THE FROZEN SPECIMEN HAS NOT DRIFTED. A fresh baseline run must reproduce
+//      the committed receipt byte for byte, and the receipt must carry its
+//      revision pins. This keeps the historical claim honest.
+//
+// WHAT THIS GATE DOES NOT DO. It cannot detect a regression in `integrations`
+// or `codex-mcp`. The baseline is a frozen copy and never executes either
+// consumer; it supports a claim about the pinned revisions and nothing later.
+// Those repositories detect their own regressions by running this corpus
+// against their actual implementations.
+//
+// It also does not check the corpus against a reference implementation, because
+// there is none yet. When the standard-owned validator lands, its tests consume
+// this corpus and the disagreement count is expected to fall to zero for the
+// executed kinds.
 
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -47,9 +56,18 @@ const REQUIRED_FIELDS = {
   storedKey: ["input", "expect"],
   identity: ["inputs", "expect"],
   matching: ["storedKey", "query", "expect"],
-  hostQuery: ["scenario", "expect"],
-  discovery: ["scenario", "expect"],
-  acquisition: ["scenario", "expect"],
+  hostQuery: ["scenario", "expect", "fixture"],
+  discovery: ["scenario", "expect", "fixture"],
+  acquisition: ["scenario", "expect", "fixture"],
+};
+
+// The minimum a downstream harness needs in order to CONSTRUCT the case. Prose
+// alone would force every consumer to invent its own inputs, which is the
+// opposite of one normative corpus.
+const REQUIRED_FIXTURE_FIELDS = {
+  hostQuery: ["repositoryRoot", "trackedEntries", "filesystem", "inputPath"],
+  discovery: ["repositories", "queryOrigin"],
+  acquisition: ["acquisitionMode"],
 };
 
 for (const c of corpus.cases) {
@@ -75,6 +93,49 @@ for (const c of corpus.cases) {
   // claim cannot be checked.
   if (c.silentlyRepaired && !c.normalizingReaderYields) {
     fail(`${c.id} — silentlyRepaired requires normalizingReaderYields`);
+  }
+
+  // ---- delegated cases must be portable
+  const fixtureFields = REQUIRED_FIXTURE_FIELDS[c.kind];
+  if (fixtureFields) {
+    for (const field of fixtureFields) {
+      if (c.fixture?.[field] === undefined) {
+        fail(`${c.id} — delegated case fixture is missing '${field}'; a downstream harness would have to invent it`);
+      }
+    }
+    // An outcome is not portable either unless the expected result is stated in
+    // the same machine-readable terms the owner will produce.
+    if (c.expect === "key" && !c.expectedKey) {
+      fail(`${c.id} — expects a key but does not say which one`);
+    }
+    if (c.expect === "unsupported" && !c.expectedReason) {
+      fail(`${c.id} — expects unsupported but names no reason classification`);
+    }
+    if (c.kind === "discovery" && c.expectedRoot === undefined) {
+      fail(`${c.id} — a discovery case must state expectedRoot, including when the answer is no artifact`);
+    }
+    if (c.kind === "acquisition" && c.expect !== "requires-raw-bytes" && !c.expectedFailure && c.expectedDecoded === undefined) {
+      fail(`${c.id} — an acquisition case must state either expectedDecoded or expectedFailure`);
+    }
+    for (const declared of [c.expectedReason, c.expectedFailure].filter(Boolean)) {
+      if (!(declared in (corpus.delegation?.failureClassifications ?? {}))) {
+        fail(`${c.id} — '${declared}' is not a declared failure classification`);
+      }
+    }
+  }
+}
+
+// The delegation map must agree with the cases actually present, or the counts
+// this gate reports are fiction.
+{
+  const executedHere = new Set(corpus.delegation?.executedHere ?? []);
+  const delegated = new Set(corpus.delegation?.delegated ?? []);
+  for (const k of kinds) {
+    if (!executedHere.has(k) && !delegated.has(k)) fail(`kind '${k}' is in neither executedHere nor delegated`);
+    if (executedHere.has(k) && delegated.has(k)) fail(`kind '${k}' is in both executedHere and delegated`);
+  }
+  for (const k of [...executedHere, ...delegated]) {
+    if (!kinds.has(k)) fail(`delegation names unknown kind '${k}'`);
   }
 }
 
@@ -136,20 +197,46 @@ for (const id of ["identity/case-distinct", "identity/nfc-vs-nfd"]) {
 // ---- 3: the watched-red receipt is current ----------------------------------
 
 const committed = readFileSync(join(dir, "receipt-baseline.json"), "utf8");
+
+// The receipt is a historical claim, so it must name what it observed.
+{
+  const r = JSON.parse(committed);
+  const prov = r.provenance;
+  if (!prov) fail("receipt-baseline.json carries no provenance block — an undated, unpinned claim is not evidence");
+  else {
+    if (prov.kind !== "historical-defect-witness") fail("receipt provenance.kind must be 'historical-defect-witness'");
+    if (!prov.limitation) fail("receipt provenance must state its limitation");
+    const pins = prov.observedAt ?? [];
+    if (pins.length === 0) fail("receipt provenance names no observation points");
+    for (const pin of pins) {
+      if (!pin.repository) fail("a receipt provenance entry has no repository");
+      if (!/^[0-9a-f]{40}$/.test(pin.revision ?? "")) {
+        fail(`receipt provenance for ${pin.repository ?? "?"} needs a full 40-character revision, not ${JSON.stringify(pin.revision)}`);
+      }
+      if (!Array.isArray(pin.sourcePaths) || pin.sourcePaths.length === 0) {
+        fail(`receipt provenance for ${pin.repository ?? "?"} lists no source paths`);
+      }
+    }
+  }
+}
 const fresh = execFileSync(process.execPath, [join(dir, "run-baseline.mjs")], { encoding: "utf8" });
 if (committed !== fresh) {
   fail(
     "conformance/path-identity/receipt-baseline.json is stale — a fresh baseline run does not reproduce it. " +
-      "Re-run `node conformance/path-identity/run-baseline.mjs --write` and review the diff: it means the " +
-      "reproduced consumer behavior changed, which is exactly the event this receipt exists to catch.",
+      "Re-run `node conformance/path-identity/run-baseline.mjs --write` and review the diff: either the corpus " +
+      "changed, or the frozen specimen was edited and no longer reflects the pinned revisions.",
   );
 }
 
 const receipt = JSON.parse(committed);
 if (receipt.totals.silentlyRepairedIntoAValidLookingKey === 0) {
+  // The specimen is deliberately defective and must stay that way. A clean
+  // reading here means the frozen copy stopped reproducing what was observed at
+  // the pinned revisions, or that the evidence was edited — not that anything
+  // downstream was fixed.
   fail(
-    "the receipt records zero silent repairs. Either the baseline no longer reproduces the shipped matcher, " +
-      "or this file was edited to look clean. The defect is real until the consumers are fixed in their own repositories.",
+    "the receipt records zero silent repairs. The historical specimen is intentionally defective; a clean " +
+      "reading means the frozen reproduction drifted from the pinned revisions, or the receipt was edited.",
   );
 }
 
@@ -160,16 +247,22 @@ console.log("Path-identity corpus (ADR-006)");
 console.log(`  cases               ${corpus.cases.length}`);
 for (const [k, n] of Object.entries(byKind).sort()) console.log(`    ${k.padEnd(18)}${n}`);
 console.log(`  required classes    ${REQUIRED_CASES.length}/${REQUIRED_CASES.length} present`);
+console.log(`  executed here       ${receipt.totals.executedHere}  (${corpus.delegation.executedHere.join(", ")})`);
+console.log(`  delegated           ${receipt.totals.delegated}  (${corpus.delegation.delegated.join(", ")}) — portable fixtures verified`);
 console.log(
-  `  watched-red         ${receipt.totals.disagrees} disagreement(s), ` +
-    `${receipt.totals.silentlyRepairedIntoAValidLookingKey} silent repair(s) over ` +
-    `${receipt.totals.runnable} runnable case(s)`,
+  `  historical witness  ${receipt.totals.disagrees} disagreement(s), ` +
+    `${receipt.totals.silentlyRepairedIntoAValidLookingKey} silent repair(s) at the pinned revisions`,
 );
-console.log(`  not runnable here   ${receipt.totals.notRunnable} (filesystem, repository or raw-byte cases — owned per ADR-006 §10)`);
+for (const pin of receipt.provenance.observedAt) {
+  console.log(`                      ${pin.repository} @ ${pin.revision.slice(0, 8)}  [${pin.sourcePaths.join(", ")}]`);
+}
 
 if (failures.length) {
   console.error(`\ncheck-corpus: ${failures.length} failure(s)\n`);
   for (const f of failures) console.error(`  ${f}`);
   process.exit(1);
 }
-console.log("\nOK — corpus is structurally sound, covers every required class, and the watched-red receipt reproduces.");
+console.log(
+  "\nOK — corpus is structurally sound, covers every required class, every delegated case is portable, " +
+    "and the historical witness reproduces at its pinned revisions.",
+);

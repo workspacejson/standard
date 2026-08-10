@@ -11,9 +11,9 @@ only way two independent implementations can be said to agree.
 | File | What it is |
 | -- | -- |
 | `corpus.json` | The corpus. Hand-authored, reviewed, normative. |
-| `baseline-normalize.mjs` | A reproduction of the matcher shipping **today**, kept so the defect is measurable here. Not a reference implementation. |
-| `run-baseline.mjs` | Runs the corpus against that baseline and writes the receipt. |
-| `receipt-baseline.json` | **Watched-red evidence.** What the current consumers do to the corpus. |
+| `baseline-normalize.mjs` | A **frozen historical specimen**: the matcher as it existed at two pinned revisions. Not a reference implementation. |
+| `run-baseline.mjs` | Runs the corpus against that specimen and writes the receipt. |
+| `receipt-baseline.json` | **Watched-red evidence.** What that behavior did to the corpus, with structured provenance. |
 
 Gate: `pnpm run check:corpus`.
 
@@ -39,19 +39,28 @@ commit; it must not be imported through a sibling-checkout path.
 
 ## Case kinds
 
-Only three of the six are decidable as pure string operations. The corpus
-carries all six because the contract spans all six, and the runner counts the
-others as **not runnable here** rather than skipping them silently — a harness
-that quietly drops two thirds of a corpus reports coverage it does not have.
+Three kinds are decidable as pure string operations and are **executed here**.
+Three are **delegated** to their ADR-006 §10 owners. Of 59 cases, 45 are
+executed by this harness and 14 are delegated — 3 of the 6 kinds.
 
-| Kind | Decidable by | Owner (ADR-006 §10) |
-| -- | -- | -- |
-| `storedKey` | pure string | standard |
-| `identity` | pure string | standard |
-| `matching` | pure string | standard semantics |
-| `hostQuery` | filesystem + repository | integration or host |
-| `discovery` | repository layout | integration or host |
-| `acquisition` | raw bytes | CLI producer |
+| Kind | Cases | Decidable by | Executed here? | Owner (ADR-006 §10) |
+| -- | --: | -- | -- | -- |
+| `storedKey` | 33 | pure string | yes | standard |
+| `matching` | 8 | pure string | yes | standard semantics |
+| `identity` | 4 | pure string | yes | standard |
+| `hostQuery` | 8 | filesystem + repository | delegated | integration or host |
+| `discovery` | 3 | repository layout | delegated | integration or host |
+| `acquisition` | 3 | raw bytes | delegated | CLI producer |
+
+**Delegated does not mean unrunnable.** Every delegated case carries a complete
+machine-readable `fixture` — repository root, tracked entries, filesystem
+entries and symlinks and an input path for `hostQuery`; repository boundaries,
+artifact locations and a query origin for `discovery`; raw pathname or Git-output
+bytes as hex and an acquisition mode for `acquisition` — plus an expected result
+in the same machine-readable terms, drawn from a declared table of failure
+classifications. An owning harness constructs the case from the corpus without
+inventing semantics, which is what makes "one normative corpus" true rather than
+aspirational. `check-corpus.mjs` fails if any of that is missing.
 
 ## Two distinctions the corpus is careful about
 
@@ -72,8 +81,26 @@ therefore an `acquisition` case, not a `storedKey` one.
 
 ## The watched-red receipt
 
-`receipt-baseline.json` records what today's shipped matcher does when the
-corpus is run through it. It is evidence of a defect, not a target.
+`receipt-baseline.json` records the behavior **observed at the pinned
+revisions** when the corpus is run through the frozen specimen. It is evidence of
+a defect, not a target.
+
+**What it is pinned to**, carried as structured provenance in the receipt itself:
+
+| Repository | Revision | Source paths reproduced |
+| -- | -- | -- |
+| `workspacejson/integrations` | `219d3322f4fe39d21ae8a8b15b5634764b90df2c` | `src/path-match.ts`, `extension/src/pathMatch.ts` |
+| `workspace-json/codex-mcp` | `ddcd7b70ac231b1d8ec559bf69eea90ad8dd615d` | `src/path-match.ts`, `extension/src/pathMatch.ts` |
+
+Byte-identity between the two was verified with `diff -q` on 2026-08-09. The
+ordering defect — validation running *after* normalization — was observed at
+`extension/src/parseSnapshot.ts:66,88,147` in both.
+
+**What this evidence cannot do.** The specimen is a frozen copy and never
+executes either consumer, so it **cannot detect a future regression** in
+`integrations` or `codex-mcp`. It supports a claim about the pinned revisions and
+nothing later. Those repositories detect their own regressions by running this
+normative corpus against their actual implementations.
 
 The baseline reproduces the **cause** — `node:path.normalize` applied to a
 stored key — rather than importing the consumers, which the architecture guard
@@ -82,7 +109,7 @@ multi-repository checkout. The consumers are cited by location in
 `baseline-normalize.mjs`, verified byte-identical between `integrations` and
 `codex-mcp`.
 
-Current findings, reproduced on every run:
+Findings at those revisions, reproduced on every run:
 
 - **5 malformed keys are silently repaired into valid-looking keys** —
   `src/../x` → `x`, `a/b/../b/c.ts` → `a/b/c.ts`, `./leading.ts` →
@@ -97,10 +124,11 @@ Current findings, reproduced on every run:
   guard in the shipped code does not bound this; it only excludes single-segment
   stored keys.
 
-`check:corpus` fails if a fresh run stops reproducing the committed receipt, and
-fails if the receipt ever records zero silent repairs — either would mean the
-baseline no longer reflects what ships, or that the evidence was edited to look
-clean.
+`check:corpus` fails if a fresh run stops reproducing the committed receipt,
+fails if the provenance pins are missing or abbreviated, and fails if the receipt
+ever records zero silent repairs. The specimen is *intentionally* defective and
+must stay that way: a clean reading means the frozen copy drifted from the pinned
+revisions or the evidence was edited, not that anything downstream was fixed.
 
-When Phase 4 replaces those matchers in their own repositories, this baseline
-stays as the regression witness.
+When those matchers are replaced in their own repositories, this specimen stays
+as the historical record of what was there before.

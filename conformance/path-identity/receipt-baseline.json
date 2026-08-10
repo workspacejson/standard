@@ -1,10 +1,41 @@
 {
-  "$comment": "WATCHED-RED EVIDENCE. Produced by run-baseline.mjs against the matcher behavior shipping today. Every entry under `disagreements` is a case where the current consumers depart from ADR-006. This file records the defect; it is not a target.",
+  "$comment": "WATCHED-RED EVIDENCE. A historical defect witness. Produced by run-baseline.mjs against a frozen reproduction of the matcher behavior OBSERVED AT THE PINNED REVISIONS below. Every entry under `disagreements` is a case where that behavior departed from ADR-006. This file records a defect; it is not a target. It cannot detect a future regression in either consumer — it never executes them. Those repositories detect their own regressions by running this corpus against their actual implementations.",
   "corpusVersion": 1,
+  "provenance": {
+    "kind": "historical-defect-witness",
+    "observedOn": "2026-08-09",
+    "byteIdenticalAcrossRepositories": true,
+    "byteIdentityVerifiedWith": "diff -q",
+    "observedAt": [
+      {
+        "repository": "workspacejson/integrations",
+        "revision": "219d3322f4fe39d21ae8a8b15b5634764b90df2c",
+        "sourcePaths": [
+          "src/path-match.ts",
+          "extension/src/pathMatch.ts"
+        ]
+      },
+      {
+        "repository": "workspace-json/codex-mcp",
+        "revision": "ddcd7b70ac231b1d8ec559bf69eea90ad8dd615d",
+        "sourcePaths": [
+          "src/path-match.ts",
+          "extension/src/pathMatch.ts"
+        ]
+      }
+    ],
+    "reproducedSymbols": [
+      "normalizeKey",
+      "pathsMatch",
+      "isValidRelativeKey"
+    ],
+    "orderingObservedAt": "extension/src/parseSnapshot.ts:66,88,147",
+    "limitation": "A frozen copy. It never executes either consumer, so it establishes what shipped at the pinned revisions and nothing about any later revision."
+  },
   "totals": {
     "cases": 59,
-    "runnable": 45,
-    "notRunnable": 14,
+    "executedHere": 45,
+    "delegated": 14,
     "agrees": 31,
     "disagrees": 14,
     "silentlyRepairedIntoAValidLookingKey": 5
@@ -147,7 +178,7 @@
       "corpusExpects": "no-match"
     }
   ],
-  "notRunnable": {
+  "delegated": {
     "hostQuery": 8,
     "discovery": 3,
     "acquisition": 3
