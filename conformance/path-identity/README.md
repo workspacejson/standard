@@ -20,10 +20,10 @@ Gate: `pnpm run check:corpus`.
 ## What the corpus is not
 
 **It is not a reference implementation, and there is no reference
-implementation yet.** `validateStoredKey` is Phase 3 of META-278. The corpus
-exists first on purpose: fixtures written after an implementation are written
-against its behavior, which is the difference between ratification and
-rubber-stamping.
+implementation yet.** The standard-owned `validateStoredKey` is a later step in
+the same programme of work. The corpus exists first on purpose: fixtures written
+after an implementation are written against its behavior, which is the
+difference between ratification and rubber-stamping.
 
 **It is not a schema change.** Nothing here alters `packages/spec/schema/v1.json`
 or what `validate()` accepts. Under ADR-006 §9 a v0.4.x reader **reports** a
