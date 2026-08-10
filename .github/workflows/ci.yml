@@ -96,6 +96,15 @@ jobs:
       - name: Validate shipped examples against the package schema
         run: pnpm run check:examples
 
+      # ADR-006's normative path-identity corpus: structure, coverage, and that
+      # every delegated case carries a portable fixture. Also re-runs the frozen
+      # historical witness and fails if it stops reproducing the committed
+      # receipt, which would mean the specimen no longer reflects the revisions
+      # it is pinned to. It does NOT observe the consumer repositories — they
+      # run this corpus against their own implementations.
+      - name: Verify the path-identity corpus and its watched-red receipt
+        run: pnpm run check:corpus
+
       # Only packages this repository publishes are verified here.
       # agents-audit belongs to workspacejson/cli and is deliberately absent.
       #

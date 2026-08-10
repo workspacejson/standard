@@ -27,6 +27,7 @@
     "check:examples": "node scripts/validate-examples.mjs",
     "check:conformance": "node scripts/check-producer-conformance.mjs",
     "check:conformance:test": "node scripts/check-producer-conformance.test.mjs",
+    "check:corpus": "node scripts/check-corpus.mjs",
     "check:docs": "node scripts/check-docs.mjs",
     "check:adr": "node scripts/adr-index.mjs",
     "check:adr:test": "node scripts/adr-index.test.mjs",

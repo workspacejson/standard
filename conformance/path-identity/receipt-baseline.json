@@ -1,0 +1,186 @@
+{
+  "$comment": "WATCHED-RED EVIDENCE. A historical defect witness. Produced by run-baseline.mjs against a frozen reproduction of the matcher behavior OBSERVED AT THE PINNED REVISIONS below. Every entry under `disagreements` is a case where that behavior departed from ADR-006. This file records a defect; it is not a target. It cannot detect a future regression in either consumer — it never executes them. Those repositories detect their own regressions by running this corpus against their actual implementations.",
+  "corpusVersion": 1,
+  "provenance": {
+    "kind": "historical-defect-witness",
+    "observedOn": "2026-08-09",
+    "byteIdenticalAcrossRepositories": true,
+    "byteIdentityVerifiedWith": "diff -q",
+    "observedAt": [
+      {
+        "repository": "workspacejson/integrations",
+        "revision": "219d3322f4fe39d21ae8a8b15b5634764b90df2c",
+        "sourcePaths": [
+          "src/path-match.ts",
+          "extension/src/pathMatch.ts"
+        ]
+      },
+      {
+        "repository": "workspace-json/codex-mcp",
+        "revision": "ddcd7b70ac231b1d8ec559bf69eea90ad8dd615d",
+        "sourcePaths": [
+          "src/path-match.ts",
+          "extension/src/pathMatch.ts"
+        ]
+      }
+    ],
+    "reproducedSymbols": [
+      "normalizeKey",
+      "pathsMatch",
+      "isValidRelativeKey"
+    ],
+    "orderingObservedAt": "extension/src/parseSnapshot.ts:66,88,147",
+    "limitation": "A frozen copy. It never executes either consumer, so it establishes what shipped at the pinned revisions and nothing about any later revision."
+  },
+  "totals": {
+    "cases": 59,
+    "executedHere": 45,
+    "delegated": 14,
+    "agrees": 31,
+    "disagrees": 14,
+    "silentlyRepairedIntoAValidLookingKey": 5
+  },
+  "silentRepairs": [
+    {
+      "id": "stored/invalid/interior-dotdot",
+      "storedAs": "x"
+    },
+    {
+      "id": "stored/invalid/interior-dotdot-roundtrip",
+      "storedAs": "a/b/c.ts"
+    },
+    {
+      "id": "stored/invalid/leading-dot-slash",
+      "storedAs": "leading.ts"
+    },
+    {
+      "id": "stored/invalid/repeated-separator",
+      "storedAs": "double/sep.ts"
+    },
+    {
+      "id": "stored/invalid/trailing-separator",
+      "storedAs": "trailing"
+    }
+  ],
+  "disagreements": [
+    {
+      "id": "stored/invalid/interior-dotdot",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "x",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/interior-dotdot-roundtrip",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "a/b/c.ts",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/drive-letter",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "C:/drive/x.ts",
+      "mutated": true,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/drive-letter-forward",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "C:/drive/x.ts",
+      "mutated": false,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/backslash",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "back/slash.ts",
+      "mutated": true,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/leading-dot-slash",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "leading.ts",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/repeated-separator",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "double/sep.ts",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/trailing-separator",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "trailing",
+      "mutated": true,
+      "silentlyRepaired": true
+    },
+    {
+      "id": "stored/invalid/nul",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "a\u0000b.ts",
+      "mutated": false,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "stored/invalid/unpaired-surrogate",
+      "kind": "storedKey",
+      "baselineAdmitted": true,
+      "corpusExpects": "invalid",
+      "baselineKey": "lone\ud800.ts",
+      "mutated": false,
+      "silentlyRepaired": false
+    },
+    {
+      "id": "matching/malformed-never-matches-repaired-value",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    },
+    {
+      "id": "matching/malformed-never-matches-itself",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    },
+    {
+      "id": "matching/no-suffix-fallback-absolute",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    },
+    {
+      "id": "matching/no-suffix-fallback-absolute-deep",
+      "kind": "matching",
+      "baselineMatched": true,
+      "corpusExpects": "no-match"
+    }
+  ],
+  "delegated": {
+    "hostQuery": 8,
+    "discovery": 3,
+    "acquisition": 3
+  }
+}
