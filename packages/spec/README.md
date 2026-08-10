@@ -47,6 +47,114 @@ validateV4(doc);      // true if doc is a valid v0.4 document
 validateLegacy(doc);  // true if doc is a valid v0.1/v0.2 document
 ```
 
+### Path identity — stored keys
+
+Per [ADR-006](../../docs/adr/006-canonical-path-identity.md): a path-bearing value in a
+`workspace.json` is **data, not a command**. It must already be a canonical
+repository-root-relative POSIX key. Two functions decide that — one for a single key, one for a
+whole document — and neither ever produces or repairs a key.
+
+```ts
+import { validateStoredKey, inspectStoredKeys } from '@workspacejson/spec';
+import type {
+  StoredKeyResult,
+  StoredKeyRejection,
+  StoredKeyDocument,
+  StoredKeySurface,
+  StoredKeyFinding,
+} from '@workspacejson/spec';
+```
+
+#### `validateStoredKey(rawKey)` — one key
+
+```ts
+validateStoredKey('src/a.ts');    // { valid: true,  key: 'src/a.ts' }
+validateStoredKey('src/../a.ts'); // { valid: false, reason: 'dotdot-segment' }
+```
+
+```ts
+type StoredKeyResult =
+  | { readonly valid: true;  readonly key: string }
+  | { readonly valid: false; readonly reason: StoredKeyRejection }
+
+type StoredKeyRejection =
+  | 'empty' | 'nul' | 'unpaired-surrogate'
+  | 'unc-prefix' | 'drive-letter' | 'backslash' | 'absolute-posix'
+  | 'leading-dot-slash' | 'dot-segment' | 'dotdot-segment'
+  | 'repeated-separator' | 'trailing-separator'
+```
+
+Pure, total, filesystem-free and deterministic. Apply it to the string **as stored, before any
+path library sees it** — normalizing first and validating second is the defect ADR-006 records,
+because by then `src/../a.ts` is already `a.ts` and nothing ever asked whether it was well-formed.
+
+**There is deliberately no repaired-key field.** A valid result carries the input unchanged; a
+rejection carries a reason and nothing you could mistake for a usable key. A malformed key matches
+nothing — including the value normalization would have produced.
+
+**Reason precedence is fixed**, so two implementations classify the same key identically:
+cannot-be-a-string first, then cannot-be-POSIX, then merely non-canonical. `C:\x` reports
+`drive-letter` rather than `backslash`; `./x` reports `leading-dot-slash` rather than `dot-segment`.
+
+Case and Unicode form are **significant**: `A.ts` and `a.ts` are two keys, and so are the NFC and
+NFD spellings of `café.ts`. A genuine U+FFFD is a valid pathname character — distinguishing it from
+a substitution needs the original bytes, which is a producer concern.
+
+`canonicalizeHostQuery` is **not** part of this package. Turning a host or editor path into a key
+needs a filesystem and a proven repository root; ADR-006 §10 assigns it to integrations and hosts.
+
+#### `inspectStoredKeys(document)` — one document
+
+Reports every malformed key on every ratified path-bearing surface. This is the *report it* half of
+ADR-006 §9; *decline to match it* stays with you, since only you know what a lookup is.
+
+```ts
+if (!validate(raw)) {
+  // Existing invalid-document handling.
+} else {
+  for (const finding of inspectStoredKeys(raw)) {
+    console.warn(`${finding.pointer}: ${finding.rawKey} — ${finding.reason}`);
+  }
+}
+```
+
+```ts
+type StoredKeyDocument = WorkspaceJsonV3 | WorkspaceJsonV4
+
+type StoredKeySurface =
+  | 'generated.fileIndex'
+  | 'generated.coChange[].files[]'
+  | 'generated.fragility[].file'
+  | 'manual.fragileFiles[].path'
+
+type StoredKeyFinding = {
+  readonly pointer: string          // RFC 6901, with `~0` / `~1` escaping
+  readonly surface: StoredKeySurface
+  readonly rawKey: string           // exactly as stored
+  readonly reason: StoredKeyRejection
+}
+```
+
+**The input is a schema-validated document, not `unknown`** — call `validate()` first, as above.
+That narrowing is what makes the result unambiguous: `[]` means every inspected value in an
+accepted document is well-formed, and an unvalidated value is outside the declared input domain
+rather than silently "clean". `inspectStoredKeys` does not call `validate()` for you and is not a
+second document validator.
+
+Findings are **location-bearing records**: one per occurrence, never deduplicated, never repaired.
+The same malformed spelling at four locations is four findings. **Order carries no meaning** — match
+on `pointer`, never on position.
+
+`manual.coChangePatterns` is **not** inspected. ADR-003 amendment A-005 has not ratified its item
+shape — the schema constrains items to `{"type": "object"}` and nothing more — so inspecting a
+presumed `files` field would turn an authoring-time assumption into a normative contract. The
+surface is added once A-005 settles it.
+
+**v0.4.x acceptance is unaffected.** `validate()` and `validateV4()` still accept artifacts that
+carry malformed keys, because a v0.4.x reader is required to *report* and *decline to match* while
+continuing over the well-formed remainder. Rejecting such a document is a v0.5 document-profile
+change and has not happened.
+
 ### Schema object
 
 ```ts
