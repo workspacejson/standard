@@ -53,6 +53,7 @@ const PROVENANCE_FILES = new Set([
   "docs/adr/001-canonical-artifact-path.md",
   "docs/adr/002-bounded-enrichment-program.md",
   "docs/adr/003-field-lifecycle-and-admission.md",
+  "docs/adr/006-canonical-path-identity.md",
 ]);
 
 // Historical release notes are a record of what was published, not live prose.
