@@ -3,6 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { compileSchemaValidator } from './validator.js';
 
 export { workspaceJsonSchema } from './schema.js';
+export { validateStoredKey } from './path-identity.js';
+export type { StoredKeyResult, StoredKeyRejection } from './path-identity.js';
 export type {
   WorkspaceJson,
   WorkspacePackage,
