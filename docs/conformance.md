@@ -84,7 +84,7 @@ Ten executable examples live in
 | `populated-v0.3.json` | v0.3 | Every v0.3 section populated |
 | `with-manual-block-v0.3.json` | v0.3 | Human-authored `manual` evidence |
 | `populated-v0.4.json` | v0.4 | Every v0.4 section populated |
-| `cochange-observations-v0.4.json` | v0.4 | Observation form: raw counts, a pair stored in reversed order, a zero-support observation, and `support == occurrences` |
+| `cochange-observations-v0.4.json` | v0.4 | Observation form: raw counts, a zero-support observation, and `support == occurrences`. Its pair is stored in **non-canonical order** as a reader-tolerance fixture — **not** reference-producer output; new producers canonicalize by ascending UTF-8 bytes. See the ordering note under *Known gaps*. |
 | `cochange-legacy-rate-v0.4.json` | v0.4 | Legacy form with no basis pin — executable proof that the A-009 widening invalidates no published artifact |
 | `cochange-legacy-head-basis-v0.4.json` | v0.4 | Legacy artifact carrying `basisRevision: "HEAD"` — the regression guard proving the object-ID pattern is scoped to the observation form and not global |
 | `cochange-absent-v0.4.json` | v0.4 | State: **not analyzed** — `coChange` absent |
@@ -316,6 +316,91 @@ Stated plainly, because a conformance document that hides them is misleading:
   voids a conformance signal measured against obligations absent from the bundle
   the implementer received, and pinned in both directions by test so this
   paragraph cannot drift away from the behavior.
+- **No validator can prove that `occurrences` is the union rather than one
+  endpoint's marginal.** This is the same class of limit as the one above, and
+  the more consequential of the two, because the defect it admits is silent.
+  `occurrences` is defined as the count of qualifying commits in which **at
+  least one** of the two files changed — the symmetric union. A producer that
+  instead emitted one endpoint's marginal would ship a document that is
+  internally consistent in every checkable way:
+
+  | Check | On an observation whose `occurrences` is a subject marginal |
+  | -- | -- |
+  | Bare packaged schema | **accepts** |
+  | `validate()` / `validateV4()` | **accepts** |
+
+  Both counts are non-negative integers, `support <= occurrences` still holds,
+  the entry is unambiguously in the observation form, and `basisRevision` is
+  pinned. Nothing in the document contradicts anything else in it. Detecting the
+  substitution requires recounting against the repository history the artifact
+  was derived from, which document validation does not have and never will.
+
+  Three consequences follow, and they are stated separately because collapsing
+  them is what makes this limit easy to under-report:
+
+  1. **Union semantics are a producer-profile obligation**, not a document
+     property. They are eventually exercised by candidate-producer conformance
+     against real repository history — the only place the claim is falsifiable —
+     and not by any check in this repository today.
+  2. **The marginals must be asymmetric for a test to be meaningful.** Equal
+     marginals make the union and the subject denominator coincide, so the
+     substitution becomes unobservable. The worked invariant used throughout
+     this standard is deliberately asymmetric: marginals **20** and **12** with
+     intersection **8** give `support: 8` and `occurrences: 24`, and 24 is
+     neither 20 nor 12. It is derived from a commit ledger and compared against
+     the bytes of `examples/cochange-observations-v0.4.json` by test, so the
+     shipped example cannot drift toward a marginal unnoticed.
+  3. **Two conforming-looking producers can disagree.** An unordered pair has no
+     subject, so "the subject's marginal" is not even well defined — a producer
+     adopting it has two answers available and nothing in the artifact to choose
+     between them. That is the reason the union was selected, recorded in
+     ADR-003 A-009.
+- **Emission policy for `rate` is unenforceable at the document level, by
+  construction.** A new observation producer must emit `support` +
+  `occurrences` and **must not** emit `rate`. But legacy `rate` artifacts remain
+  schema-valid for the whole of the v0.4 transition — that is the entire point
+  of the widening — so a document carrying `rate` is indistinguishable from a
+  correctly-behaving legacy artifact. Validation cannot tell a valid legacy
+  document from a new producer violating the emission policy, and no rule added
+  here could make it, short of a narrowing that would invalidate published
+  artifacts. What *is* checkable, and is checked, is that an entry never carries
+  `rate` and `support` together and that an array never mixes the two forms.
+  The residue — *which* producer wrote a legacy-form entry — is carried by the
+  producer profile alone. `rate` is removed at the next document-profile change,
+  at which point the obligation becomes a schema rule; that step is not
+  authorized here.
+- **Pair ordering is a producer obligation and deliberately not a schema rule.**
+  `generated.coChange[].files` is an **unordered pair with set semantics**: both
+  orderings are valid, joins are by membership, and no reader may attribute
+  meaning to position. Readers are not narrowed, and reversed documents must
+  keep validating — a schema ordering constraint would break every published
+  artifact that stored the other ordering. Separately, a **new producer
+  serializes the two canonical stored keys in ascending UTF-8 byte order** — not
+  locale collation, not case-folded, and with no Unicode normalization applied,
+  since each of those is a different total order and ADR-006 forbids rewriting a
+  stored key. The property this buys is that endpoint reversal produces
+  identical producer bytes, so a regenerated artifact is stable. Enforcement
+  belongs to the candidate-producer conformance suite that gates observation-form
+  emission — recorded in ADR-003 A-009, and out of scope for this repository;
+  what is pinned here by test is the rule itself and the fact that applying it
+  changes nothing about what readers accept.
+
+  **`cochange-observations-v0.4.json` stores its pair as
+  `["src/session.ts", "src/auth.ts"]`, which is *not* ascending UTF-8 order.
+  That is deliberate and it stays.** Three statements about it, none of which may
+  be inferred away:
+
+  1. It is retained as a **reader-tolerance fixture** — executable evidence that
+     a conforming reader must not depend on pair order, and that the reversed
+     ordering is fully valid.
+  2. It is **not reference-producer output**, and must not be read as a model of
+     what a producer emits. No published example in this repository is a
+     producer receipt.
+  3. **New producers canonicalize pair members by ascending UTF-8 bytes.** The
+     fixture's ordering is therefore *not* a precedent, and its validity is not
+     evidence that canonical ordering is optional for producers. Reader
+     tolerance and producer obligation are separate contracts, and this fixture
+     exists to exercise the first one, not to relax the second.
 
 ### Producer conformance IS mechanically checked here
 
