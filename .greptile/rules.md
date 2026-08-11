@@ -104,7 +104,9 @@ Reader validity and producer obligations must remain distinct. Reader tolerance
 does not relax producer obligations. A reader that accepts a missing field does
 not mean a producer may omit it. Keep these two concerns in separate code paths
 and documentation sections. A change that widens what a reader accepts must not
-be interpreted as widening what a producer must emit.
+be interpreted as widening what a producer must emit. The ordering of
+`generated.coChange[].files` is normative document validity and reversed pairs
+must be rejected by the reader.
 
 Scope: `packages/spec/**`, `docs/conformance.md`
 
