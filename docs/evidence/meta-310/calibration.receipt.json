@@ -1,0 +1,179 @@
+{
+  "label": "CALIBRATION",
+  "repoRoot": "/private/tmp/claude-502/-Users-user1-dev-workspacejson-projects-standard/91d9ed1b-3746-41c4-a5ad-d64b924c9a12/scratchpad/meta310/wt/calib",
+  "pinnedRevision": "8e08c8c5cd110e7f95bbd52246ea295c22b072e3",
+  "shallow": false,
+  "firstParentCountAtPin": 90,
+  "producerElapsedMs": 7282,
+  "historyRefresh": {
+    "requested": true,
+    "mined": true,
+    "preserved": false
+  },
+  "artifact": {
+    "path": ".agents/workspace.json",
+    "bytes": 20417,
+    "sha256": "cc88989ccc8cf325af45330ef9b4f1c00c21fa1c85c8bb0ccf264b462832a988",
+    "specVersion": "0.4",
+    "basisRevision": "8e08c8c5cd110e7f95bbd52246ea295c22b072e3",
+    "coChangePresent": true,
+    "entryCount": 50,
+    "historyBlockSha256": "7012352617df37f442a627b8dfc334ed17d63dd2a69bb2d875f759bfddcc7b4f",
+    "shapeAudit": {
+      "distinctKeysets": [
+        "files,occurrences,support"
+      ],
+      "anyStoredRate": false,
+      "anyGeneratedFlag": false,
+      "allPairsUtf8Ordered": true,
+      "supportLteOccurrences": true,
+      "minSupportEmitted": 4,
+      "maxSupportEmitted": 12
+    },
+    "topEntries": [
+      {
+        "files": [
+          "packages/rules/package.json",
+          "packages/spec/package.json"
+        ],
+        "support": 12,
+        "occurrences": 24
+      },
+      {
+        "files": [
+          "packages/spec/schema/v1.json",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 10,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          "packages/spec/src/index.test.ts",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 10,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "packages/spec/schema/v1.json",
+          "packages/spec/src/index.test.ts"
+        ],
+        "support": 9,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "packages/spec/schema/v1.json",
+          "packages/spec/src/types.ts"
+        ],
+        "support": 8,
+        "occurrences": 10
+      },
+      {
+        "files": [
+          "packages/spec/src/schema.ts",
+          "packages/spec/src/types.ts"
+        ],
+        "support": 8,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          "packages/spec/CHANGELOG.md",
+          "packages/spec/package.json"
+        ],
+        "support": 8,
+        "occurrences": 23
+      },
+      {
+        "files": [
+          ".github/workflows/ci.yml",
+          "package.json"
+        ],
+        "support": 7,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          "packages/spec/src/index.test.ts",
+          "packages/spec/src/types.ts"
+        ],
+        "support": 7,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "packages/spec/src/index.test.ts",
+          "packages/spec/src/index.ts"
+        ],
+        "support": 7,
+        "occurrences": 16
+      }
+    ]
+  },
+  "validation": {
+    "valid": true,
+    "errorCount": 0,
+    "errors": []
+  },
+  "receipts": {
+    "completeness": {
+      "state": "QUALIFYING_RELATIONSHIP_OBSERVED",
+      "reason": "MINED",
+      "detail": "mined 90 first-parent transition(s) from 8e08c8c5cd110e7f95bbd52246ea295c22b072e3; 6913 pair(s) at or above 1 co-occurrence(s)"
+    },
+    "basisWindow": {
+      "basisRevision": "HEAD",
+      "basisCommit": "8e08c8c5cd110e7f95bbd52246ea295c22b072e3",
+      "windowTransitions": 500,
+      "availableTransitions": 90,
+      "extractedTransitions": 90,
+      "windowTruncated": false
+    },
+    "scoringBasis": {
+      "weightingVersion": "META-289 v2.2.1",
+      "sizeWeightNumerator": 10,
+      "positionDecayHalfLife": 250,
+      "maxScoredFileCount": 50,
+      "basisRevision": "8e08c8c5cd110e7f95bbd52246ea295c22b072e3",
+      "windowOldestCommit": "eb00f60ea60fb1aa4f1ecaed0f219fb6553cb91d",
+      "windowNewestCommit": "8e08c8c5cd110e7f95bbd52246ea295c22b072e3",
+      "decayOriginPosition": 89
+    },
+    "exclusions": {
+      "maxFileCount": 50,
+      "scoredEventCount": 89,
+      "excludedEventCount": 1,
+      "excludedCommits": [
+        "eb00f60ea60fb1aa4f1ecaed0f219fb6553cb91d"
+      ],
+      "excludedCommitsTotal": 1
+    },
+    "selection": {
+      "minSupport": 3,
+      "pairsBeforeCap": 128,
+      "pairsEmitted": 50,
+      "cap": 50,
+      "rankingRule": "support DESC, then occurrences ASC, then files[0] ASC by UTF-8 bytes, then files[1] ASC by UTF-8 bytes",
+      "capBound": true
+    },
+    "pairsEmitted": 50
+  },
+  "crossCheck": {
+    "producerEntries": 50,
+    "receiptEntries": 50,
+    "identical": true
+  },
+  "determinism": {
+    "secondRunHistoryBlockSha256": "7012352617df37f442a627b8dfc334ed17d63dd2a69bb2d875f759bfddcc7b4f",
+    "historyBlockStable": true,
+    "wholeFileIdentical": true,
+    "secondRunRefresh": {
+      "requested": true,
+      "mined": true,
+      "preserved": false
+    }
+  }
+}

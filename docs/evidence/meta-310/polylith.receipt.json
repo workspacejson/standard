@@ -1,0 +1,203 @@
+{
+  "label": "polylith",
+  "repoRoot": "/private/tmp/claude-502/-Users-user1-dev-workspacejson-projects-standard/91d9ed1b-3746-41c4-a5ad-d64b924c9a12/scratchpad/meta310/targets/polylith",
+  "pinnedRevision": "68dab9868274c8044817983c2424fbdbd616a456",
+  "shallow": false,
+  "firstParentCountAtPin": 394,
+  "producerElapsedMs": 34027,
+  "historyRefresh": {
+    "requested": true,
+    "mined": true,
+    "preserved": false
+  },
+  "artifact": {
+    "path": ".agents/workspace.json",
+    "bytes": 102632,
+    "sha256": "848540525a7b20842105eea5b62024604580fb63ad615b5d962c49d6e5e82c8a",
+    "specVersion": "0.4",
+    "basisRevision": "68dab9868274c8044817983c2424fbdbd616a456",
+    "coChangePresent": true,
+    "entryCount": 50,
+    "historyBlockSha256": "a77451d9727da87d4312fdd6da7a2a59ea5f402b7b08e04ee0d4fe7b66fc15d0",
+    "shapeAudit": {
+      "distinctKeysets": [
+        "files,occurrences,support"
+      ],
+      "anyStoredRate": false,
+      "anyGeneratedFlag": false,
+      "allPairsUtf8Ordered": true,
+      "supportLteOccurrences": true,
+      "minSupportEmitted": 13,
+      "maxSupportEmitted": 95
+    },
+    "topEntries": [
+      {
+        "files": [
+          "components/version/src/polylith/clj/core/version/interface.clj",
+          "readme.adoc"
+        ],
+        "support": 95,
+        "occurrences": 172
+      },
+      {
+        "files": [
+          "scripts/output/local-dep-old-format/ws.edn",
+          "scripts/output/local-dep/ws.edn"
+        ],
+        "support": 35,
+        "occurrences": 37
+      },
+      {
+        "files": [
+          "examples/doc-example/ws.edn",
+          "scripts/output/local-dep-old-format/ws.edn"
+        ],
+        "support": 29,
+        "occurrences": 35
+      },
+      {
+        "files": [
+          "examples/doc-example/ws.edn",
+          "scripts/output/local-dep/ws.edn"
+        ],
+        "support": 29,
+        "occurrences": 37
+      },
+      {
+        "files": [
+          "components/version/src/polylith/clj/core/version/interface.clj",
+          "doc/commands.adoc"
+        ],
+        "support": 29,
+        "occurrences": 164
+      },
+      {
+        "files": [
+          "components/version/src/polylith/clj/core/version/interface.clj",
+          "projects/poly/test/project/poly/poly_workspace_test.clj"
+        ],
+        "support": 29,
+        "occurrences": 167
+      },
+      {
+        "files": [
+          "doc/commands.adoc",
+          "scripts/output/help/help.txt"
+        ],
+        "support": 28,
+        "occurrences": 35
+      },
+      {
+        "files": [
+          "components/version/src/polylith/clj/core/version/interface.clj",
+          "scripts/output/local-dep-old-format/ws.edn"
+        ],
+        "support": 28,
+        "occurrences": 166
+      },
+      {
+        "files": [
+          "components/version/src/polylith/clj/core/version/interface.clj",
+          "scripts/output/local-dep/ws.edn"
+        ],
+        "support": 28,
+        "occurrences": 168
+      },
+      {
+        "files": [
+          "components/version/src/polylith/clj/core/version/interface.clj",
+          "examples/doc-example/ws.edn"
+        ],
+        "support": 27,
+        "occurrences": 161
+      }
+    ]
+  },
+  "validation": {
+    "valid": true,
+    "errorCount": 0,
+    "errors": []
+  },
+  "receipts": {
+    "completeness": {
+      "state": "QUALIFYING_RELATIONSHIP_OBSERVED",
+      "reason": "MINED",
+      "detail": "mined 394 first-parent transition(s) from 68dab9868274c8044817983c2424fbdbd616a456; 594890 pair(s) at or above 1 co-occurrence(s)"
+    },
+    "basisWindow": {
+      "basisRevision": "HEAD",
+      "basisCommit": "68dab9868274c8044817983c2424fbdbd616a456",
+      "windowTransitions": 500,
+      "availableTransitions": 394,
+      "extractedTransitions": 394,
+      "windowTruncated": false
+    },
+    "scoringBasis": {
+      "weightingVersion": "META-289 v2.2.1",
+      "sizeWeightNumerator": 10,
+      "positionDecayHalfLife": 250,
+      "maxScoredFileCount": 50,
+      "basisRevision": "68dab9868274c8044817983c2424fbdbd616a456",
+      "windowOldestCommit": "0aaeb588b004d48a6f34f35be52d204d568af9ec",
+      "windowNewestCommit": "68dab9868274c8044817983c2424fbdbd616a456",
+      "decayOriginPosition": 393
+    },
+    "exclusions": {
+      "maxFileCount": 50,
+      "scoredEventCount": 357,
+      "excludedEventCount": 37,
+      "excludedCommits": [
+        "9b3cc9e48947b016d546ae70259c3473e790e0e6",
+        "19995f5f83bad54ea48b46312afb60efe753f525",
+        "78b2c77c56d1b41109d68b451069affac935200e",
+        "e3b148a22ad77af3e3b35d504016e1dd5ca386c9",
+        "34804e54538fad540b69498996c1b6a6adecf67c",
+        "d8b55eb42154df962b940503c5f7a5870d283b5f",
+        "febea3d8a9b30a60397594dda3cb0f25154b8d8d",
+        "31c1fe4e71fa250544b7b549ff9734a074c809a4",
+        "36b75565032dea88ee20cdc0bc5af18f6f4d4cf4",
+        "abd20bb656e2cdd712732d80e1238316d3ea1b7f",
+        "7bbdf80c88b13a838a8b438f6878f3dfdf4d399f",
+        "6bb6140688d9dcd2935543f288b75c680cea19ff",
+        "e3bc4556f5efa0346bd144dfe579a7a453a4464d",
+        "f51abaf45990eb08575317b970a388f5b6955015",
+        "3a9b27783b8a14eda1051240b13c9ff9435f458f",
+        "e4d3f0e67bf1082d686b3049682b3f811cb1925a",
+        "bd84789c9fe41eaaf19d431f1fc8772808c9eaad",
+        "1209a81e6b8f70987050d65d106e99d1a902969a",
+        "9053b190d5f3b0680ac4fe5c5f1851f7c0d40830",
+        "e7dc026a595894665de82b644ee4f6da0dfbeaa8",
+        "6144c816d813ff891e557592542b70262a85b435",
+        "6bb18c96a1dc7fc368674ce20dc172d83a6649bb",
+        "2df5541fdb6d1739603687b1c2d0618175f4012f",
+        "c7e7a64f13e06d6dac5658e230ab17c39cb77607",
+        "00579eefcaaa853ede3275e1c6a3395c1f37710b"
+      ],
+      "excludedCommitsTotal": 37
+    },
+    "selection": {
+      "minSupport": 3,
+      "pairsBeforeCap": 1658,
+      "pairsEmitted": 50,
+      "cap": 50,
+      "rankingRule": "support DESC, then occurrences ASC, then files[0] ASC by UTF-8 bytes, then files[1] ASC by UTF-8 bytes",
+      "capBound": true
+    },
+    "pairsEmitted": 50
+  },
+  "crossCheck": {
+    "producerEntries": 50,
+    "receiptEntries": 50,
+    "identical": true
+  },
+  "determinism": {
+    "secondRunHistoryBlockSha256": "a77451d9727da87d4312fdd6da7a2a59ea5f402b7b08e04ee0d4fe7b66fc15d0",
+    "historyBlockStable": true,
+    "wholeFileIdentical": true,
+    "secondRunRefresh": {
+      "requested": true,
+      "mined": true,
+      "preserved": false
+    }
+  }
+}
