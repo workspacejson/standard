@@ -1012,6 +1012,11 @@ describe('A-009 co-change raw observations', () => {
       'cochange-both-representations.json': (d) => {
         delete d.generated.coChange[0]!['rate'];
       },
+      'cochange-legacy-missing-generated.json': (d) => {
+        // A-010 widened the OBSERVATION form only. The legacy form still
+        // requires the classification flag, so restoring it is the whole repair.
+        d.generated.coChange[0]!['generated'] = false;
+      },
       'cochange-missing-basis-revision.json': (d) => {
         d.generated.basisRevision = BASIS;
       },
