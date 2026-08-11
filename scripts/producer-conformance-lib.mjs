@@ -200,19 +200,34 @@ export function runMediated(candidate, repo) {
 // ---------------------------------------------------------------------------
 
 export function createReporter() {
-  const state = { pass: 0, fail: 0, failures: [] };
+  const state = { pass: 0, fail: 0, failures: [], notMeasured: [] };
+  const check = (label, condition, detail = '') => {
+    if (condition) {
+      console.log(`  PASS  ${label}`);
+      state.pass += 1;
+    } else {
+      console.log(`  FAIL  ${label}${detail ? `\n          ${detail}` : ''}`);
+      state.fail += 1;
+      state.failures.push(label);
+    }
+  };
+
+  /**
+   * Record a property this candidate gave the suite no way to measure.
+   *
+   * Counted separately from `pass` on purpose. A property that could not be
+   * exercised has not been demonstrated, and folding it into the pass count
+   * would inflate the denominator with checks that measured nothing — the
+   * failure this suite refuses to skip for elsewhere.
+   */
+  check.notMeasured = (label) => {
+    console.log(`  N/A   ${label}`);
+    state.notMeasured.push(label);
+  };
+
   return {
     state,
-    check(label, condition, detail = '') {
-      if (condition) {
-        console.log(`  PASS  ${label}`);
-        state.pass += 1;
-      } else {
-        console.log(`  FAIL  ${label}${detail ? `\n          ${detail}` : ''}`);
-        state.fail += 1;
-        state.failures.push(label);
-      }
-    },
+    check,
     section(title) {
       console.log(`\n${'='.repeat(70)}\n ${title}\n${'='.repeat(70)}`);
     },

@@ -1,0 +1,637 @@
+{
+  "manual": {},
+  "generated": {
+    "specVersion": "0.4",
+    "generatedAt": "2026-08-11T14:09:41.759Z",
+    "by": {
+      "name": "@workspacejson/cli",
+      "version": "0.5.2"
+    },
+    "frameworkManifest": [],
+    "conventions": [],
+    "fileIndex": {
+      ".changeset/README.md": {},
+      ".changeset/config.json": {},
+      ".changeset/lucky-pugs-invent.md": {},
+      ".changeset/olive-crabs-observe.md": {},
+      ".changeset/olive-hosts-settle.md": {},
+      ".changeset/olive-keys-report.md": {},
+      ".changeset/olive-moons-listen.md": {},
+      ".changeset/tall-otters-classify.md": {},
+      ".editorconfig": {},
+      ".gitattributes": {},
+      ".github/CODEOWNERS": {},
+      ".github/ISSUE_TEMPLATE/bug_report.yml": {},
+      ".github/ISSUE_TEMPLATE/config.yml": {},
+      ".github/ISSUE_TEMPLATE/feature_request.yml": {},
+      ".github/RELEASE-AUTHORITY.md": {},
+      ".github/copilot-instructions.md": {},
+      ".github/dependabot.yml": {},
+      ".github/instructions/ci-release.instructions.md": {},
+      ".github/instructions/conformance.instructions.md": {},
+      ".github/instructions/governance-docs.instructions.md": {},
+      ".github/instructions/repo-tooling.instructions.md": {},
+      ".github/instructions/rules-engine.instructions.md": {},
+      ".github/instructions/schema-contract.instructions.md": {},
+      ".github/pull_request_template.md": {},
+      ".github/workflows/adr-006-evidence.yml": {},
+      ".github/workflows/ci.yml": {},
+      ".gitignore": {},
+      ".npmrc": {},
+      "AGENTS.md": {},
+      "CHANGELOG.md": {},
+      "CODE_OF_CONDUCT.md": {},
+      "CONTRIBUTING.md": {},
+      "GOVERNANCE.md": {},
+      "LICENSE": {},
+      "MAINTAINERS.md": {},
+      "OWNERSHIP.md": {},
+      "README.md": {},
+      "SECURITY.md": {},
+      "SUPPORT.md": {},
+      "assets/README.md": {},
+      "assets/workspace-json-lockup-dark.png": {},
+      "assets/workspace-json-lockup-light.png": {},
+      "conformance/path-identity/README.md": {},
+      "conformance/path-identity/baseline-normalize.mjs": {},
+      "conformance/path-identity/corpus.json": {},
+      "conformance/path-identity/receipt-baseline.json": {},
+      "conformance/path-identity/run-baseline.mjs": {},
+      "docs/adr/001-canonical-artifact-path.md": {},
+      "docs/adr/002-bounded-enrichment-program.md": {},
+      "docs/adr/003-field-lifecycle-and-admission.md": {},
+      "docs/adr/004-root-version-compatibility.md": {},
+      "docs/adr/005-schema-identity.md": {},
+      "docs/adr/006-canonical-path-identity.md": {},
+      "docs/adr/README.md": {},
+      "docs/adr/experiments/006-path-identity/receipts-darwin.json": {},
+      "docs/adr/experiments/006-path-identity/receipts-linux.json": {},
+      "docs/adr/experiments/006-path-identity/run.mjs": {},
+      "docs/adr/index.json": {},
+      "docs/conformance.md": {},
+      "docs/glossary.md": {},
+      "docs/repository-settings.md": {},
+      "docs/troubleshooting.md": {},
+      "docs/versioning.md": {},
+      "migration/PROVENANCE.md": {},
+      "migration/architecture-red-tests.txt": {},
+      "migration/commit-map.txt": {},
+      "migration/parity-packed.mjs": {},
+      "migration/parity-packed.txt": {},
+      "migration/parity-runtime.mjs": {},
+      "migration/parity-runtime.txt": {},
+      "package.json": {},
+      "packages/rules/CHANGELOG.md": {},
+      "packages/rules/LICENSE": {},
+      "packages/rules/README.md": {},
+      "packages/rules/package.json": {},
+      "packages/rules/src/engine/__tests__/finding-graph.test.ts": {},
+      "packages/rules/src/engine/__tests__/hygiene-score.invariants.test.ts": {},
+      "packages/rules/src/engine/__tests__/incremental-cache.test.ts": {},
+      "packages/rules/src/engine/__tests__/rule-dependency-graph.test.ts": {},
+      "packages/rules/src/engine/__tests__/rule-engine.test.ts": {},
+      "packages/rules/src/engine/__tests__/temporal-decay.test.ts": {},
+      "packages/rules/src/engine/finding-graph.ts": {},
+      "packages/rules/src/engine/hygiene-score.ts": {},
+      "packages/rules/src/engine/incremental-cache.ts": {},
+      "packages/rules/src/engine/rule-dependency-graph.ts": {},
+      "packages/rules/src/engine/rule-engine.ts": {},
+      "packages/rules/src/engine/temporal-decay.ts": {},
+      "packages/rules/src/index.ts": {},
+      "packages/rules/src/parser/__tests__/agents-md-parser.test.ts": {},
+      "packages/rules/src/parser/agents-md-parser.ts": {},
+      "packages/rules/src/plugin.ts": {},
+      "packages/rules/src/presets/index.ts": {},
+      "packages/rules/src/rules/consistency/__tests__/convention-mismatch.test.ts": {},
+      "packages/rules/src/rules/consistency/convention-mismatch.ts": {},
+      "packages/rules/src/rules/drift/__tests__/framework-drift.test.ts": {},
+      "packages/rules/src/rules/drift/framework-drift.ts": {},
+      "packages/rules/src/rules/fragility/__tests__/blast-radius.test.ts": {},
+      "packages/rules/src/rules/fragility/__tests__/churn-fragility.test.ts": {},
+      "packages/rules/src/rules/fragility/blast-radius.ts": {},
+      "packages/rules/src/rules/fragility/churn-fragility.ts": {},
+      "packages/rules/src/rules/integrity/__tests__/missing-file-reference.test.ts": {},
+      "packages/rules/src/rules/integrity/__tests__/pattern-zero-match.test.ts": {},
+      "packages/rules/src/rules/integrity/missing-file-reference.ts": {},
+      "packages/rules/src/rules/integrity/pattern-zero-match.ts": {},
+      "packages/rules/src/rules/intelligence/__tests__/review-time-anomaly.test.ts": {},
+      "packages/rules/src/rules/intelligence/review-time-anomaly.ts": {},
+      "packages/rules/src/rules/meta/__tests__/rule-coverage-gap.test.ts": {},
+      "packages/rules/src/rules/meta/rule-coverage-gap.ts": {},
+      "packages/rules/src/rules/staleness/__tests__/section-staleness.test.ts": {},
+      "packages/rules/src/rules/staleness/section-staleness.ts": {},
+      "packages/rules/src/scanner/__tests__/repo-scanner.test.ts": {},
+      "packages/rules/src/scanner/repo-scanner.ts": {},
+      "packages/rules/src/testing/__tests__/real-repos.integration.test.ts": {},
+      "packages/rules/src/testing/__tests__/rule-tester.test.ts": {},
+      "packages/rules/src/testing/fixtures/agents-md/colocated-tests.md": {},
+      "packages/rules/src/testing/fixtures/agents-md/dunder-tests.md": {},
+      "packages/rules/src/testing/fixtures/agents-md/framework-heavy.md": {},
+      "packages/rules/src/testing/fixtures/agents-md/minimal.md": {},
+      "packages/rules/src/testing/fixtures/agents-md/missing-paths.md": {},
+      "packages/rules/src/testing/fixtures/agents-md/python-package.md": {},
+      "packages/rules/src/testing/fixtures/agents-md/stale-conventions.md": {},
+      "packages/rules/src/testing/fixtures/agents-md/typescript-monorepo.md": {},
+      "packages/rules/src/testing/fixtures/repos/clean-repo/package.json": {},
+      "packages/rules/src/testing/fixtures/repos/clean-repo/src/index.test.ts": {},
+      "packages/rules/src/testing/fixtures/repos/clean-repo/src/index.ts": {},
+      "packages/rules/src/testing/fixtures/repos/python-package/pyproject.toml": {},
+      "packages/rules/src/testing/fixtures/repos/python-package/src/main.py": {},
+      "packages/rules/src/testing/fixtures/repos/ts-monorepo/package.json": {},
+      "packages/rules/src/testing/fixtures/repos/ts-monorepo/packages/app/AGENTS.md": {},
+      "packages/rules/src/testing/fixtures/repos/ts-monorepo/packages/app/package.json": {},
+      "packages/rules/src/testing/fixtures/repos/ts-monorepo/packages/app/src/index.test.ts": {},
+      "packages/rules/src/testing/fixtures/repos/ts-monorepo/packages/app/src/index.ts": {},
+      "packages/rules/src/testing/rule-tester.ts": {},
+      "packages/rules/src/types.ts": {},
+      "packages/rules/src/validator/__tests__/workspace-json-validator.test.ts": {},
+      "packages/rules/src/validator/workspace-json-validator.ts": {},
+      "packages/rules/tsconfig.json": {},
+      "packages/spec/CHANGELOG.md": {},
+      "packages/spec/LICENSE": {},
+      "packages/spec/README.md": {},
+      "packages/spec/examples/cochange-absent-v0.4.json": {},
+      "packages/spec/examples/cochange-empty-pinned-v0.4.json": {},
+      "packages/spec/examples/cochange-empty-unpinned-v0.4.json": {},
+      "packages/spec/examples/cochange-legacy-head-basis-v0.4.json": {},
+      "packages/spec/examples/cochange-legacy-rate-v0.4.json": {},
+      "packages/spec/examples/cochange-observations-v0.4.json": {},
+      "packages/spec/examples/cochange-unclassified-v0.4.json": {},
+      "packages/spec/examples/invalid/cochange-abbreviated-basis-revision.json": {},
+      "packages/spec/examples/invalid/cochange-both-forms-zero-occurrences.json": {},
+      "packages/spec/examples/invalid/cochange-both-representations.json": {},
+      "packages/spec/examples/invalid/cochange-legacy-missing-generated.json": {},
+      "packages/spec/examples/invalid/cochange-missing-basis-revision.json": {},
+      "packages/spec/examples/invalid/cochange-mixed-forms-disguised.json": {},
+      "packages/spec/examples/invalid/cochange-mixed-forms.json": {},
+      "packages/spec/examples/invalid/cochange-negative-support.json": {},
+      "packages/spec/examples/invalid/cochange-neither-representation.json": {},
+      "packages/spec/examples/invalid/cochange-non-integer-occurrences.json": {},
+      "packages/spec/examples/invalid/cochange-support-exceeds-occurrences.json": {},
+      "packages/spec/examples/invalid/cochange-zero-denominator.json": {},
+      "packages/spec/examples/minimal-v0.3.json": {},
+      "packages/spec/examples/populated-v0.3.json": {},
+      "packages/spec/examples/populated-v0.4.json": {},
+      "packages/spec/examples/with-manual-block-v0.3.json": {},
+      "packages/spec/package.json": {},
+      "packages/spec/schema/v1.json": {},
+      "packages/spec/src/cli.test.ts": {},
+      "packages/spec/src/cli.ts": {},
+      "packages/spec/src/index.test.ts": {},
+      "packages/spec/src/index.ts": {},
+      "packages/spec/src/path-identity.test.ts": {},
+      "packages/spec/src/path-identity.ts": {},
+      "packages/spec/src/schema.ts": {},
+      "packages/spec/src/stored-key-inspection.test.ts": {},
+      "packages/spec/src/stored-key-inspection.ts": {},
+      "packages/spec/src/type-invariants.ts": {},
+      "packages/spec/src/types.ts": {},
+      "packages/spec/src/validator.ts": {},
+      "packages/spec/tsconfig.json": {},
+      "pnpm-lock.yaml": {},
+      "pnpm-workspace.yaml": {},
+      "scripts/adr-index.mjs": {},
+      "scripts/adr-index.test.mjs": {},
+      "scripts/check-architecture.mjs": {},
+      "scripts/check-architecture.test.mjs": {},
+      "scripts/check-corpus.mjs": {},
+      "scripts/check-docs.mjs": {},
+      "scripts/check-packed-path-identity.mjs": {},
+      "scripts/check-producer-conformance.mjs": {},
+      "scripts/check-producer-conformance.test.mjs": {},
+      "scripts/producer-conformance-lib.mjs": {},
+      "scripts/validate-examples.mjs": {},
+      "scripts/verify-npm-publish-access.mjs": {},
+      "scripts/verify-package-tarball.mjs": {},
+      "scripts/verify-published.mjs": {},
+      "scripts/verify-schema-provenance.mjs": {},
+      "tsconfig.base.json": {},
+      "types/ambient.d.ts": {}
+    },
+    "topology": {
+      "packageCount": 5,
+      "type": "monorepo",
+      "ciProvider": "github-actions",
+      "agentFiles": {
+        "agentsMd": "AGENTS.md",
+        "workspaceJson": ".agents/workspace.json"
+      }
+    },
+    "hygiene": {
+      "score": 76,
+      "grade": "C",
+      "failCount": 0,
+      "warnCount": 8,
+      "scannedAt": "2026-08-11T14:09:41.759Z"
+    },
+    "basisRevision": "8e08c8c5cd110e7f95bbd52246ea295c22b072e3",
+    "coChange": [
+      {
+        "files": [
+          "packages/rules/package.json",
+          "packages/spec/package.json"
+        ],
+        "support": 12,
+        "occurrences": 24
+      },
+      {
+        "files": [
+          "packages/spec/schema/v1.json",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 10,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          "packages/spec/src/index.test.ts",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 10,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "packages/spec/schema/v1.json",
+          "packages/spec/src/index.test.ts"
+        ],
+        "support": 9,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "packages/spec/schema/v1.json",
+          "packages/spec/src/types.ts"
+        ],
+        "support": 8,
+        "occurrences": 10
+      },
+      {
+        "files": [
+          "packages/spec/src/schema.ts",
+          "packages/spec/src/types.ts"
+        ],
+        "support": 8,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          "packages/spec/CHANGELOG.md",
+          "packages/spec/package.json"
+        ],
+        "support": 8,
+        "occurrences": 23
+      },
+      {
+        "files": [
+          ".github/workflows/ci.yml",
+          "package.json"
+        ],
+        "support": 7,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          "packages/spec/src/index.test.ts",
+          "packages/spec/src/types.ts"
+        ],
+        "support": 7,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "packages/spec/src/index.test.ts",
+          "packages/spec/src/index.ts"
+        ],
+        "support": 7,
+        "occurrences": 16
+      },
+      {
+        "files": [
+          "packages/spec/CHANGELOG.md",
+          "packages/spec/src/index.test.ts"
+        ],
+        "support": 7,
+        "occurrences": 20
+      },
+      {
+        "files": [
+          "packages/spec/README.md",
+          "packages/spec/src/index.test.ts"
+        ],
+        "support": 7,
+        "occurrences": 21
+      },
+      {
+        "files": [
+          "packages/spec/package.json",
+          "packages/spec/src/index.test.ts"
+        ],
+        "support": 7,
+        "occurrences": 25
+      },
+      {
+        "files": [
+          "packages/spec/src/index.ts",
+          "packages/spec/src/types.ts"
+        ],
+        "support": 6,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          "packages/spec/schema/v1.json",
+          "packages/spec/src/index.ts"
+        ],
+        "support": 6,
+        "occurrences": 13
+      },
+      {
+        "files": [
+          "packages/spec/src/index.ts",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 6,
+        "occurrences": 14
+      },
+      {
+        "files": [
+          "packages/rules/README.md",
+          "packages/spec/README.md"
+        ],
+        "support": 6,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "packages/rules/CHANGELOG.md",
+          "packages/rules/package.json"
+        ],
+        "support": 6,
+        "occurrences": 19
+      },
+      {
+        "files": [
+          "packages/spec/package.json",
+          "packages/spec/src/index.ts"
+        ],
+        "support": 6,
+        "occurrences": 21
+      },
+      {
+        "files": [
+          "CONTRIBUTING.md",
+          "SECURITY.md"
+        ],
+        "support": 5,
+        "occurrences": 7
+      },
+      {
+        "files": [
+          "docs/versioning.md",
+          "packages/spec/src/index.test.ts"
+        ],
+        "support": 5,
+        "occurrences": 14
+      },
+      {
+        "files": [
+          "packages/rules/CHANGELOG.md",
+          "packages/spec/CHANGELOG.md"
+        ],
+        "support": 5,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "docs/conformance.md",
+          "packages/spec/src/index.test.ts"
+        ],
+        "support": 5,
+        "occurrences": 16
+      },
+      {
+        "files": [
+          "packages/spec/CHANGELOG.md",
+          "packages/spec/src/index.ts"
+        ],
+        "support": 5,
+        "occurrences": 17
+      },
+      {
+        "files": [
+          ".github/workflows/ci.yml",
+          "packages/spec/README.md"
+        ],
+        "support": 5,
+        "occurrences": 19
+      },
+      {
+        "files": [
+          "packages/spec/README.md",
+          "packages/spec/schema/v1.json"
+        ],
+        "support": 5,
+        "occurrences": 19
+      },
+      {
+        "files": [
+          "packages/spec/README.md",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 5,
+        "occurrences": 20
+      },
+      {
+        "files": [
+          "packages/spec/CHANGELOG.md",
+          "packages/spec/README.md"
+        ],
+        "support": 5,
+        "occurrences": 22
+      },
+      {
+        "files": [
+          "packages/spec/package.json",
+          "packages/spec/schema/v1.json"
+        ],
+        "support": 5,
+        "occurrences": 23
+      },
+      {
+        "files": [
+          "packages/spec/package.json",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 5,
+        "occurrences": 24
+      },
+      {
+        "files": [
+          "packages/spec/README.md",
+          "packages/spec/package.json"
+        ],
+        "support": 5,
+        "occurrences": 27
+      },
+      {
+        "files": [
+          "docs/adr/README.md",
+          "scripts/check-docs.mjs"
+        ],
+        "support": 4,
+        "occurrences": 8
+      },
+      {
+        "files": [
+          "docs/conformance.md",
+          "docs/versioning.md"
+        ],
+        "support": 4,
+        "occurrences": 8
+      },
+      {
+        "files": [
+          "docs/versioning.md",
+          "packages/spec/schema/v1.json"
+        ],
+        "support": 4,
+        "occurrences": 11
+      },
+      {
+        "files": [
+          ".github/workflows/ci.yml",
+          "CONTRIBUTING.md"
+        ],
+        "support": 4,
+        "occurrences": 12
+      },
+      {
+        "files": [
+          ".github/workflows/ci.yml",
+          "SECURITY.md"
+        ],
+        "support": 4,
+        "occurrences": 12
+      },
+      {
+        "files": [
+          "docs/versioning.md",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 4,
+        "occurrences": 12
+      },
+      {
+        "files": [
+          ".github/workflows/ci.yml",
+          "packages/rules/README.md"
+        ],
+        "support": 4,
+        "occurrences": 13
+      },
+      {
+        "files": [
+          ".github/workflows/ci.yml",
+          "types/ambient.d.ts"
+        ],
+        "support": 4,
+        "occurrences": 13
+      },
+      {
+        "files": [
+          "docs/versioning.md",
+          "packages/spec/README.md"
+        ],
+        "support": 4,
+        "occurrences": 15
+      },
+      {
+        "files": [
+          "docs/conformance.md",
+          "packages/spec/README.md"
+        ],
+        "support": 4,
+        "occurrences": 17
+      },
+      {
+        "files": [
+          "packages/spec/README.md",
+          "types/ambient.d.ts"
+        ],
+        "support": 4,
+        "occurrences": 17
+      },
+      {
+        "files": [
+          "packages/spec/src/index.test.ts",
+          "types/ambient.d.ts"
+        ],
+        "support": 4,
+        "occurrences": 17
+      },
+      {
+        "files": [
+          "packages/rules/package.json",
+          "scripts/verify-package-tarball.mjs"
+        ],
+        "support": 4,
+        "occurrences": 18
+      },
+      {
+        "files": [
+          "packages/spec/package.json",
+          "scripts/verify-package-tarball.mjs"
+        ],
+        "support": 4,
+        "occurrences": 18
+      },
+      {
+        "files": [
+          "packages/spec/CHANGELOG.md",
+          "packages/spec/schema/v1.json"
+        ],
+        "support": 4,
+        "occurrences": 19
+      },
+      {
+        "files": [
+          "packages/spec/README.md",
+          "packages/spec/src/index.ts"
+        ],
+        "support": 4,
+        "occurrences": 19
+      },
+      {
+        "files": [
+          ".github/workflows/release.yml",
+          "packages/rules/package.json"
+        ],
+        "support": 4,
+        "occurrences": 20
+      },
+      {
+        "files": [
+          "packages/spec/CHANGELOG.md",
+          "packages/spec/src/schema.ts"
+        ],
+        "support": 4,
+        "occurrences": 20
+      },
+      {
+        "files": [
+          "packages/rules/CHANGELOG.md",
+          "packages/spec/package.json"
+        ],
+        "support": 4,
+        "occurrences": 21
+      }
+    ]
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "INSUFFICIENT_DATA",
+    "observationCount": 0,
+    "confidence": 0
+  }
+}

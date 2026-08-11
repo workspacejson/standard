@@ -192,6 +192,60 @@ section('5. Producer identity, determinism, and mediation');
   check('output validates as v0.4 when it declares specVersion 0.4',
     doc.generated?.specVersion !== '0.4' || validateV4(doc) === true);
 
+  // Canonical pair ordering — the producer-profile obligation from ADR-003
+  // A-009, enforced here rather than merely described.
+  //
+  // `docs/conformance.md` previously said this suite enforced it while nothing
+  // in the suite looked at `coChange[].files` at all, so a producer emitting
+  // reversed endpoints passed a gate that advertised the check. That is fixed
+  // here rather than by softening the claim.
+  //
+  // Scope, stated so the result is not over-read: readers stay unordered and a
+  // reversed document remains VALID. This is a producer obligation only, and it
+  // applies to what a candidate emits, never to what a consumer must accept.
+  const coChange = Array.isArray(doc.generated?.coChange) ? doc.generated.coChange : undefined;
+  const observationEntries = (coChange ?? []).filter((entry) => entry?.support !== undefined);
+
+  if (observationEntries.length === 0) {
+    // Absence is reported as absence. A producer that emits no observation-form
+    // pairs has not demonstrated this property, and recording it as a pass
+    // would be the "green gate that measured nothing" failure this file exists
+    // to avoid.
+    check.notMeasured('canonical pair ordering — candidate emitted no observation-form coChange entries, so this property was not exercised');
+  } else {
+    // UTF-8 BYTE order, not `<`. A bare string comparison is UTF-16 code unit
+    // order and the two disagree on supplementary-plane characters, so `<`
+    // would accept an ordering the rule forbids.
+    const compareUtf8 = (a, b) => Buffer.compare(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'));
+
+    // Malformed pairs are FAILED, not skipped.
+    //
+    // An earlier version folded the well-formedness test into the ordering
+    // filter, so an entry whose `files` was not a two-string array could not be
+    // counted as misordered and silently passed the ordering check. A
+    // structurally invalid observation must not be able to buy itself an
+    // exemption from the rule it cannot be evaluated against — that is the same
+    // "green gate that measured nothing" failure the NOT MEASURED channel above
+    // exists to prevent, arriving one level down.
+    const wellFormed = (entry) =>
+      Array.isArray(entry.files) && entry.files.length === 2 && entry.files.every((p) => typeof p === 'string');
+    const malformed = observationEntries.filter((entry) => !wellFormed(entry));
+    check('every emitted coChange entry carries a two-string files pair',
+      malformed.length === 0,
+      `${malformed.length} of ${observationEntries.length} entr(ies) malformed, e.g. ${JSON.stringify(malformed[0]?.files)}`);
+
+    const misordered = observationEntries.filter(
+      (entry) => wellFormed(entry) && compareUtf8(entry.files[0], entry.files[1]) > 0,
+    );
+    check('every emitted coChange pair is ordered by ascending UTF-8 bytes',
+      misordered.length === 0,
+      `${misordered.length} of ${observationEntries.length} pair(s) reversed, e.g. ${JSON.stringify(misordered[0]?.files)}`);
+
+    check('no emitted coChange entry stores a derived rate',
+      observationEntries.every((entry) => !('rate' in entry)),
+      'a new observation producer must emit support + occurrences and must not emit rate');
+  }
+
   // Determinism: same repository, same producer version, byte-identical.
   const first = readArtifactRaw(repo);
   const second = runDirect(candidate, repo);
@@ -241,6 +295,11 @@ section('5. Producer identity, determinism, and mediation');
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(70)}`);
 console.log(` RESULT: ${state.pass} passed, ${state.fail} failed  (total ${state.pass + state.fail})`);
+if (state.notMeasured.length > 0) {
+  // Reported separately and never folded into the pass count: a property the
+  // candidate gave no way to exercise has not been demonstrated.
+  console.log(` NOT MEASURED: ${state.notMeasured.length} — ${state.notMeasured.join('; ')}`);
+}
 if (state.fail) console.log(` FAILED: ${state.failures.join(', ')}`);
 console.log('='.repeat(70));
 process.exit(state.fail ? 1 : 0);
