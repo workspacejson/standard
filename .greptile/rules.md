@@ -51,8 +51,8 @@ and must not reference private organizational internals.
 
 ### Checks cannot be vacuous
 
-Every verification check must be considered in both directions: cannot-never-pass
-and cannot-never-fail. A guard that rejected everything looks identical to a
+Every verification check must be considered in both directions: cannot-ever-pass
+and cannot-ever-fail. A guard that rejected everything looks identical to a
 working guard from a green build. If you add a check, consider what it would
 look like if it were broken in each direction.
 
