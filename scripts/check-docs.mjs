@@ -60,6 +60,20 @@ const PROVENANCE_FILES = new Set([
 // Rewriting them to remove a reference would falsify the record.
 const isChangelog = (f) => /(^|\/)CHANGELOG\.md$/.test(f);
 
+// Evidence directories are provenance by construction, and a directory rather
+// than a fixed list because each run adds files. Two distinct reasons they
+// cannot be held to the identifier rule:
+//
+//   - the receipts record which tracked work froze the contract they ran under,
+//     which is the same "an audit trail must name its own source" argument as
+//     PROVENANCE_FILES above;
+//   - the artifacts are *producer output*, not prose. The miner stamps its own
+//     `weightingVersion` into every scoring basis, and that string embeds the
+//     identifier of the issue that specified the weighting. Editing it to
+//     satisfy this gate would mean shipping an artifact that misreports which
+//     algorithm produced it — falsifying evidence to pass a style check.
+const isEvidence = (f) => f.startsWith("docs/evidence/");
+
 // This file names the pattern in order to forbid it.
 const SELF = "scripts/check-docs.mjs";
 
@@ -122,7 +136,7 @@ for (const file of markdown) {
     }
 
     // ---- internal tracker identifiers
-    if (file === SELF || PROVENANCE_FILES.has(file) || isChangelog(file)) return;
+    if (file === SELF || PROVENANCE_FILES.has(file) || isChangelog(file) || isEvidence(file)) return;
     for (const match of line.matchAll(INTERNAL_ID)) {
       fail(
         file,
@@ -137,7 +151,7 @@ for (const file of markdown) {
 // Non-Markdown tracked text is held to the identifier rule too, so an internal
 // reference cannot simply move into a workflow comment or a script header.
 for (const file of files.filter((f) => /\.(ya?ml|json|mjs|js|ts)$/.test(f))) {
-  if (file === SELF || PROVENANCE_FILES.has(file)) continue;
+  if (file === SELF || PROVENANCE_FILES.has(file) || isEvidence(file)) continue;
   const content = readFileSync(join(repoRoot, file), "utf8");
   content.split("\n").forEach((line, index) => {
     for (const match of line.matchAll(INTERNAL_ID)) {
@@ -233,6 +247,9 @@ console.log(`  links checked       ${linksChecked}  (${relativeLinks} relative, 
 console.log(`  pnpm commands       ${commandsChecked} documented references verified against package.json`);
 console.log(`  stable read paths   ${STABLE_READ_PATHS.length} confirmed in the schema; ${enumerationsChecked} prose enumerations complete`);
 console.log(`  provenance files    ${PROVENANCE_FILES.size} exempt from the tracker-identifier rule`);
+console.log(
+  `  evidence files      ${files.filter(isEvidence).length} exempt under docs/evidence/ — receipts and producer output`,
+);
 
 if (failures.length) {
   console.error(`\ncheck-docs: ${failures.length} failure(s)\n`);

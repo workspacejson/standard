@@ -1,0 +1,194 @@
+{
+  "label": "syncpack",
+  "repoRoot": "/private/tmp/claude-502/-Users-user1-dev-workspacejson-projects-standard/91d9ed1b-3746-41c4-a5ad-d64b924c9a12/scratchpad/meta310/targets/syncpack",
+  "pinnedRevision": "958d30689ac24b60623258630242330bd6d0264b",
+  "shallow": false,
+  "firstParentCountAtPin": 919,
+  "producerElapsedMs": 54439,
+  "historyRefresh": {
+    "requested": true,
+    "mined": true,
+    "preserved": false
+  },
+  "artifact": {
+    "path": ".agents/workspace.json",
+    "bytes": 53861,
+    "sha256": "3d3d435ad0e3e00eff7abdb2f90fa4ed88d764e7cd38930fc966104a7e911222",
+    "specVersion": "0.4",
+    "basisRevision": "958d30689ac24b60623258630242330bd6d0264b",
+    "coChangePresent": true,
+    "entryCount": 50,
+    "historyBlockSha256": "ce5ecabea30e44578d24cd85038a92a3ed3ec8c5af773a514d80d3fee008de5a",
+    "shapeAudit": {
+      "distinctKeysets": [
+        "files,occurrences,support"
+      ],
+      "anyStoredRate": false,
+      "anyGeneratedFlag": false,
+      "allPairsUtf8Ordered": true,
+      "supportLteOccurrences": true,
+      "minSupportEmitted": 8,
+      "maxSupportEmitted": 99
+    },
+    "topEntries": [
+      {
+        "files": [
+          "Cargo.lock",
+          "Cargo.toml"
+        ],
+        "support": 99,
+        "occurrences": 117
+      },
+      {
+        "files": [
+          "CHANGELOG.md",
+          "package.json"
+        ],
+        "support": 65,
+        "occurrences": 115
+      },
+      {
+        "files": [
+          "Cargo.toml",
+          "package.json"
+        ],
+        "support": 55,
+        "occurrences": 166
+      },
+      {
+        "files": [
+          "Cargo.lock",
+          "package.json"
+        ],
+        "support": 55,
+        "occurrences": 168
+      },
+      {
+        "files": [
+          "CHANGELOG.md",
+          "Cargo.toml"
+        ],
+        "support": 53,
+        "occurrences": 120
+      },
+      {
+        "files": [
+          "CHANGELOG.md",
+          "Cargo.lock"
+        ],
+        "support": 53,
+        "occurrences": 122
+      },
+      {
+        "files": [
+          "package.json",
+          "pnpm-lock.yaml"
+        ],
+        "support": 36,
+        "occurrences": 128
+      },
+      {
+        "files": [
+          "pnpm-lock.yaml",
+          "site/package.json"
+        ],
+        "support": 33,
+        "occurrences": 56
+      },
+      {
+        "files": [
+          "package-lock.json",
+          "package.json"
+        ],
+        "support": 31,
+        "occurrences": 115
+      },
+      {
+        "files": [
+          "CHANGELOG.md",
+          "package-lock.json"
+        ],
+        "support": 30,
+        "occurrences": 68
+      }
+    ]
+  },
+  "validation": {
+    "valid": true,
+    "errorCount": 0,
+    "errors": []
+  },
+  "receipts": {
+    "completeness": {
+      "state": "QUALIFYING_RELATIONSHIP_OBSERVED",
+      "reason": "MINED",
+      "detail": "mined 500 first-parent transition(s) from 958d30689ac24b60623258630242330bd6d0264b; 149032 pair(s) at or above 1 co-occurrence(s)"
+    },
+    "basisWindow": {
+      "basisRevision": "HEAD",
+      "basisCommit": "958d30689ac24b60623258630242330bd6d0264b",
+      "windowTransitions": 500,
+      "availableTransitions": 919,
+      "extractedTransitions": 500,
+      "windowTruncated": true
+    },
+    "scoringBasis": {
+      "weightingVersion": "META-289 v2.2.1",
+      "sizeWeightNumerator": 10,
+      "positionDecayHalfLife": 250,
+      "maxScoredFileCount": 50,
+      "basisRevision": "958d30689ac24b60623258630242330bd6d0264b",
+      "windowOldestCommit": "04bdf63a1df85169023962d7122065173863233a",
+      "windowNewestCommit": "958d30689ac24b60623258630242330bd6d0264b",
+      "decayOriginPosition": 499
+    },
+    "exclusions": {
+      "maxFileCount": 50,
+      "scoredEventCount": 484,
+      "excludedEventCount": 16,
+      "excludedCommits": [
+        "b02c4215e06fe28d83656860095dc72244913ad2",
+        "c0d08d571cb595fc877477cec22b2d928b2ef1bc",
+        "c6528535c37f95aa77aff3c19d9add4ce935ab4b",
+        "a37e52e5a29215cc57c28b7a2fb7df27069fd2dc",
+        "f11d741b95dbf53286300aa961330f07ce8e3d60",
+        "2cad9931f9e1924b0283c3c8a2f76e695403acc6",
+        "c801b2a6221f90940b56aba0500ef042b1bf74e6",
+        "71f927b960c7aada7c5e6550ba36b56cdc73a320",
+        "dd8cf64e7dfb2779dfd90e7f5ae6dc22b4804e3e",
+        "70d66ccede0295ccb3e8c78087c3bb8548f37818",
+        "c0482e6e29e95636ffdcf2e9fb5d0dd6aff64b00",
+        "233a0b37265ff278bc96ece91f8c2bbfcaeeb280",
+        "352229642dbbbb27272170e99cf6a520706c39e2",
+        "53d54e07d69c35abc1a4124509d876f5dc837690",
+        "efad1b5bd2a671d17404b15177383b20f208919d",
+        "d6c9ac534c922a545b9a46e0e7669d642a6fbbc7"
+      ],
+      "excludedCommitsTotal": 16
+    },
+    "selection": {
+      "minSupport": 3,
+      "pairsBeforeCap": 729,
+      "pairsEmitted": 50,
+      "cap": 50,
+      "rankingRule": "support DESC, then occurrences ASC, then files[0] ASC by UTF-8 bytes, then files[1] ASC by UTF-8 bytes",
+      "capBound": true
+    },
+    "pairsEmitted": 50
+  },
+  "crossCheck": {
+    "producerEntries": 50,
+    "receiptEntries": 50,
+    "identical": true
+  },
+  "determinism": {
+    "secondRunHistoryBlockSha256": "ce5ecabea30e44578d24cd85038a92a3ed3ec8c5af773a514d80d3fee008de5a",
+    "historyBlockStable": true,
+    "wholeFileIdentical": true,
+    "secondRunRefresh": {
+      "requested": true,
+      "mined": true,
+      "preserved": false
+    }
+  }
+}
