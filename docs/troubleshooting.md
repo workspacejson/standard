@@ -175,11 +175,21 @@ on the third state explicitly:
 
 ```js
 for (const entry of doc.generated.coChange ?? []) {
-  if (entry.generated === true) continue;            // classified tooling-coupled
-  if (entry.generated === undefined) { /* unclassified — say so, do not assume */ }
-  // …otherwise classified as a real source coupling
+  if (entry.generated === true) {
+    continue;                      // classified tooling-coupled — skip it
+  } else if (entry.generated === undefined) {
+    reportUnclassified(entry);     // no classification — report the gap, never assume `false`
+    continue;                      // the `continue` is the point: no fall-through
+  }
+  // Reached only when `generated === false`: classified as a real source coupling.
+  reportSourceCoupling(entry);
 }
 ```
+
+The three branches are mutually exclusive on purpose. Written as three bare `if`
+statements without the `continue`, an unclassified entry falls through into the
+handling reserved for `false` — which is this same bug one step further along,
+and the reason the loop is written as an explicit chain rather than a filter.
 
 If every entry in an artifact omits the flag, its producer classified nothing.
 That is a gap in what you can report, not a finding that the pairs are all real
