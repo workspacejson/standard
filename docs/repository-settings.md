@@ -78,8 +78,9 @@ GitHub API on 2026-08-04, it requires:
 - require conversation resolution;
 - block force pushes and branch deletion;
 - require review from code owners — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
-  A post-calibration transition to Greptile as the independent review gate is
-  planned; see [`.github/GREPTILE-MERGE-PROTOCOL.md`](../.github/GREPTILE-MERGE-PROTOCOL.md).
+  A post-calibration transition to independent AI review layers (Greptile as
+  hard status gate, Sourcery as mandatory review-completion gate) is planned;
+  see [`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
 Two controls this document previously claimed are **not** in place:
 
@@ -113,9 +114,10 @@ not any one of them alone.
 The controls are configured. What is missing is a *second person*: no combination
 of the above currently results in a change being reviewed by someone other than
 its author. A post-calibration transition is planned: Greptile would serve as an
-enforceable independent review gate, after which required code-owner approval
-would be disabled until a second human maintainer exists. See
-[`.github/GREPTILE-MERGE-PROTOCOL.md`](../.github/GREPTILE-MERGE-PROTOCOL.md).
+enforceable independent review gate and Sourcery as a mandatory
+review-completion gate, after which required code-owner approval would be
+disabled until a second human maintainer exists. See
+[`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
 **This is not currently a credentialed package-publication risk**, because this
 repository holds no npm credential and ships no release workflow. It is not
