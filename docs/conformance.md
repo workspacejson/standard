@@ -409,11 +409,22 @@ Stated plainly, because a conformance document that hides them is misleading:
   locale collation, not case-folded, and with no Unicode normalization applied,
   since each of those is a different total order and ADR-006 forbids rewriting a
   stored key. The property this buys is that endpoint reversal produces
-  identical producer bytes, so a regenerated artifact is stable. Enforcement
-  belongs to the candidate-producer conformance suite that gates observation-form
-  emission — recorded in ADR-003 A-009, and out of scope for this repository;
-  what is pinned here by test is the rule itself and the fact that applying it
-  changes nothing about what readers accept.
+  identical producer bytes, so a regenerated artifact is stable.
+
+  **Enforcement now lives in this repository's candidate-producer conformance
+  suite**, which checks that every emitted observation-form pair is ordered by
+  ascending UTF-8 bytes — a real byte comparison, not `<`, since a bare string
+  comparison is UTF-16 code unit order and the two disagree on
+  supplementary-plane characters. The suite also checks that no emitted entry
+  stores a derived `rate`. This paragraph previously said enforcement was out of
+  scope for this repository while the suite examined `coChange[].files` not at
+  all, so a producer emitting reversed endpoints passed a gate that advertised
+  the check. The gate was added rather than the claim softened.
+
+  **A candidate that emits no observation-form entries is recorded as
+  `NOT MEASURED`, counted separately from passes.** A property that could not be
+  exercised has not been demonstrated, and folding it into the pass total would
+  inflate the denominator with a check that measured nothing.
 
   **`cochange-observations-v0.4.json` stores its pair as
   `["src/session.ts", "src/auth.ts"]`, which is *not* ascending UTF-8 order.
