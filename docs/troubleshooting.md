@@ -157,9 +157,43 @@ v0.4-only fields.
 
 ### `coChange` is full of lockfile pairs
 
-Filter on `generated: true` to skip tooling-coupled pairs and surface real source
-couplings. Do not apply path heuristics at read time — the flag exists so you do
-not have to.
+Filter on `generated === true` to skip tooling-coupled pairs and surface real
+source couplings. Where the flag is present, do not apply path heuristics at read
+time — the flag exists so you do not have to.
+
+**The flag may be absent, and absent is not `false`.** It is a classification
+rather than an observation, and a producer that implements no deterministic
+classifier omits it instead of guessing. So there are three states — `true`,
+`false`, and absent-meaning-unclassified — and
+
+```js
+if (!entry.generated) { /* treat as a real source coupling */ }
+```
+
+is wrong: it reads an unclassified entry as a confirmed source coupling. Branch
+on the third state explicitly:
+
+```js
+for (const entry of doc.generated.coChange ?? []) {
+  if (entry.generated === true) {
+    continue;                      // classified tooling-coupled — skip it
+  } else if (entry.generated === undefined) {
+    reportUnclassified(entry);     // no classification — report the gap, never assume `false`
+    continue;                      // the `continue` is the point: no fall-through
+  }
+  // Reached only when `generated === false`: classified as a real source coupling.
+  reportSourceCoupling(entry);
+}
+```
+
+The three branches are mutually exclusive on purpose. Written as three bare `if`
+statements without the `continue`, an unclassified entry falls through into the
+handling reserved for `false` — which is this same bug one step further along,
+and the reason the loop is written as an explicit chain rather than a filter.
+
+If every entry in an artifact omits the flag, its producer classified nothing.
+That is a gap in what you can report, not a finding that the pairs are all real
+source couplings.
 
 Similarly, filter `generated.fragility` on `excluded: false` before ranking;
 excluded entries are generated or lock files carrying `fragilityScore: 0`.

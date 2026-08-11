@@ -117,8 +117,6 @@ export interface CoChangeEntryCommon {
    * must not be compared across the two forms.
    */
   occurrences: number;
-  /** true = tooling-coupled pair (e.g. lockfile + package.json); consumers skip these */
-  generated: boolean;
 }
 
 /**
@@ -134,6 +132,17 @@ export interface LegacyCoChangeEntry extends CoChangeEntryCommon {
   rate: number;
   /** Never present in the legacy form — the two forms are mutually exclusive. */
   support?: never;
+  /**
+   * `true` = tooling-coupled pair (e.g. lockfile + manifest); consumers skip these.
+   *
+   * **Required in this form only.** Every artifact published in the legacy form
+   * already carries it and that contract is frozen until the form is removed, so
+   * widening it here would loosen a shape nobody should be emitting. New
+   * producers do not emit this form at all — see
+   * {@link ObservationCoChangeEntry.generated} for the three-state reading that
+   * applies to everything written from now on.
+   */
+  generated: boolean;
 }
 
 /**
@@ -177,6 +186,35 @@ export interface ObservationCoChangeEntry extends CoChangeEntryCommon {
   occurrences: number;
   /** Never present in the observation form — the two forms are mutually exclusive. */
   rate?: never;
+  /**
+   * Whether the pair is tooling-coupled — a lockfile and its manifest, a
+   * generated file and its source — so that a consumer surfacing real source
+   * couplings can skip it.
+   *
+   * **Optional, and three-state.** Unlike `support` and `occurrences` this is a
+   * *classification*, not an observation: it cannot be read off the commit
+   * graph, because it requires a judgement about what a file *is*, and this
+   * standard specifies no portable deterministic classifier from public
+   * repository inputs. Read it as:
+   *
+   * - `true` — classified as tooling-coupled;
+   * - `false` — classified as **not** tooling-coupled;
+   * - **absent** — no classification was performed; the producer asserts
+   *   nothing.
+   *
+   * A reader must not collapse absent into `false`. Doing so converts a
+   * producer's silence into a positive claim that the pair is a real source
+   * coupling — the unsupported certainty a required boolean forced, and the
+   * reason this field is optional. Use `entry.generated === true` to skip and
+   * `entry.generated === false` to keep; branch separately on `undefined`
+   * rather than letting it fall through a falsy test.
+   *
+   * A producer omits this unless it implements a public, deterministic,
+   * perturbation-tested classifier. Two producers that classify the same pair
+   * differently are both conformant, so this is not a comparison surface
+   * between producers.
+   */
+  generated?: boolean;
 }
 
 /**

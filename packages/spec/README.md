@@ -208,8 +208,9 @@ const doc: WorkspaceJsonV4 = {
     frameworkManifest: [],
     fileIndex: {},
     coChange: [
-      // Observation form — what a new producer emits.
-      { files: ['src/auth.ts', 'src/session.ts'], support: 8, occurrences: 24, generated: false },
+      // Observation form — what a new producer emits. `generated` is optional:
+      // omit it unless you implement a deterministic classifier.
+      { files: ['src/auth.ts', 'src/session.ts'], support: 8, occurrences: 24 },
       { files: ['pnpm-lock.yaml', 'package.json'], support: 196, occurrences: 204, generated: true },
     ],
     fragility: [
@@ -228,8 +229,16 @@ const doc: WorkspaceJsonV4 = {
 };
 ```
 
-**Consumer guidance for `coChange`**: filter on `generated: true` to skip tooling-coupled pairs
+**Consumer guidance for `coChange`**: filter on `generated === true` to skip tooling-coupled pairs
 (lockfiles, package manifests) and surface only real source couplings.
+
+The flag is **optional in the observation form and three-state** — `true`, `false`, and **absent,
+meaning the producer performed no classification and asserts nothing**. It is a classification
+rather than an observation: it cannot be read off the commit graph, and this standard specifies no
+portable deterministic classifier, so a producer without one omits it rather than guessing. Never
+collapse absent into `false` — `if (!entry.generated)` reads an unclassified pair as a confirmed
+source coupling. Branch on `undefined` separately. The flag remains required in the deprecated
+legacy form. See ADR-003 A-010.
 
 **Two entry forms during the v0.4 transition.** Exactly one applies to any entry, and a reader
 must establish which before reading the numbers:

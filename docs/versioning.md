@@ -199,9 +199,12 @@ if (validateV4(doc)) {
 Two consumer guidances are part of the released contract and are easy to get
 wrong:
 
-- **`generated.coChange`** — filter on `generated: true` to skip tooling-coupled
+- **`generated.coChange`** — filter on `generated === true` to skip tooling-coupled
   pairs such as a lockfile and its manifest, and surface only real source
-  couplings. Do not apply path heuristics at read time. **Check the entry form
+  couplings. Do not apply path heuristics where the flag is present. The flag is
+  **optional in the observation form and three-state**: `true`, `false`, and
+  **absent meaning the producer classified nothing**. Absent is not `false`, so
+  `if (!e.generated)` is a bug — it reads silence as a positive claim. **Check the entry form
   before reading the counts**, because during the v0.4 transition both are
   legal: an entry with `support` is the observation form, where `occurrences` is
   the symmetric union denominator and you derive `support / occurrences`
@@ -213,6 +216,8 @@ wrong:
 
   ```ts
   for (const e of doc.generated.coChange ?? []) {
+    if (e.generated === true) continue;          // classified tooling-coupled
+    // e.generated === undefined means UNCLASSIFIED — not "false"
     if (e.support !== undefined) {
       const ratio = e.occurrences > 0 ? e.support / e.occurrences : undefined;
     } // else: legacy entry — e.rate, on the older denominator

@@ -1,0 +1,24 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "INVALID: a legacy-form entry omits generated. A-010 made the classification flag optional in the observation form only. The legacy form is deprecated and frozen — every artifact published in it already carries the flag — so widening it too would loosen a shape no producer should still be emitting. Repairing this entry means restoring generated, nothing else.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "by": { "name": "legacy-producer", "version": "0.4.4" },
+    "frameworkManifest": [],
+    "fileIndex": {},
+    "coChange": [
+      {
+        "files": ["src/a.ts", "src/b.ts"],
+        "rate": 0.87,
+        "occurrences": 9
+      }
+    ]
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "OBSERVING",
+    "observationCount": 0,
+    "confidence": 0
+  }
+}

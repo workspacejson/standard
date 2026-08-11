@@ -9,6 +9,7 @@ import type { CoChangeEntry } from './index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_JSON_PATH = resolve(__dirname, '../schema/v1.json');
+const EXAMPLES_DIR = resolve(__dirname, '../examples');
 const CHANGELOG_PATH = resolve(__dirname, '../CHANGELOG.md');
 const PKG_PATH = resolve(__dirname, '../package.json');
 
@@ -1011,6 +1012,11 @@ describe('A-009 co-change raw observations', () => {
       'cochange-both-representations.json': (d) => {
         delete d.generated.coChange[0]!['rate'];
       },
+      'cochange-legacy-missing-generated.json': (d) => {
+        // A-010 widened the OBSERVATION form only. The legacy form still
+        // requires the classification flag, so restoring it is the whole repair.
+        d.generated.coChange[0]!['generated'] = false;
+      },
       'cochange-missing-basis-revision.json': (d) => {
         d.generated.basisRevision = BASIS;
       },
@@ -1447,16 +1453,21 @@ describe('A-009 co-change raw observations', () => {
       ((gen(s)['properties'] as Record<string, Record<string, unknown>>)['coChange']['items']) as Record<string, unknown>;
 
     it('both mirrors require only what BOTH forms carry', () => {
+      // A-010 removed `generated` from this set. It is not something both forms
+      // carry: the observation form may omit it, and an item-level requirement
+      // would force a producer to classify a pair it has no classifier for.
       for (const source of [json(), workspaceJsonSchema as unknown as Record<string, unknown>]) {
         const required = [...(item(source)['required'] as string[])].sort();
-        expect(required).toEqual(['files', 'generated', 'occurrences']);
+        expect(required).toEqual(['files', 'occurrences']);
       }
     });
 
     it('both mirrors express the two forms as a oneOf, so exactly one applies', () => {
       for (const source of [json(), workspaceJsonSchema as unknown as Record<string, unknown>]) {
         const branches = item(source)['oneOf'] as Array<Record<string, unknown>>;
-        expect(branches.map((b) => b['required'])).toEqual([['rate'], ['support']]);
+        // The legacy branch carries `generated` after A-010: the requirement did
+        // not disappear, it moved down into the one form that is frozen.
+        expect(branches.map((b) => b['required'])).toEqual([['rate', 'generated'], ['support']]);
       }
     });
 
@@ -1544,6 +1555,191 @@ describe('A-009 co-change raw observations', () => {
       expect(
         ((gen(json())['properties'] as Record<string, Record<string, unknown>>)['coChange'])['description'],
       ).toContain('qualifying commit');
+    });
+  });
+});
+
+// A-010 — the tooling-coupling flag is a classification, not an observation.
+//
+// The defect this closes: `generated` was required on every item, and the
+// producer that mines the commit graph has no classifier to fill it with. It was
+// emitting a constant `false`, which on the pinned dotenv fixture asserted that
+// `package-lock.json ↔ package.json` — the textbook tooling-coupled pair — is a
+// real source coupling. A required boolean does not produce knowledge; it
+// produces a value.
+//
+// The widening is deliberately asymmetric, and both halves are asserted here:
+// optional in the observation form, still required in the frozen legacy form.
+describe('A-010 tooling-coupling classification is optional and three-state', () => {
+  const observation = (over: Record<string, unknown> = {}) => ({
+    files: ['src/auth.ts', 'src/session.ts'],
+    support: 8,
+    occurrences: 24,
+    ...over,
+  });
+
+  const legacy = (over: Record<string, unknown> = {}) => ({
+    files: ['src/auth.ts', 'src/session.ts'],
+    rate: 0.87,
+    occurrences: 9,
+    ...over,
+  });
+
+  const doc = (entries: unknown[], generatedOver: Record<string, unknown> = {}) => ({
+    ...minimalV4,
+    generated: { ...minimalV4.generated, coChange: entries, ...generatedOver },
+  });
+
+  /** A legacy document carries no basis pin, exactly as published. */
+  const legacyDoc = (entries: unknown[]) => {
+    const { basisRevision: _dropped, ...generatedWithoutBasis } = minimalV4.generated;
+    return { ...minimalV4, generated: { ...generatedWithoutBasis, coChange: entries } };
+  };
+
+  describe('the observation form', () => {
+    it('accepts an entry that omits the flag — the shape the amendment exists to admit', () => {
+      expect(validateV4(doc([observation()]))).toBe(true);
+    });
+
+    it('still accepts both classified states, so widening removed nothing', () => {
+      expect(validateV4(doc([observation({ generated: true })]))).toBe(true);
+      expect(validateV4(doc([observation({ generated: false })]))).toBe(true);
+    });
+
+    it('accepts a partially classified array — the flag is per entry, not per array', () => {
+      // Nothing at the collection level makes classification all-or-nothing. A
+      // producer that can classify lockfiles and nothing else is conformant.
+      expect(
+        validateV4(
+          doc([
+            observation({ files: ['package.json', 'pnpm-lock.yaml'], generated: true }),
+            observation(),
+          ]),
+        ),
+      ).toBe(true);
+    });
+
+    it('omitting the flag does not make an entry formless — the discriminator is support vs rate', () => {
+      // Guards against a plausible misreading in which the flag is treated as
+      // part of the form discriminator. It is not: an entry with `support` and
+      // no flag is unambiguously the observation form.
+      expect(validateV4(doc([observation()]))).toBe(true);
+      expect(validate(doc([observation({ rate: 0.5 })]))).toBe(false);
+    });
+
+    it('rejects a non-boolean flag — optional widens presence, not type', () => {
+      expect(validate(doc([observation({ generated: 'true' })]))).toBe(false);
+      expect(validate(doc([observation({ generated: null })]))).toBe(false);
+      expect(validate(doc([observation({ generated: 1 })]))).toBe(false);
+    });
+  });
+
+  describe('the legacy form stays frozen', () => {
+    it('rejects a legacy entry that omits the flag', () => {
+      // The requirement moved into the legacy branch rather than disappearing.
+      // Every artifact published in this form already carries the flag, so
+      // widening here would loosen a shape nobody should still emit.
+      expect(validate(legacyDoc([legacy()]))).toBe(false);
+    });
+
+    it('accepts the legacy entry that carries it, unchanged', () => {
+      expect(validate(legacyDoc([legacy({ generated: false })]))).toBe(true);
+      expect(validate(legacyDoc([legacy({ generated: true })]))).toBe(true);
+    });
+
+    it('the shipped legacy example still validates', () => {
+      const shipped = JSON.parse(
+        readFileSync(resolve(EXAMPLES_DIR, 'cochange-legacy-rate-v0.4.json'), 'utf8'),
+      ) as Record<string, unknown>;
+      expect(validate(shipped)).toBe(true);
+    });
+  });
+
+  describe('absence is a third state, and the shipped fixture proves it', () => {
+    const shipped = () =>
+      JSON.parse(
+        readFileSync(resolve(EXAMPLES_DIR, 'cochange-unclassified-v0.4.json'), 'utf8'),
+      ) as { generated: { coChange: Array<Record<string, unknown>> } };
+
+    it('THE SHIPPED UNCLASSIFIED EXAMPLE validates and classifies nothing', () => {
+      const document = shipped();
+      expect(validate(document)).toBe(true);
+      expect(document.generated.coChange.length).toBeGreaterThan(0);
+      for (const item of document.generated.coChange) {
+        expect('generated' in item).toBe(false);
+      }
+    });
+
+    it('carries the lockfile pair unflagged — the case a reader must not resolve to false', () => {
+      // The pair whose misclassification opened this amendment. Present on
+      // purpose: a reader collapsing absent into false reads it as a confirmed
+      // real source coupling.
+      const document = shipped();
+      const lockfilePair = document.generated.coChange.find((item) =>
+        (item['files'] as string[]).includes('pnpm-lock.yaml'),
+      );
+      expect(lockfilePair).toBeDefined();
+      expect(lockfilePair!['generated']).toBeUndefined();
+    });
+
+    it('absent and false are distinguishable at the document level, not merely at the type level', () => {
+      // The whole point of the three states. A reader that cannot tell these
+      // two documents apart has lost the distinction the amendment created.
+      const unclassified = doc([observation()]);
+      const classifiedNegative = doc([observation({ generated: false })]);
+      expect(validateV4(unclassified)).toBe(true);
+      expect(validateV4(classifiedNegative)).toBe(true);
+      expect('generated' in (unclassified.generated.coChange as Array<Record<string, unknown>>)[0]!).toBe(false);
+      expect((classifiedNegative.generated.coChange as Array<Record<string, unknown>>)[0]!['generated']).toBe(false);
+    });
+  });
+
+  describe('the mirrors agree on the widening', () => {
+    const gen = (s: Record<string, unknown>) =>
+      (s['properties'] as Record<string, Record<string, unknown>>)['generated'] as Record<string, unknown>;
+    const item = (s: Record<string, unknown>) =>
+      (gen(s)['properties'] as Record<string, Record<string, unknown>>)['coChange']['items'] as Record<
+        string,
+        unknown
+      >;
+    const sources = () => [
+      JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>,
+      workspaceJsonSchema as unknown as Record<string, unknown>,
+    ];
+
+    it('neither mirror requires the flag at item level', () => {
+      for (const source of sources()) {
+        expect(item(source)['required']).not.toContain('generated');
+      }
+    });
+
+    it('both mirrors require it on the legacy branch only', () => {
+      for (const source of sources()) {
+        const branches = item(source)['oneOf'] as Array<Record<string, unknown>>;
+        const legacyBranch = branches.find((b) => b['title'] === 'legacy form')!;
+        const observationBranch = branches.find((b) => b['title'] === 'observation form')!;
+        expect(legacyBranch['required']).toContain('generated');
+        expect(observationBranch['required']).not.toContain('generated');
+      }
+    });
+
+    it('both mirrors document the three states rather than leaving absence to inference', () => {
+      // A bare `{type: boolean}` is what let a reader assume two states. The
+      // description is the contract an independent implementer builds from.
+      for (const source of sources()) {
+        const description = (item(source)['properties'] as Record<string, Record<string, unknown>>)[
+          'generated'
+        ]['description'] as string;
+        expect(description).toContain('ABSENT');
+        expect(description).toContain('must not collapse absent into false');
+        expect(description).toContain('classification, not an observation');
+      }
+      const [fromJson, fromTs] = sources();
+      expect(
+        (item(fromTs!)['properties'] as Record<string, Record<string, unknown>>)['generated']['description'],
+      ).toBe(
+        (item(fromJson!)['properties'] as Record<string, Record<string, unknown>>)['generated']['description'],
+      );
     });
   });
 });

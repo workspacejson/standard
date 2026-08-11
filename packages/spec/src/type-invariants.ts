@@ -88,6 +88,30 @@ type _DiscriminatingOnRateYieldsTheLegacyForm = Assert<
   Equals<Extract<CoChangeEntry, { rate: number }>, LegacyCoChangeEntry>
 >;
 
+// ── `generated` is three-state on the observation form, and only there ────────
+// A-010. The flag is a classification, not an observation: absent means "not
+// classified", which is a third state and not a synonym for `false`. The type
+// has to carry that or a consumer writing `if (!entry.generated)` compiles
+// cleanly while silently treating silence as a positive claim.
+
+type GeneratedOnUnion = CoChangeEntry['generated'];
+type _GeneratedIsOptionalOnTheUnion = Assert<Equals<GeneratedOnUnion, boolean | undefined>>;
+type _GeneratedIsNotBareBoolean = Assert<Equals<Equals<GeneratedOnUnion, boolean>, false>>;
+
+// An observation entry that classified nothing is a legal entry. This is the
+// shape the amendment exists to admit, asserted rather than described.
+type ObservationWithoutGenerated = { files: string[]; occurrences: number; support: number };
+type _ObservationWithoutGeneratedIsAnEntry = Assert<
+  IsAssignable<ObservationWithoutGenerated, CoChangeEntry>
+>;
+
+// …while the deprecated legacy form still demands it, so widening the current
+// form did not quietly loosen the frozen one.
+type LegacyWithoutGenerated = { files: string[]; occurrences: number; rate: number };
+type _LegacyWithoutGeneratedIsRejected = Assert<
+  Equals<IsAssignable<LegacyWithoutGenerated, CoChangeEntry>, false>
+>;
+
 // …and that discrimination actually removes something. If either extraction
 // returned the full union, the checks above could pass vacuously on a union that
 // had collapsed into a single permissive member.

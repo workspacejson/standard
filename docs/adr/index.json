@@ -30,9 +30,9 @@
       "status": "Accepted",
       "decisionDate": "2026-08-03",
       "ratifyingIssue": "META-264 (internal tracker)",
-      "blob": "e7874b9cc4d27eea3a6c661d3ccc1e151cacf5fa",
-      "revision": "bd14f3954e9c359978fc691784b11561b2288ef0",
-      "pullRequest": 21
+      "blob": "c9c446ed3395a1593a0bffb5d4458fd6a514ae95",
+      "revision": null,
+      "pullRequest": null
     },
     {
       "adr": 4,

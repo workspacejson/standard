@@ -68,9 +68,25 @@ a basis pin: **pinned** means the analysis ran and found no qualifying pairs;
 **unpinned** means legacy or unknown, and is not evidence of zero. An absent
 array means the producer did not analyze at all.
 
-The `generated: boolean` flag distinguishes tooling-coupled pairs — a lockfile and
-its manifest — from real source couplings. Consumers should filter on that flag
-rather than applying path heuristics at read time.
+The optional `generated` flag distinguishes tooling-coupled pairs — a lockfile
+and its manifest — from real source couplings. It is a **classification, not an
+observation**: unlike `support` and `occurrences` it cannot be read off the
+commit graph, and the standard specifies no portable deterministic classifier, so
+it is **three-state** for readers:
+
+| Value | Meaning |
+| -- | -- |
+| `true` | classified as tooling-coupled — skip when surfacing real source couplings |
+| `false` | classified as **not** tooling-coupled |
+| absent | **no classification was performed**; the producer asserts nothing |
+
+Absence is not `false`. Collapsing the two turns a producer's silence into a
+positive claim that the pair is a real source coupling, so branch on `undefined`
+separately rather than letting it fall through a falsy test. Where the flag is
+present, filter on it rather than applying path heuristics at read time; where it
+is absent, the classification is simply unavailable and no heuristic recovers it
+without inventing evidence. The flag is required in the deprecated legacy form
+and optional in the observation form — see ADR-003 A-010.
 
 Maintainer-declared couplings are a different thing and live at
 `manual.coChangePatterns`.

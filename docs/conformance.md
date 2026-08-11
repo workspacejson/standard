@@ -42,6 +42,24 @@ that collapses them reports a producer gap as a repository fact:
 | `coChange: []`, with `basisRevision` | Analyzed at that revision; no qualifying pairs. A positive finding. |
 | `basisRevision` ≠ the repository's current revision | The observations are real but describe an earlier revision. Stale, not absent. |
 
+The per-entry `generated` flag repeats the pattern at one level down, and it is
+the same mistake in a smaller place. It is a **classification, not an
+observation**: it cannot be read off the commit graph, this standard specifies no
+portable deterministic classifier, and so it is **optional in the observation
+form** and carries three states.
+
+| Value | Means |
+| -- | -- |
+| `true` | Classified as tooling-coupled — skip when surfacing real source couplings. |
+| `false` | Classified as **not** tooling-coupled. |
+| absent | **No classification performed.** The producer asserts nothing either way. |
+
+A reader must not collapse absent into `false`. Doing so converts a producer's
+silence into a positive claim that the pair is a real source coupling — so
+`if (!entry.generated)` is a defect, not a shorthand, and `undefined` needs its
+own branch. The flag remains **required in the deprecated legacy form**, where
+every published artifact already carries it. See ADR-003 A-010.
+
 ## Checking a document
 
 The packaged validator is the reference implementation. Do not re-implement it —
@@ -75,7 +93,7 @@ import schema from '@workspacejson/spec/schema' with { type: 'json' };
 
 ## Fixtures shipped by this repository
 
-Ten executable examples live in
+Eleven executable examples live in
 [`packages/spec/examples/`](../packages/spec/examples/):
 
 | Example | Profile | Demonstrates |
@@ -90,8 +108,9 @@ Ten executable examples live in
 | `cochange-absent-v0.4.json` | v0.4 | State: **not analyzed** — `coChange` absent |
 | `cochange-empty-unpinned-v0.4.json` | v0.4 | State: **legacy / unknown** — empty array, no pin; not evidence of zero |
 | `cochange-empty-pinned-v0.4.json` | v0.4 | State: **analyzed, no qualifying pairs** — empty array with a pin |
+| `cochange-unclassified-v0.4.json` | v0.4 | State: **unclassified** — observation form in which every entry omits `generated`, carrying an unflagged lockfile pair on purpose, so a reader that resolves absence to `false` is visibly wrong against it |
 
-Eleven **negative** fixtures live alongside them in
+Twelve **negative** fixtures live alongside them in
 [`packages/spec/examples/invalid/`](../packages/spec/examples/invalid/), each
 carrying a `generated.$comment` naming the single defect it exhibits:
 
@@ -107,6 +126,7 @@ carrying a `generated.$comment` naming the single defect it exhibits:
 | `cochange-zero-denominator.json` | Observation-form `occurrences: 0` — a pair never observed has no entry, not a zero denominator | schema and validator |
 | `cochange-both-forms-zero-occurrences.json` | Both `rate` and `support`, disguised by `occurrences: 0` — the adversarial case that defeated an earlier `oneOf` | schema and validator |
 | `cochange-mixed-forms-disguised.json` | A mixed array whose second entry is a disguised both-form entry, which the earlier rule read as homogeneously legacy | schema and validator |
+| `cochange-legacy-missing-generated.json` | The legacy form still requires `generated`; A-010 widened the observation form only | schema and validator |
 | `cochange-support-exceeds-occurrences.json` | `support` counts a subset of what `occurrences` counts | **validator only** — see below |
 
 That last row is the one asymmetry in the bundle, and it is stated here rather
@@ -292,6 +312,16 @@ Stated plainly, because a conformance document that hides them is misleading:
   normatively in A-009: an unpinned empty array means **legacy / unknown**, not
   zero — only a *pinned* empty array asserts that the analysis ran and found
   nothing. Both states ship as fixtures and are asserted by test.
+- **Producer agreement is not measured on the `generated` flag, and cannot be.**
+  As of A-010 the flag is optional and carries no specified derivation, so two
+  independent producers may classify the same pair differently — or one may
+  classify and the other omit — and **both conform**. Agreement between producers
+  is therefore measured on `files`, `support` and `occurrences` only. A candidate
+  producer is not marked non-conforming for omitting the flag, for disagreeing
+  about it, or for classifying nothing at all; it *is* non-conforming if it emits
+  a non-boolean, or if it emits the legacy form without it. Nothing here obliges
+  a producer to classify: absent is a legitimate and, for a producer with no
+  public deterministic classifier, the **correct** output.
 - **The union-denominator guarantee is conditional while both forms are legal.**
   It holds for entries in the observation form. A legacy entry's `occurrences`
   carries the pre-amendment meaning, which was never normatively specified and
