@@ -78,6 +78,9 @@ GitHub API on 2026-08-04, it requires:
 - require conversation resolution;
 - block force pushes and branch deletion;
 - require review from code owners — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
+  A post-calibration transition to independent AI review layers (Greptile as
+  hard status gate, Sourcery as mandatory review-completion gate) is planned;
+  see [`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
 Two controls this document previously claimed are **not** in place:
 
@@ -110,7 +113,11 @@ not any one of them alone.
 
 The controls are configured. What is missing is a *second person*: no combination
 of the above currently results in a change being reviewed by someone other than
-its author.
+its author. A post-calibration transition is planned: Greptile would serve as an
+enforceable independent review gate and Sourcery as a mandatory
+review-completion gate, after which required code-owner approval would be
+disabled until a second human maintainer exists. See
+[`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
 **This is not currently a credentialed package-publication risk**, because this
 repository holds no npm credential and ships no release workflow. It is not
@@ -120,22 +127,60 @@ land the same way.
 
 ### Remediation
 
-Raising the approval count alone does not fix this. All four are required:
+Raising the approval count alone does not fix this. The remediation has two
+phases:
+
+**Phase 1 (current): Greptile as independent review gate.**
+
+Adding Greptile as a required status check creates an enforceable independent
+gate that does not depend on a second human reviewer. The `.greptile/`
+configuration (see [`.greptile/config.json`](../.greptile/config.json)) defines
+project-specific review rules. `triggerOnDrafts: true` ensures the review starts
+before the PR leaves draft, and `triggerOnUpdates: true` ensures new commits
+retrigger review.
+
+**Phase 2 (after Greptile gate is demonstrated): Disable required
+code-owner approval.**
+
+Once the Greptile gate is proven to fire and block, required code-owner approval
+is disabled (it cannot be satisfied by the sole code owner who authors all
+changes). CODEOWNERS remains authoritative for ownership/routing but is no longer
+a merge gate.
+
+The interim governance model for this sole-steward repository:
+
+```
+CODEOWNERS
+    -> ownership/routing signal (not a merge gate)
+
+Required Greptile review
++ current-head CI
++ conversation resolution
++ normative governance tests
+    -> merge authorization
+```
+
+`enforce_admins` remains **off** during initial calibration. Admin bypass is
+retained as an exceptional, recorded recovery path until Greptile reliability
+has been observed. When a genuine second standard maintainer exists, restore
+required code-owner approval and enable administrator enforcement.
+
+The following must still be closed *before* publication authority transfers:
 
 1. **At least one independent maintainer or code owner** able to review
-   `@qmarcelle`-authored changes. Without this, nobody can satisfy point 3 above.
+   `@qmarcelle`-authored changes.
 2. **At least one required approval** (`required_approving_review_count >= 1`),
    so review is required on paths no code-owner rule reaches.
 3. **Administrator enforcement**, or a no-bypass ruleset carrying a deliberately
-   bounded and documented release exception — bypass should be an explicit,
-   narrow act rather than the default posture.
+   bounded and documented release exception.
 4. **Continued protection of `.github/CODEOWNERS` itself**, so the ownership map
    cannot be edited to route around the requirement. This is already in place at
    `.github/CODEOWNERS:29` and must survive any change made for points 1–3.
 
 `.github/RELEASE-AUTHORITY.md` and the migration plan both treat protected,
-reviewed release paths as a precondition for holding a credential. This must be
-closed *before* publication authority transfers, not after.
+reviewed release paths as a precondition for holding a credential. The Greptile
+gate is an interim measure, not a substitute for independent human review before
+publication.
 
 ## Repository metadata
 

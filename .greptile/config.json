@@ -1,0 +1,91 @@
+{
+  "strictness": 1,
+  "triggerOnUpdates": true,
+  "triggerOnDrafts": true,
+  "statusCheck": true,
+  "ignorePatterns": "node_modules/**\ndist/**\ncoverage/**\n.git/**",
+  "summarySection": {
+    "included": true,
+    "collapsible": true,
+    "defaultOpen": false
+  },
+  "issuesTableSection": {
+    "included": true,
+    "collapsible": false
+  },
+  "confidenceScoreSection": {
+    "included": true,
+    "collapsible": true,
+    "defaultOpen": false
+  },
+  "instructions": "This is the canonical source of the workspace.json specification. It owns the normative JSON Schema, validation semantics, deterministic rules, conformance fixtures, and ADRs. The repository is descriptive, never prescriptive: no enforcement, approval-gate, or merge-blocking fields. The committed artifact must be daemon-free and independently useful. The four stable read paths (manual.fragileFiles, manual.coChangePatterns, generated.fileIndex, generated.frameworkManifest) are breaking surfaces regardless of semver optics. @workspacejson/spec and @workspacejson/rules are the published packages. No proprietary organizational scope, private sidecar artifact, or cross-org implementation dependency may appear anywhere. See .greptile/rules.md for the explicit boundary names.",
+  "rules": [
+    {
+      "id": "evidence-load-bearing",
+      "rule": "Evidence claims must be load-bearing. A verification check that cannot fail proves nothing. A metric that does not perturb when its referent changes is a constant, not a measurement. If a test or guard is added, it must be capable of failing for the defect it claims to catch.",
+      "severity": "high"
+    },
+    {
+      "id": "absence-not-success",
+      "rule": "Absence, skipped, unsupported, or unavailable is never success, false, safe, empty, or green. A gate that goes green because it could not find the thing it measures reports conformance it never measured. Missing evidence must be reported as missing, not as a passing result.",
+      "severity": "high"
+    },
+    {
+      "id": "metrics-perturb",
+      "rule": "Metrics and receipts must perturb when their referent changes. A number that does not move when its input changes is decorative. If a metric is added or updated, verify it actually responds to changes in the underlying value it claims to measure.",
+      "severity": "high"
+    },
+    {
+      "id": "no-cross-org-deps",
+      "rule": "No proprietary organizational scope, private sidecar artifact, or cross-org implementation dependency may appear in any file including config, comments, or documentation. This repository is the public canonical standard and must not reference private organizational internals. See .greptile/rules.md for the explicit boundary names that this rule enforces.",
+      "severity": "high"
+    },
+    {
+      "id": "bidirectional-checks",
+      "rule": "Every verification check must be considered in both directions: cannot-ever-pass and cannot-ever-fail. A guard that rejected everything looks identical to a working guard from a green build. If you add a check, consider what it would look like if it were broken in each direction.",
+      "severity": "high"
+    },
+    {
+      "id": "descriptive-not-prescriptive",
+      "rule": "workspace.json remains descriptive, never prescriptive. No enforcement, approval-gate, or merge-blocking fields may be added to the schema or documentation. The standard describes what is; it does not mandate what must be done with it.",
+      "scope": ["packages/spec/**", "docs/adr/**", "docs/conformance.md", "docs/versioning.md", "docs/glossary.md", "docs/troubleshooting.md"],
+      "severity": "high"
+    },
+    {
+      "id": "daemon-free",
+      "rule": "The committed artifact must remain daemon-free and independently useful with nothing running. No field, example, or documentation may introduce a dependency on a running service, daemon, or live process for the artifact to be meaningful.",
+      "scope": ["packages/spec/**", "docs/**"],
+      "severity": "high"
+    },
+    {
+      "id": "four-read-paths-breaking",
+      "rule": "The four stable read paths (manual.fragileFiles, manual.coChangePatterns, generated.fileIndex, generated.frameworkManifest) are breaking surfaces regardless of semver optics. Changes to their structure, semantics, or field names require an ADR and are not additive changes.",
+      "scope": ["packages/spec/**", "docs/conformance.md"],
+      "severity": "high"
+    },
+    {
+      "id": "reader-producer-distinct",
+      "rule": "Reader validity and producer obligations must remain distinct. Reader tolerance does not relax producer obligations. A reader that accepts a missing field does not mean a producer may omit it. Keep these two concerns in separate code paths and documentation sections.",
+      "scope": ["packages/spec/**", "docs/conformance.md"],
+      "severity": "high"
+    },
+    {
+      "id": "cochange-ordering-evidence",
+      "rule": "Canonical co-change producer ordering must be executable evidence before documentation may claim it is enforced. Do not document an ordering as enforced unless a test proves it. Do not add a producer ordering claim without a corresponding test that fails when the ordering is violated.",
+      "scope": ["packages/spec/**", "docs/**"],
+      "severity": "high"
+    },
+    {
+      "id": "no-derived-probability",
+      "rule": "Observation-form co-change emission must not reintroduce derived probability fields (such as 'rate') as a compatibility shortcut. Observations are raw counts; derived metrics belong in the consumer, not in the standard's emitted artifact.",
+      "scope": ["packages/spec/**"],
+      "severity": "high"
+    },
+    {
+      "id": "negative-fixtures-single-defect",
+      "rule": "Negative fixtures must be single-defect. Each invalid example must violate exactly one constraint. Repairs must mutate only the named field or path. A fixture rejected for an unrelated defect proves nothing about the one it is named for. Test machinery that validates negative fixtures must attribute the rejection to the specific defect, not to a generic failure.",
+      "scope": ["packages/spec/examples/invalid/**", "packages/spec/src/**/*test.ts", "scripts/validate-examples.mjs", "scripts/check-producer-conformance.mjs"],
+      "severity": "high"
+    }
+  ]
+}

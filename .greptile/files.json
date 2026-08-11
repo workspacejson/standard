@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "path": "OWNERSHIP.md",
+      "description": "Defines what this repository owns (normative schema, validation, rules, ADRs), what it consumes (nothing), and what it must never define (producer code, host integrations, site rendering, prescriptive policy, daemon assumptions). The authoritative boundary document."
+    },
+    {
+      "path": "docs/versioning.md",
+      "description": "Versioning policy for the workspace.json specification, including how semver applies to the schema, the four stable read paths, compatibility profiles, and the relationship between field lifecycle stages and version bumps."
+    },
+    {
+      "path": "docs/conformance.md",
+      "description": "How to check conformance to workspace.json for producers and consumers. Defines reader vs producer obligations, the executable producer contract, and known gaps in conformance checking."
+    },
+    {
+      "path": "docs/adr/README.md",
+      "description": "ADR index and format. Lists when an ADR is required (schema bytes, stable read paths, export surface, descriptive-not-prescriptive property, daemon-free property) and the status vocabulary."
+    },
+    {
+      "path": "docs/adr/003-field-lifecycle-and-admission.md",
+      "description": "Field lifecycle and admission process. Defines three independent axes (field lifecycle, evidence tier, release state) and the stages from Draft to Stable surface. Governs how fields enter and leave the standard."
+    },
+    {
+      "path": "packages/spec/schema/v1.json",
+      "description": "The canonical normative JSON Schema. Exactly one copy exists. Changes to these bytes require an ADR. The schema is the single source of truth for what workspace.json validates."
+    }
+  ]
+}
