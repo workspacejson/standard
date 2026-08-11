@@ -74,7 +74,8 @@ documentation. The standard describes what is; it does not mandate what must
 be done with it. A field that tells a consumer "you must block merges if this
 is present" is prescriptive and does not belong here.
 
-Scope: `packages/spec/**`, `docs/**`
+Scope: `packages/spec/**`, `docs/adr/**`, `docs/conformance.md`,
+`docs/versioning.md`, `docs/glossary.md`, `docs/troubleshooting.md`
 
 ### Daemon-free
 

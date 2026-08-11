@@ -48,7 +48,7 @@
     {
       "id": "descriptive-not-prescriptive",
       "rule": "workspace.json remains descriptive, never prescriptive. No enforcement, approval-gate, or merge-blocking fields may be added to the schema or documentation. The standard describes what is; it does not mandate what must be done with it.",
-      "scope": ["packages/spec/**", "docs/**"],
+      "scope": ["packages/spec/**", "docs/adr/**", "docs/conformance.md", "docs/versioning.md", "docs/glossary.md", "docs/troubleshooting.md"],
       "severity": "high"
     },
     {
