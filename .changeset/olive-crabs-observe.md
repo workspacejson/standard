@@ -39,8 +39,16 @@ A `generated.coChange` entry now takes **exactly one of two forms**:
 
 ```diff
   { files: [a, b], rate: 0.87, occurrences: 9,  generated: false }   // still valid
-+ { files: [a, b], support: 9, occurrences: 21, generated: false }   // now valid
++ { files: [a, b], support: 8, occurrences: 24, generated: false }   // now valid
 ```
+
+Those two numbers are the worked invariant, not an illustration. Over the
+analyzed history `a` changed in **20** qualifying commits and `b` in **12**, and
+**8** commits changed both. `support` is that intersection; `occurrences` is the
+symmetric union, `20 + 12 − 8 = 24`. The marginals are deliberately unequal,
+because that is what makes the denominator observable: a producer using one
+endpoint's marginal would emit 20 or 12 here, and an unordered pair gives it no
+principled way to choose between them. 24 is neither.
 
 An entry carrying **both** is invalid — they are different contracts, the counts
 need not agree, and a reader cannot know which was measured. An entry carrying
