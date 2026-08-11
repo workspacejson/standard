@@ -1,0 +1,35 @@
+{
+  "manual": {},
+  "generated": {
+    "$comment": "A-010: the observation form with NO tooling-coupling classification. Every entry omits `generated`, because this producer implements no deterministic classifier and declines to assert one. Absence is the third state — it means unclassified, not false. The lockfile/manifest pair is deliberately present and deliberately unflagged: a reader that collapses absent into false would read it as a confirmed real source coupling, which is precisely the unsupported certainty the amendment removed. Note also that this document is NOT mixed-form: the legacy/observation discriminator is `rate` vs `support`, and the classification flag plays no part in it.",
+    "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
+    "basisRevision": "3c9a0f14b7e25d8613af04c2e9b7d5081f6a2c3d",
+    "by": { "name": "unclassified-example-producer", "version": "1.0.0" },
+    "frameworkManifest": [],
+    "fileIndex": {
+      "src/auth.ts": {},
+      "src/session.ts": {}
+    },
+    "coChange": [
+      {
+        "files": ["src/auth.ts", "src/session.ts"],
+        "support": 8,
+        "occurrences": 24
+      },
+      {
+        "files": ["package.json", "pnpm-lock.yaml"],
+        "support": 12,
+        "occurrences": 12
+      }
+    ],
+    "fragility": [],
+    "warnings": []
+  },
+  "agents": {},
+  "health": {
+    "intelligenceState": "OBSERVING",
+    "observationCount": 24,
+    "confidence": 0.4
+  }
+}

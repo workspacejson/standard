@@ -328,6 +328,7 @@ path.
 | A-007 | `manual.fragileFiles` disposition — required by the §10 interlock and absent from the initial six. The v0.5 relocation to `generated` is a stable-surface move on a grandfathered path | **Keep** — remain in `manual`; do not relocate to `generated` | 2026-08-03 |
 | A-008 | `generated.frameworkManifest` disposition — required by the §10 interlock and absent from the initial six | **Keep and specify** — stable; specify its contract | 2026-08-03 |
 | A-009 | `generated.coChange` item shape — admit raw perturbable counts (`support`, `occurrences`) and a `generated`-level `basisRevision`; retire the derived `rate` | **Amend** — counts admitted with a symmetric union denominator, as a staged widening under an unchanged v0.4 profile; `rate` deprecated and accepted until the next profile change; not promoted to the stable surface | 2026-08-09 |
+| A-010 | `generated.coChange[].generated` — a required boolean with no reproducible classifier, which forces a producer to assert a classification it cannot derive | **Amend** — reader widening: optional in the observation form, absence meaning *unclassified* rather than `false`; still required in the deprecated legacy form | 2026-08-11 |
 
 ### Ratification record
 
@@ -771,3 +772,135 @@ individually well-formed; and `cochange-zero-denominator.json` pins the
 | 6 Identity and provenance rules defined | `generated.basisRevision`, defined above |
 | 7 Forward and backward compatibility specified | Compatibility paragraph above |
 | 8 Concrete consumer problem | A commit-graph producer had no conforming shape for the counts it measures, blocking every downstream diagnostic that reads the committed artifact |
+
+**A-010 — `generated.coChange[].generated`**
+
+- Disposition: Amend the item definition to make the classification flag
+  optional in the observation form
+- Authority: Qwynn Marcelle, sole steward
+- Decision date: 2026-08-11
+- Ratification ledger: **META-264** (internal tracker), as for A-001 through
+  A-009 — the ledger named in this record's metadata table, and the authoritative
+  history for every amendment against it under §11
+- Implementation receipt: META-316 (internal tracker), which records the defect,
+  the reader-widening decision, and the landed change. It is the receipt for the
+  work, not the ratification ledger; if the two disagree, META-264 governs
+- Effective revision: the revision recorded for this record in
+  [`index.json`](./index.json), as for the amendments before it
+- Lifecycle state after this amendment: **normative optional**, unchanged.
+  `generated.coChange` is not promoted toward the stable surface and §10's
+  interlock is untouched
+
+*Proposal.* A-009 left `generated` in the item's `required` set, where it had sat
+since before the observation form existed. It is a boolean, so a producer must
+emit `true` or `false` for every pair. Make it optional, and define absence.
+
+*The defect is unsupported certainty, not a missing feature.* `support` and
+`occurrences` are observations: a producer counts commits and reports what it
+counted, and a second producer counting the same commits gets the same numbers.
+`generated` is a **classification**. Answering it requires a judgement about what
+a file *is* — that `pnpm-lock.yaml` is a lockfile, that a file under `dist/` is
+built rather than authored — and no portable deterministic classifier from public
+repository inputs is specified anywhere in this standard. A required boolean does
+not produce that judgement. It produces a *value*, and the value carries the
+authority of the artifact regardless of whether anything backed it.
+
+This was not hypothetical when the amendment was written. The Phase 3
+commit-graph producer had no classifier and emitted a constant `false`. On its
+pinned fixture the top-ranked pair was `package-lock.json ↔ package.json` —
+carrying `generated: false`, which under the pre-amendment contract asserts *this
+is a real source coupling, do not skip it*, about the single most textbook
+tooling-coupled pair in the ecosystem. The field was not merely uninformative; it
+was confidently wrong, and it was wrong because the schema required an answer.
+
+*Why widening the reader rather than specifying a classifier.* The alternative
+was to specify a portable classifier and require independent producers to agree
+on it. That was rejected, and not on effort grounds. Such a classifier does not
+exist today, and inventing one inside a producer would put a §7 producer-profile
+heuristic — path patterns, filename lists, generated-file conventions that differ
+per ecosystem and per repository — behind a field that reads as normative. Two
+conforming producers would then classify the same pair differently while both
+validating, which is the §3 criterion 1 failure (referent not precisely defined)
+dressed as a boolean. Better to admit the standard has no classifier than to
+publish one that cannot be reproduced. If a public, deterministic,
+perturbation-tested classifier is later specified, this amendment does not stand
+in its way: the property is retained, and specifying its derivation is a later
+amendment rather than a reversal of this one.
+
+*Absence is a third state, and this is the operative rule.* A reader must not
+collapse an absent flag into `false`.
+
+| Value | Means |
+| -- | -- |
+| `true` | Classified as tooling-coupled; a consumer surfacing real source couplings should skip the pair |
+| `false` | Classified as **not** tooling-coupled |
+| **absent** | **No classification was performed.** The producer asserts nothing either way |
+
+Collapsing absent into `false` converts a producer's silence into a positive
+claim that the pair is a real source coupling — the same error the constant
+`false` above made, relocated from the producer into the reader. It is also the
+easy error to make, because `if (!entry.generated)` is the idiomatic falsy test
+and it is wrong here. The consumer guidance in
+[`docs/troubleshooting.md`](../troubleshooting.md),
+[`docs/glossary.md`](../glossary.md), [`docs/versioning.md`](../versioning.md)
+and the package README is corrected accordingly, and
+`cochange-unclassified-v0.4.json` ships as the executable case: an
+observation-form document in which every entry omits the flag, carrying an
+unflagged lockfile pair precisely so that a reader which resolves absence to
+`false` produces a visibly wrong answer against it.
+
+A producer omits the flag unless it implements a public, deterministic,
+perturbation-tested classifier. Because two producers may classify the same pair
+differently and both conform, **the flag is not a producer-comparison surface**:
+Role A agreement is measured on `files`, `support` and `occurrences`, and a
+disagreement on `generated` is not a conformance failure.
+
+*The widening is asymmetric, deliberately.* The requirement did not disappear; it
+moved into the legacy `oneOf` branch. The legacy form is deprecated and frozen
+until the next document-profile change, every artifact published in it already
+carries the flag, and widening it too would loosen a shape no producer should
+still be emitting — buying nothing and weakening a fixture surface. The narrow
+change is the one that resolves the defect.
+`cochange-legacy-missing-generated.json` is the negative fixture that pins the
+asymmetry: it is rejected before repair and valid after restoring the one field
+its comment names.
+
+*Compatibility (§3 criterion 7).* At the **document** level this is a pure
+widening: every document valid before this amendment is valid after it. Nothing
+that was optional becomes required, no value range narrows, no v0.3 document is
+affected, the four stable read paths are untouched, and `generated.specVersion`
+does not move. At the **package API** level `generated` moves off
+`CoChangeEntryCommon`: it stays `boolean` on `LegacyCoChangeEntry` and becomes
+`boolean | undefined` on `ObservationCoChangeEntry`. A TypeScript consumer that
+assigns `entry.generated` to a bare `boolean` without narrowing stops compiling —
+which is the intended outcome, since that consumer was the one at risk of reading
+absence as `false`. Asserted in `src/type-invariants.ts` rather than described.
+
+*Sequencing (§5).* §5's discipline concerns relaxing `required`, ceasing
+emission, and removing a property. This amendment performs only the first, on a
+normative-optional path, and it does not authorize anything downstream. It does
+**not** authorize observation-form emission — that gate is A-009 step 2 and is
+owned by META-297, and it remains closed on its own terms. It does not remove the
+property, and it does not remove `rate`.
+
+*Fixtures (§6).* `cochange-unclassified-v0.4.json` (positive: observation form,
+nothing classified, unflagged lockfile pair) and
+`cochange-legacy-missing-generated.json` (negative: the legacy form still
+requires the flag), both executed by `pnpm run check:examples` in their
+respective directions. The behavioral suite in `packages/spec/src/index.test.ts`
+covers the three states, per-entry rather than per-array classification, type
+rejection of a non-boolean, the form discriminator remaining `support` versus
+`rate`, and agreement between the two schema mirrors. The watched-red receipt is
+recorded on META-316: restoring the pre-amendment `required` set rejects
+`cochange-unclassified-v0.4.json` and turns nine tests red.
+
+| §3 criterion | How it is met |
+| -- | -- |
+| 1 Referent precisely defined | Three states defined above and in both schema mirrors; the standard states plainly that it specifies no classifier, rather than implying one exists |
+| 2 Descriptive, not evaluative | Unchanged; the amendment removes an assertion the producer could not support |
+| 3 Perturbs when the referent changes | Where a producer classifies, `true` and `false` remain distinguishable from each other and from absence; asserted at the document level, not merely in the types |
+| 4 Missing, empty, unsupported and stale distinguishable | **This amendment is what makes *unsupported* expressible.** Before it, an unclassified pair was indistinguishable from one classified `false` |
+| 5 Independently implementable from the pinned bundle | Schema, descriptions and both fixtures ship together; the absence of a classifier is stated rather than left for an implementer to discover |
+| 6 Identity and provenance rules defined | Unchanged by this amendment |
+| 7 Forward and backward compatibility specified | Compatibility paragraph above |
+| 8 Concrete consumer problem | A producer with no classifier had to assert one, and did so wrongly on the highest-ranked pair of its own pinned fixture |
