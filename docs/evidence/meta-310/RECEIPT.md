@@ -245,12 +245,38 @@ co-change without an import edge is closer to expected than surprising.
 ```text
 driver:      workspacejson/cli @ evidence/meta-310/meta310-mine.mjs
                sha256 5be5c814caed895b30a26d6fee697e1b65bc01c95789235dc49ad2a3f805e83c
+               BYTE-FROZEN — this digest is the reproduction claim
 runner env:  workspacejson/cli @ evidence/meta-310/runner-package.json
-               sha256 fed868de3cce3c5e75010fa7062221fb53f155a20ca90c850c5ed47be5a59795
+               NOT byte-frozen — see below
 call:        generateWorkspaceJson(repoRoot, {}, { mineHistory: true })
 command:     node meta310-mine.mjs <label> <repoRoot> <outDir>
-environment: Node v22.19.0, pnpm 9.0.0, darwin
+environment: Node v22.19.0, npm (bundled), pnpm 9.0.0, darwin
 ```
+
+**The runner manifest is deliberately not byte-frozen, and that is a correction
+to what this receipt first claimed.** As it ran it carried machine-local absolute
+paths under `/private/tmp/...`, which resolve on exactly one machine. Review on
+workspacejson/cli#21 caught that those bytes documented the environment while
+preventing anyone from recreating it. The committed manifest uses paths relative
+to a `tarballs/` directory instead.
+
+The as-run copy hashed
+`fed868de3cce3c5e75010fa7062221fb53f155a20ca90c850c5ed47be5a59795` and the
+committed file no longer matches it. They differ only in the tarball directory
+prefix: package set, versions, and the `overrides` forcing `file:` resolution are
+identical. **No result depends on the prefix** — the run depended on the content
+of the four tarballs, whose digests are recorded above and are unchanged.
+
+Verified end to end rather than by inspection: a fresh directory with the
+tarballs copied in, `npm install`, then the driver run against
+`workspacejson/standard` @ `8e08c8c` reproduces history-block
+`7012352617df37f442a627b8dfc334ed17d63dd2a69bb2d875f759bfddcc7b4f` with 50
+entries, valid, cross-check identical — and the install audit still shows 0
+registry URLs for `@workspacejson/*`, all four resolving `file:`, and exactly one
+copy of `@workspacejson/spec`.
+
+Step-by-step reproduction instructions live in that repository at
+`evidence/meta-310/README.md`.
 
 `mineHistory` is a programmatic option with no CLI flag. A public mining flag is
 a later increment and did not block this run.
