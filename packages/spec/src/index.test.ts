@@ -682,6 +682,403 @@ describe('A-009 co-change raw observations', () => {
     });
   });
 
+  // ---- the union denominator, DERIVED from asymmetric marginals ------------
+  // Everything above uses `support: 8, occurrences: 24` as literals. Two
+  // literals cannot demonstrate a counting rule: 24 is equally consistent with
+  // "the union", "the larger marginal plus four" and "a number someone typed".
+  // The rule only becomes visible once the counts are COMPUTED from a commit
+  // ledger whose two marginals differ.
+  //
+  // The marginals are deliberately ASYMMETRIC — 20 and 12. That is what makes
+  // the subject-marginal alternative incoherent rather than merely different:
+  // an unordered pair has no subject, so a producer using "the subject's
+  // marginal" as the denominator has two answers available (20 or 12) and
+  // nothing in the artifact to choose between them. Two conforming producers
+  // would emit different denominators for the same observation. The union is
+  // the only denominator that is a function of the pair rather than of an
+  // ordering the pair does not carry.
+  describe('union denominator derived from asymmetric marginals (20, 12, ∩ 8)', () => {
+    // A synthetic ledger of 24 qualifying commits, indexed 1..24.
+    //   src/auth.ts    changed in commits  1..20   → marginal 20
+    //   src/session.ts changed in commits 13..24   → marginal 12
+    //   both                              13..20   → intersection 8
+    //   either                             1..24   → union 24
+    const commits = Array.from({ length: 24 }, (_, i) => i + 1);
+    const touchedBy = {
+      'src/auth.ts': new Set(commits.filter((c) => c <= 20)),
+      'src/session.ts': new Set(commits.filter((c) => c >= 13)),
+    } as const;
+
+    const pair = ['src/auth.ts', 'src/session.ts'] as const;
+    const marginal = (f: (typeof pair)[number]) => touchedBy[f].size;
+
+    /** Qualifying commits in which BOTH files changed. */
+    const countSupport = () =>
+      commits.filter((c) => pair.every((f) => touchedBy[f].has(c))).length;
+
+    /** Qualifying commits in which AT LEAST ONE changed — the symmetric union. */
+    const countOccurrences = () =>
+      commits.filter((c) => pair.some((f) => touchedBy[f].has(c))).length;
+
+    it('the ledger has the asymmetric marginals the rule is interesting for', () => {
+      expect(marginal('src/auth.ts')).toBe(20);
+      expect(marginal('src/session.ts')).toBe(12);
+      // Asymmetry is the whole point: if the marginals were equal, a
+      // subject-marginal denominator would coincide with itself and the choice
+      // of denominator would be unobservable.
+      expect(marginal('src/auth.ts')).not.toBe(marginal('src/session.ts'));
+    });
+
+    it('support is the intersection: 8', () => {
+      expect(countSupport()).toBe(8);
+    });
+
+    it('occurrences is the union, and inclusion–exclusion gives 20 + 12 − 8 = 24', () => {
+      expect(countOccurrences()).toBe(24);
+      expect(countOccurrences()).toBe(
+        marginal('src/auth.ts') + marginal('src/session.ts') - countSupport(),
+      );
+    });
+
+    it('the union is NEITHER marginal — this is what rules out a subject denominator', () => {
+      // The substantive assertion. A producer that used "the subject file's
+      // marginal" would emit 20 or 12 here depending on which endpoint it
+      // silently treated as the subject. The union is 24 and is not either.
+      expect(countOccurrences()).not.toBe(marginal('src/auth.ts'));
+      expect(countOccurrences()).not.toBe(marginal('src/session.ts'));
+    });
+
+    it('the derived counts are the ones the suite carries', () => {
+      // Ties the ledger to the literals used everywhere else in this file, so
+      // the two cannot drift apart silently.
+      expect([countSupport(), countOccurrences()]).toEqual([8, 24]);
+    });
+
+    // ---- THE DESIGNATED UNION-SEMANTICS TEST --------------------------------
+    // A synthetic ledger that agrees only with itself proves nothing about what
+    // this repository ships. This is the test that binds the derivation to the
+    // ARTIFACT BYTES: the shipped observation example must carry the union, and
+    // must fail here the moment it drifts toward either endpoint's marginal.
+    //
+    // It is stated four ways on purpose. A single equality would also be
+    // satisfied by a fixture that happens to hold 24 for an unrelated reason;
+    // the inclusion–exclusion identity and the two not-a-marginal assertions are
+    // what make the number mean "the union" rather than "twenty-four".
+    it('THE SHIPPED EXAMPLE carries the union denominator, not an endpoint marginal', () => {
+      const shipped = JSON.parse(
+        readFileSync(resolve(__dirname, '../examples/cochange-observations-v0.4.json'), 'utf8'),
+      ) as {
+        generated: { coChange: Array<{ files: string[]; support: number; occurrences: number }> };
+      };
+      const observed = shipped.generated.coChange.find(
+        (e) => e.files.includes('src/auth.ts') && e.files.includes('src/session.ts'),
+      );
+      expect(observed, 'the auth/session observation must exist in the shipped example').toBeDefined();
+
+      // 1. The shipped intersection is the derived intersection.
+      expect(observed!.support).toBe(countSupport());
+
+      // 2. The shipped denominator is the derived union.
+      expect(observed!.occurrences).toBe(countOccurrences());
+
+      // 3. Inclusion–exclusion, evaluated against the SHIPPED numbers:
+      //    |A ∪ B| = |A| + |B| − |A ∩ B|  →  24 = 20 + 12 − 8.
+      expect(observed!.occurrences).toBe(
+        marginal('src/auth.ts') + marginal('src/session.ts') - observed!.support,
+      );
+
+      // 4. And it is neither marginal. This is the assertion that a producer
+      //    silently using a subject denominator would fail: it would ship 20 or
+      //    12 here, both of which satisfy every schema and validator check.
+      expect(observed!.occurrences).not.toBe(marginal('src/auth.ts'));
+      expect(observed!.occurrences).not.toBe(marginal('src/session.ts'));
+    });
+
+    it('the derived observation validates', () => {
+      const derived = withEntries([
+        entry({ files: [...pair], support: countSupport(), occurrences: countOccurrences() }),
+      ]);
+      expect(validateV4(derived)).toBe(true);
+    });
+
+    it('endpoint reversal does not change either derived count', () => {
+      // Swap invariance at the level of the DERIVATION, not just of two stored
+      // literals: recomputing with the endpoints reversed must give the same
+      // pair of numbers, because both counts quantify over commits and neither
+      // reads a subject.
+      const reversedPair = [...pair].reverse() as unknown as typeof pair;
+      const supportReversed = commits.filter((c) =>
+        reversedPair.every((f) => touchedBy[f].has(c)),
+      ).length;
+      const occurrencesReversed = commits.filter((c) =>
+        reversedPair.some((f) => touchedBy[f].has(c)),
+      ).length;
+      expect([supportReversed, occurrencesReversed]).toEqual([countSupport(), countOccurrences()]);
+    });
+
+    // ---- and the gap this exposes -------------------------------------------
+    // The union rule is NOT machine-checkable from a single document, and that
+    // is a second out-of-schema producer obligation alongside
+    // `support <= occurrences`. A subject-marginal producer emits
+    // `support: 8, occurrences: 20` — internally consistent, `support` below
+    // `occurrences`, every declared constraint satisfied. Nothing in this
+    // repository rejects it. Recorded here so the limit is pinned rather than
+    // discovered by a consumer comparing two producers.
+    it('a subject-marginal denominator passes every gate — the rule is a producer obligation', () => {
+      const subjectMarginal = withEntries([
+        entry({ files: [...pair], support: countSupport(), occurrences: marginal('src/auth.ts') }),
+      ]);
+      const bare = compileSchemaValidator<unknown>(
+        JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as object,
+      );
+      expect(bare(subjectMarginal)).toBe(true);
+      expect(validate(subjectMarginal)).toBe(true);
+      expect(validateV4(subjectMarginal)).toBe(true);
+      // It is nonetheless wrong: it disagrees with the ledger it claims to
+      // summarize, and it is not the union.
+      expect(marginal('src/auth.ts')).not.toBe(countOccurrences());
+    });
+  });
+
+  // ---- pair ordering: a PRODUCER obligation, never a reader constraint -----
+  // Two claims that are easy to conflate, and must not be:
+  //
+  //   SET SEMANTICS (reader-facing, normative here). `files` is an unordered
+  //   pair. Either ordering is valid, joins are by membership, and no reader may
+  //   attribute meaning to position. Adding an ordering constraint to the schema
+  //   would narrow acceptance and turn this amendment from a widening into a
+  //   break — so the schema deliberately says nothing about order.
+  //
+  //   CANONICAL SERIALIZATION (producer-facing, documented here, ENFORCED
+  //   ELSEWHERE). A new producer serializes the two canonical stored keys in
+  //   ascending UTF-8 byte order, so that endpoint reversal cannot change the
+  //   bytes it emits and a regenerated artifact is stable. Enforcement belongs
+  //   to the candidate-producer conformance suite that gates observation-form
+  //   emission, recorded in ADR-003 A-009 — not to this repository. What is
+  //   pinned here is the RULE and, critically, that applying it changes nothing
+  //   about what readers accept.
+  describe('canonical pair ordering (producer obligation; readers stay unconstrained)', () => {
+    /**
+     * Ascending UTF-8 BYTE order. Not locale collation, not case folding, not
+     * Unicode normalization — each of those is a different total order, and
+     * two producers disagreeing about which one applies would emit different
+     * bytes for the same observation, which is the whole failure this rule
+     * exists to prevent.
+     */
+    const canonicalOrder = (files: readonly string[]): string[] =>
+      [...files].sort((a, b) => Buffer.compare(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8')));
+
+    it('orders by UTF-8 bytes, so uppercase sorts before lowercase (NOT locale, NOT case-folded)', () => {
+      // 'Z' is 0x5A, 'a' is 0x61. Byte order puts 'src/Z.ts' first. A
+      // locale-aware or case-insensitive comparator would put 'src/a.ts' first,
+      // which is the drift this assertion rules out.
+      expect(canonicalOrder(['src/a.ts', 'src/Z.ts'])).toEqual(['src/Z.ts', 'src/a.ts']);
+      expect(canonicalOrder(['src/Z.ts', 'src/a.ts'])).toEqual(['src/Z.ts', 'src/a.ts']);
+    });
+
+    it('does not normalize Unicode — precomposed and decomposed are distinct keys', () => {
+      // U+00E9 vs 'e' + U+0301. These are different byte sequences and must be
+      // ordered as such; applying NFC/NFD here would silently rewrite a stored
+      // key, which ADR-006 forbids.
+      const precomposed = 'src/café.ts';
+      const decomposed = 'src/café.ts';
+      expect(precomposed).not.toBe(decomposed);
+      // 'e' (0x65) precedes the UTF-8 lead byte of U+00E9 (0xC3), so the
+      // decomposed form sorts first under byte order.
+      expect(canonicalOrder([precomposed, decomposed])).toEqual([decomposed, precomposed]);
+    });
+
+    it('endpoint reversal produces IDENTICAL producer bytes', () => {
+      // The property the rule exists for: whichever way the analysis happened to
+      // encounter the pair, the serialized artifact is the same.
+      const forwardPair = ['src/auth.ts', 'src/session.ts'];
+      const reversedPair = ['src/session.ts', 'src/auth.ts'];
+      expect(canonicalOrder(reversedPair)).toEqual(canonicalOrder(forwardPair));
+
+      const serialize = (files: string[]) =>
+        JSON.stringify(withEntries([entry({ files: canonicalOrder(files) })]));
+      expect(serialize(reversedPair)).toBe(serialize(forwardPair));
+    });
+
+    it('is idempotent — re-serializing an already-canonical pair changes nothing', () => {
+      const once = canonicalOrder(['src/session.ts', 'src/auth.ts']);
+      expect(canonicalOrder(once)).toEqual(once);
+    });
+
+    // ---- and the non-narrowing guarantee ------------------------------------
+    // The assertions above describe what a PRODUCER should emit. The ones below
+    // are the reason none of it may leak into the schema.
+    it('a NON-canonically-ordered pair is still fully valid — this is not a schema rule', () => {
+      const nonCanonical = ['src/session.ts', 'src/auth.ts'];
+      expect(canonicalOrder(nonCanonical)).not.toEqual(nonCanonical);
+
+      const doc = withEntries([entry({ files: nonCanonical })]);
+      const bare = compileSchemaValidator<unknown>(
+        JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as object,
+      );
+      expect(bare(doc)).toBe(true);
+      expect(validate(doc)).toBe(true);
+      expect(validateV4(doc)).toBe(true);
+    });
+
+    it('the schema declares no ordering constraint on files, in either mirror', () => {
+      // A regression guard with teeth: if someone later expresses the producer
+      // obligation as `uniqueItems`, a `const`, a `prefixItems` tuple or a
+      // pattern pair, reversed documents stop validating and every published
+      // artifact that stored the other ordering breaks.
+      for (const source of [
+        JSON.parse(readFileSync(SCHEMA_JSON_PATH, 'utf8')) as Record<string, unknown>,
+        workspaceJsonSchema as unknown as Record<string, unknown>,
+      ]) {
+        const files = (
+          (
+            (
+              (source['properties'] as Record<string, Record<string, unknown>>)['generated'][
+                'properties'
+              ] as Record<string, Record<string, unknown>>
+            )['coChange']['items'] as Record<string, Record<string, unknown>>
+          )['properties'] as Record<string, Record<string, unknown>>
+        )['files'];
+        expect(Object.keys(files).sort()).toEqual([
+          'description',
+          'items',
+          'maxItems',
+          'minItems',
+          'type',
+        ]);
+      }
+    });
+
+    it('the shipped example is NOT canonically ordered, and that is legal', () => {
+      // RETAINED DELIBERATELY, not an oversight to be corrected. The example
+      // stores ["src/session.ts", "src/auth.ts"], which a new producer would
+      // emit the other way round. Three things are true at once and none may be
+      // inferred away from the others:
+      //
+      //   1. It is a READER-TOLERANCE fixture: executable evidence that a
+      //      conforming reader must not depend on pair order.
+      //   2. It is NOT reference-producer output. No example in this repository
+      //      is a producer receipt.
+      //   3. New producers still canonicalize by ascending UTF-8 bytes. This
+      //      fixture's validity is NOT evidence that ordering is optional for a
+      //      producer — reader tolerance and producer obligation are separate
+      //      contracts, and this exercises only the first.
+      const shipped = JSON.parse(
+        readFileSync(resolve(__dirname, '../examples/cochange-observations-v0.4.json'), 'utf8'),
+      ) as { generated: { coChange: Array<{ files: string[] }> } };
+      const observed = shipped.generated.coChange.find(
+        (e) => e.files.includes('src/auth.ts') && e.files.includes('src/session.ts'),
+      );
+      expect(observed!.files).toEqual(['src/session.ts', 'src/auth.ts']);
+      expect(canonicalOrder(observed!.files)).toEqual(['src/auth.ts', 'src/session.ts']);
+      expect(validate(shipped)).toBe(true);
+    });
+  });
+
+  // ---- the negative fixtures are ONE-FIELD perturbations -------------------
+  // `scripts/validate-examples.mjs` asserts that every fixture in
+  // `examples/invalid/` is REJECTED, and each fixture carries a
+  // `generated.$comment` naming the single defect it exhibits. Rejection alone
+  // does not show the comment is true: a fixture carrying two defects, or one
+  // defect other than the one named, is rejected just as firmly, and both the
+  // gate and the comment would keep passing while the fixture stopped
+  // demonstrating what it claims.
+  //
+  // The check that closes that gap is REPAIR. Restore the single named field to
+  // a conforming value and change nothing else; if the document then validates,
+  // the named defect was the only defect, and the fixture is attributable.
+  describe('negative fixtures are attributable: repairing the named field makes each valid', () => {
+    const invalidDir = resolve(__dirname, '../examples/invalid');
+
+    type Doc = {
+      generated: {
+        basisRevision?: unknown;
+        coChange: Array<Record<string, unknown>>;
+      };
+    };
+
+    // One repair per fixture, touching ONLY the field its `$comment` names.
+    const repairs: Record<string, (d: Doc) => void> = {
+      'cochange-abbreviated-basis-revision.json': (d) => {
+        d.generated.basisRevision = BASIS;
+      },
+      'cochange-both-forms-zero-occurrences.json': (d) => {
+        // The named defect is carrying BOTH representations; `occurrences: 0`
+        // is the disguise that made the old oneOf accept it, so restoring a
+        // legal denominator is part of removing the same single defect.
+        delete d.generated.coChange[0]!['rate'];
+        d.generated.coChange[0]!['occurrences'] = 10;
+      },
+      'cochange-both-representations.json': (d) => {
+        delete d.generated.coChange[0]!['rate'];
+      },
+      'cochange-missing-basis-revision.json': (d) => {
+        d.generated.basisRevision = BASIS;
+      },
+      'cochange-mixed-forms-disguised.json': (d) => {
+        d.generated.coChange[1] = {
+          files: ['src/c.ts', 'src/d.ts'],
+          rate: 0.4,
+          occurrences: 10,
+          generated: false,
+        };
+      },
+      'cochange-mixed-forms.json': (d) => {
+        d.generated.coChange[1] = {
+          files: ['src/c.ts', 'src/d.ts'],
+          rate: 0.3,
+          occurrences: 10,
+          generated: false,
+        };
+      },
+      'cochange-negative-support.json': (d) => {
+        d.generated.coChange[0]!['support'] = 1;
+      },
+      'cochange-neither-representation.json': (d) => {
+        d.generated.coChange[0]!['support'] = 3;
+      },
+      'cochange-non-integer-occurrences.json': (d) => {
+        d.generated.coChange[0]!['occurrences'] = 10;
+      },
+      'cochange-support-exceeds-occurrences.json': (d) => {
+        d.generated.coChange[0]!['support'] = 9;
+      },
+      'cochange-zero-denominator.json': (d) => {
+        d.generated.coChange[0]!['occurrences'] = 1;
+      },
+    };
+
+    const fixtures = readdirSync(invalidDir)
+      .filter((f) => f.endsWith('.json'))
+      .sort();
+
+    it('every shipped negative fixture has a declared repair', () => {
+      // A fixture added without a repair would otherwise be silently exempt
+      // from attribution.
+      expect(fixtures).toEqual(Object.keys(repairs).sort());
+    });
+
+    for (const name of fixtures) {
+      it(`${name} is rejected, and valid once its named field is repaired`, () => {
+        const raw = readFileSync(resolve(invalidDir, name), 'utf8');
+        expect(validate(JSON.parse(raw) as unknown)).toBe(false);
+
+        const repaired = JSON.parse(raw) as Doc;
+        repairs[name]!(repaired);
+        expect(validate(repaired)).toBe(true);
+      });
+    }
+
+    it('every fixture records the defect it exhibits', () => {
+      for (const name of fixtures) {
+        const doc = JSON.parse(readFileSync(resolve(invalidDir, name), 'utf8')) as {
+          generated: { $comment?: string };
+        };
+        expect(doc.generated.$comment, name).toMatch(/^INVALID: /);
+      }
+    });
+  });
+
   // ---- counts are counts ---------------------------------------------------
   describe('invalid counts are rejected', () => {
     it('rejects a negative support', () => {
