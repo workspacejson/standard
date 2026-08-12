@@ -205,8 +205,17 @@ jobs:
       # repository secret expands to an empty string, and the resulting npm
       # failure reads like a permissions problem rather than a missing secret.
       # The token's value is never printed, and command output is scrubbed.
+      #
+      # Both variable names are set, and both are load-bearing. The committed
+      # project `.npmrc` authenticates with `${NPM_TOKEN}`, while setup-node's
+      # `registry-url` writes a user-level npmrc using `${NODE_AUTH_TOKEN}`. A
+      # project npmrc wins over a user one, so setting only NODE_AUTH_TOKEN would
+      # leave the file that actually applies expanding an unset variable — npm
+      # warns and carries on unauthenticated, which surfaces much later as a
+      # permissions error.
       - name: Verify the release credential reached this job
         env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm run check:release-credential
 
@@ -216,6 +225,7 @@ jobs:
       # `--provenance` is what makes id-token: write above mean something.
       - name: Publish
         env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
         run: pnpm changeset publish
