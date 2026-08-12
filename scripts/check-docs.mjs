@@ -58,6 +58,13 @@ const PROVENANCE_FILES = new Set([
   // ran under, for the same reason the records above must. Enumerated per file:
   // a future evidence run does NOT inherit this, and has to argue for itself.
   "docs/evidence/meta-310/RECEIPT.md",
+  // A production receipt records which tracked work set the visual and content
+  // authority it was produced against, and which deviations were deferred to
+  // which follow-on work. Strip those identifiers and the record no longer says
+  // who to ask about an unresolved ruling. Same argument as the receipt above,
+  // and enumerated per file on the same terms: a future asset pack does NOT
+  // inherit this exemption.
+  "assets/PRODUCTION-RECEIPT.md",
 ]);
 
 // Historical release notes are a record of what was published, not live prose.
