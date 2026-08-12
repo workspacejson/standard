@@ -150,8 +150,10 @@ jobs:
       - name: Decide whether to cross the publication boundary
         id: decide
         env:
-          # Absent on a tag push, which is correct: the default is a dry run for
-          # dispatch, and a tag push is an explicit release.
+          # A dispatch passes its own input; anything else resolves to 'false',
+          # because a tag push IS the explicit decision to release. That still
+          # does not publish on its own — the script also requires a
+          # package-scoped tag, and the publish job requires the environment.
           WORKSPACEJSON_RELEASE_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
         run: node scripts/release-boundary.mjs
 
