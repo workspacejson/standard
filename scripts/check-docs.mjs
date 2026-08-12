@@ -58,13 +58,31 @@ const PROVENANCE_FILES = new Set([
   // ran under, for the same reason the records above must. Enumerated per file:
   // a future evidence run does NOT inherit this, and has to argue for itself.
   "docs/evidence/meta-310/RECEIPT.md",
-  // A production receipt records which tracked work set the visual and content
-  // authority it was produced against, and which deviations were deferred to
-  // which follow-on work. Strip those identifiers and the record no longer says
-  // who to ask about an unresolved ruling. Same argument as the receipt above,
-  // and enumerated per file on the same terms: a future asset pack does NOT
-  // inherit this exemption.
-  "assets/PRODUCTION-RECEIPT.md",
+]);
+
+// A narrower exemption than PROVENANCE_FILES. That set admits every identifier
+// anywhere in a file; this one admits only the identifiers enumerated for it,
+// by value. An identifier that shows up later still fails and has to argue for
+// itself, rather than inheriting an exemption that was granted for a different
+// reference on a different line.
+//
+// Prefer this form. A whole-file exemption is the blunt instrument, and is
+// worth reaching for only when the file cannot enumerate its references in
+// advance — an open-ended migration log, say.
+const SCOPED_PROVENANCE = new Map([
+  [
+    // A production receipt records which tracked work set the authority it ran
+    // under, and which follow-on work owns each ruling it deferred. Strip those
+    // and the record no longer says who to ask about an unresolved deviation.
+    "assets/PRODUCTION-RECEIPT.md",
+    new Set([
+      "GTM-30", // content authority the pack was produced against
+      "GTM-31", // the work that specified the pack
+      "GTM-32", // owns the deferred README integration
+      "GTM-33", // rule source for shipping no star CTA in the banner
+      "META-297", // the finding the co-change stability tag turns on
+    ]),
+  ],
 ]);
 
 // Historical release notes are a record of what was published, not live prose.
@@ -152,7 +170,9 @@ for (const file of markdown) {
 
     // ---- internal tracker identifiers
     if (file === SELF || PROVENANCE_FILES.has(file) || isChangelog(file)) return;
+    const admitted = SCOPED_PROVENANCE.get(file);
     for (const match of line.matchAll(INTERNAL_ID)) {
+      if (admitted?.has(match[0])) continue;
       fail(
         file,
         lineNumber,
@@ -167,10 +187,12 @@ for (const file of markdown) {
 // reference cannot simply move into a workflow comment or a script header.
 for (const file of files.filter((f) => /\.(ya?ml|json|mjs|js|ts)$/.test(f))) {
   if (file === SELF || PROVENANCE_FILES.has(file)) continue;
+  const admitted = SCOPED_PROVENANCE.get(file);
   const content = readFileSync(join(repoRoot, file), "utf8");
   content.split("\n").forEach((line, index) => {
     if (PRODUCER_STAMPED.test(line)) return;
     for (const match of line.matchAll(INTERNAL_ID)) {
+      if (admitted?.has(match[0])) continue;
       fail(file, index + 1, `internal tracker identifier '${match[0]}' — describe the work instead`);
     }
   });
@@ -255,6 +277,81 @@ for (const file of markdown) {
   }
 }
 
+// ---- 5: asset receipts are recomputed from the assets -----------------------
+
+// A receipt that records "pass" against a file it never reads is a claim, not
+// evidence: regenerate the asset and the receipt goes on reporting the old
+// result. So the manifest's dimensions are read back out of the PNG headers,
+// and the size ceilings are recomputed from the files on disk. Change an
+// export without updating its receipt row and this fails.
+//
+// The receipt owns the numbers. Nothing here hardcodes a dimension — the table
+// is the input, and the PNG is the referent it is checked against.
+
+const ASSET_RECEIPT = "assets/PRODUCTION-RECEIPT.md";
+
+// Ceilings the receipt's preflight states, in bytes.
+const SIZE_CEILINGS = { social: 300 * 1024, readme: 400 * 1024 };
+
+// Width and height live in the IHDR chunk, at a fixed offset in every PNG.
+const pngSize = (buffer) => {
+  const isPng = buffer.length >= 24 && buffer.readUInt32BE(0) === 0x89504e47;
+  if (!isPng) return null;
+  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+};
+
+let assetRowsChecked = 0;
+if (files.includes(ASSET_RECEIPT)) {
+  const receipt = readFileSync(join(repoRoot, ASSET_RECEIPT), "utf8");
+  // | `name.png` | purpose | 2560 x 800 | ... |
+  const ROW = /^\|\s*`([\w.-]+\.png)`\s*\|[^|]*\|\s*(\d+)\s*x\s*(\d+)\s*\|/gm;
+
+  for (const [, name, w, h] of receipt.matchAll(ROW)) {
+    const rel = `assets/${name}`;
+    const abs = join(repoRoot, rel);
+    if (!existsSync(abs)) {
+      fail(ASSET_RECEIPT, 0, `manifest lists '${name}' but ${rel} does not exist`);
+      continue;
+    }
+
+    assetRowsChecked++;
+    const bytes = readFileSync(abs);
+    const actual = pngSize(bytes);
+    if (!actual) {
+      fail(rel, 0, `manifest records it as a PNG export, but the file has no PNG header`);
+      continue;
+    }
+
+    const claimed = { width: Number(w), height: Number(h) };
+    if (actual.width !== claimed.width || actual.height !== claimed.height) {
+      fail(
+        ASSET_RECEIPT,
+        0,
+        `manifest records '${name}' as ${claimed.width} x ${claimed.height}, but the file is ` +
+          `${actual.width} x ${actual.height} — regenerate the asset or correct the receipt`,
+      );
+    }
+
+    // The social card is the only asset the receipt holds to the tighter
+    // ceiling, and it is the only one authored at its final unfurl size.
+    const ceiling = claimed.width === 1200 && claimed.height === 630
+      ? SIZE_CEILINGS.social
+      : SIZE_CEILINGS.readme;
+    if (bytes.length > ceiling) {
+      fail(
+        rel,
+        0,
+        `${(bytes.length / 1024).toFixed(0)} KB exceeds the ${ceiling / 1024} KB ceiling the ` +
+          `receipt records as passing`,
+      );
+    }
+  }
+
+  if (assetRowsChecked === 0) {
+    fail(ASSET_RECEIPT, 0, `no manifest rows parsed — the receipt cannot be checked against its assets`);
+  }
+}
+
 // ---- report ----------------------------------------------------------------
 
 console.log("Documentation integrity");
@@ -262,7 +359,8 @@ console.log(`  markdown files      ${markdown.length}`);
 console.log(`  links checked       ${linksChecked}  (${relativeLinks} relative, resolved on disk; ${externalLinks} external, syntax only)`);
 console.log(`  pnpm commands       ${commandsChecked} documented references verified against package.json`);
 console.log(`  stable read paths   ${STABLE_READ_PATHS.length} confirmed in the schema; ${enumerationsChecked} prose enumerations complete`);
-console.log(`  provenance files    ${PROVENANCE_FILES.size} exempt from the tracker-identifier rule`);
+console.log(`  provenance files    ${PROVENANCE_FILES.size} exempt from the tracker-identifier rule; ${SCOPED_PROVENANCE.size} scoped to enumerated identifiers`);
+console.log(`  asset receipts      ${assetRowsChecked} manifest rows recomputed from the PNGs on disk`);
 console.log(
   `  producer-stamped    weightingVersion admitted by value on its own line; no directory is exempt`,
 );
