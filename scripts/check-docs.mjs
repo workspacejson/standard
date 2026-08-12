@@ -362,9 +362,16 @@ const firstTransparentSample = (buffer, { width, height, colourType, interlace }
   const { idat } = readChunks(buffer);
   if (!idat.length) throw new Error("no IDAT chunk");
 
-  const raw = inflateSync(Buffer.concat(idat));
+  // A PNG's decompressed size is exactly one filter byte plus one scanline per
+  // row, so the correct output length is known before inflating rather than
+  // discovered by inflating. Declaring it caps the decompressor at the size the
+  // header already committed to: a stream that expands past it stops with an
+  // error instead of growing until the process dies.
+  const stride = width * 4; // RGBA, 8 bits per channel
+  const expected = height * (stride + 1);
+  const raw = inflateSync(Buffer.concat(idat), { maxOutputLength: expected });
+  if (raw.length < expected) throw new Error("truncated image data");
   const bpp = 4; // RGBA, 8 bits per channel
-  const stride = width * bpp;
   const line = Buffer.alloc(stride);
   const previous = Buffer.alloc(stride);
 
@@ -455,6 +462,38 @@ if (!files.includes(ASSET_RECEIPT)) {
       continue;
     }
 
+    // Order matters below. The geometry and size claims are read straight off
+    // the header and the file length, so they are settled first, and only an
+    // asset that already matches its row is decoded. That keeps the one
+    // expensive check bounded by numbers the receipt has already agreed to,
+    // instead of by whatever a file happens to declare about itself.
+    const claimed = { width: Number(w), height: Number(h) };
+    const geometryMatches =
+      actual.width === claimed.width && actual.height === claimed.height;
+    if (!geometryMatches) {
+      fail(
+        ASSET_RECEIPT,
+        0,
+        `manifest records '${name}' as ${claimed.width} x ${claimed.height}, but the file is ` +
+          `${actual.width} x ${actual.height} — regenerate the asset or correct the receipt`,
+      );
+    }
+
+    // The social card is the only asset the receipt holds to the tighter
+    // ceiling, and it is the only one authored at its final unfurl size.
+    const ceiling = claimed.width === 1200 && claimed.height === 630
+      ? SIZE_CEILINGS.social
+      : SIZE_CEILINGS.readme;
+    const withinCeiling = bytes.length <= ceiling;
+    if (!withinCeiling) {
+      fail(
+        rel,
+        0,
+        `${(bytes.length / 1024).toFixed(0)} KB exceeds the ${ceiling / 1024} KB ceiling the ` +
+          `receipt records as passing`,
+      );
+    }
+
     if (actual.bitDepth !== 8 || !TRUECOLOUR.has(actual.colourType)) {
       fail(
         rel,
@@ -469,7 +508,7 @@ if (!files.includes(ASSET_RECEIPT)) {
         `receipt records the alpha channel as flattened to opaque, but the file carries a tRNS ` +
           `chunk — colour-keyed transparency the alpha samples would not show`,
       );
-    } else {
+    } else if (geometryMatches && withinCeiling) {
       try {
         const sample = firstTransparentSample(bytes, actual);
         if (sample !== null) {
@@ -483,30 +522,6 @@ if (!files.includes(ASSET_RECEIPT)) {
       } catch (error) {
         fail(rel, 0, `alpha channel could not be verified against the receipt: ${error.message}`);
       }
-    }
-
-    const claimed = { width: Number(w), height: Number(h) };
-    if (actual.width !== claimed.width || actual.height !== claimed.height) {
-      fail(
-        ASSET_RECEIPT,
-        0,
-        `manifest records '${name}' as ${claimed.width} x ${claimed.height}, but the file is ` +
-          `${actual.width} x ${actual.height} — regenerate the asset or correct the receipt`,
-      );
-    }
-
-    // The social card is the only asset the receipt holds to the tighter
-    // ceiling, and it is the only one authored at its final unfurl size.
-    const ceiling = claimed.width === 1200 && claimed.height === 630
-      ? SIZE_CEILINGS.social
-      : SIZE_CEILINGS.readme;
-    if (bytes.length > ceiling) {
-      fail(
-        rel,
-        0,
-        `${(bytes.length / 1024).toFixed(0)} KB exceeds the ${ceiling / 1024} KB ceiling the ` +
-          `receipt records as passing`,
-      );
     }
   }
 
