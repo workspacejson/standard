@@ -78,7 +78,24 @@ jobs:
       # derived. This fails if they disagree, if the fixed group is out of
       # lockstep, or if changesets are still pending.
       - name: Release identity
+        if: github.ref_type == 'tag'
         run: pnpm run check:release-identity
+
+      # A dispatch from a branch has no tag to check anything against, and the
+      # identity gate treats a missing tag as a failure rather than a pass — so
+      # running it unconditionally would abort the whole verify job at step one
+      # and skip every gate after it, breaking the dry-run path entirely.
+      #
+      # It is reported rather than silently skipped: "not run" must never read as
+      # "passed". Publication is unaffected. The boundary refuses a non-tag ref,
+      # and the publish job re-runs this same check on the tag side before
+      # anything touches the registry.
+      - name: Release identity (not run on this ref)
+        if: github.ref_type != 'tag'
+        run: |
+          note="release identity: NOT RUN — ${GITHUB_REF_TYPE} ref '${GITHUB_REF_NAME}' carries no release tag."
+          echo "$note"
+          echo "$note" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Architecture and clean-room guards
         run: pnpm run check:architecture

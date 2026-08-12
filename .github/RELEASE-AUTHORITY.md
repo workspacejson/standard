@@ -19,8 +19,8 @@ mechanically stronger than a disabled one. (An even earlier revision shipped
 produced a startup-failure run: zero jobs, zero billable time, permanent red X.)
 
 Absence stopped being the right tool once authority had to move. Absence cannot
-be reviewed, cannot be dry-run, and gives the eventual cutover nothing to
-inspect. What replaces it is not "a workflow exists now" but a **designated**
+be reviewed, cannot be dry run in advance, and gives the eventual cutover nothing
+to inspect. What replaces it is not "a workflow exists now" but a **designated**
 workflow, with the one-authority constraint moved from *nothing can publish* to
 *exactly one auditable file can, and only under these conditions*.
 
@@ -100,9 +100,9 @@ release notes.
 2. **Revoke the historical authority in the same change.** Two repositories
    publishing one package is the specific failure this arrangement prevents, and
    a window where both can publish is that failure happening.
-3. Confirm the old authority is incapable by attempting and observing, not by
-   inferring from settings — archiving a repository does not revoke its Actions
-   secrets.
+3. Confirm that the old authority is incapable by attempting and observing, not
+   by inferring from settings — archiving a repository does not revoke its
+   Actions secrets.
 4. Record the receipts the release produces: package, version, commit, tarball
    integrity, provenance attestation, and the rollback ref.
 
