@@ -4,7 +4,7 @@
 //
 // Polish decays. A README that was accurate when it was written drifts as files
 // move, and a "cold reader can follow this" claim is worthless if nothing checks
-// it. This gate makes four properties of the public surface mechanically
+// it. This gate makes five properties of the public surface mechanically
 // verifiable instead of merely asserted:
 //
 //   1. Every relative Markdown link and image resolves to a file that exists.
@@ -15,6 +15,8 @@
 //      matches the schema. The paths are restated in several documents and the
 //      architecture guard reads only source and config, so nothing else would
 //      notice a prose copy going stale.
+//   5. The asset production receipt is recomputed from the assets it describes,
+//      so a regenerated export cannot leave it reporting a stale pass.
 //
 // External links are NOT fetched. A network check in CI fails on someone else's
 // outage and trains everyone to ignore red. They are syntax-checked here and
@@ -26,6 +28,7 @@ import { readFileSync, existsSync, statSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { inflateSync } from "node:zlib";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -58,6 +61,31 @@ const PROVENANCE_FILES = new Set([
   // ran under, for the same reason the records above must. Enumerated per file:
   // a future evidence run does NOT inherit this, and has to argue for itself.
   "docs/evidence/meta-310/RECEIPT.md",
+]);
+
+// A narrower exemption than PROVENANCE_FILES. That set admits every identifier
+// anywhere in a file; this one admits only the identifiers enumerated for it,
+// by value. An identifier that shows up later still fails and has to argue for
+// itself, rather than inheriting an exemption that was granted for a different
+// reference on a different line.
+//
+// Prefer this form. A whole-file exemption is the blunt instrument, and is
+// worth reaching for only when the file cannot enumerate its references in
+// advance — an open-ended migration log, say.
+const SCOPED_PROVENANCE = new Map([
+  [
+    // A production receipt records which tracked work set the authority it ran
+    // under, and which follow-on work owns each ruling it deferred. Strip those
+    // and the record no longer says who to ask about an unresolved deviation.
+    "assets/PRODUCTION-RECEIPT.md",
+    new Set([
+      "GTM-30", // content authority the pack was produced against
+      "GTM-31", // the work that specified the pack
+      "GTM-32", // owns the deferred README integration
+      "GTM-33", // rule source for shipping no star CTA in the banner
+      "META-297", // the finding the co-change stability tag turns on
+    ]),
+  ],
 ]);
 
 // Historical release notes are a record of what was published, not live prose.
@@ -145,7 +173,9 @@ for (const file of markdown) {
 
     // ---- internal tracker identifiers
     if (file === SELF || PROVENANCE_FILES.has(file) || isChangelog(file)) return;
+    const admitted = SCOPED_PROVENANCE.get(file);
     for (const match of line.matchAll(INTERNAL_ID)) {
+      if (admitted?.has(match[0])) continue;
       fail(
         file,
         lineNumber,
@@ -160,10 +190,12 @@ for (const file of markdown) {
 // reference cannot simply move into a workflow comment or a script header.
 for (const file of files.filter((f) => /\.(ya?ml|json|mjs|js|ts)$/.test(f))) {
   if (file === SELF || PROVENANCE_FILES.has(file)) continue;
+  const admitted = SCOPED_PROVENANCE.get(file);
   const content = readFileSync(join(repoRoot, file), "utf8");
   content.split("\n").forEach((line, index) => {
     if (PRODUCER_STAMPED.test(line)) return;
     for (const match of line.matchAll(INTERNAL_ID)) {
+      if (admitted?.has(match[0])) continue;
       fail(file, index + 1, `internal tracker identifier '${match[0]}' — describe the work instead`);
     }
   });
@@ -248,6 +280,275 @@ for (const file of markdown) {
   }
 }
 
+// ---- 5: asset receipts are recomputed from the assets -----------------------
+
+// A receipt that records "pass" against a file it never reads is a claim, not
+// evidence: regenerate the asset and the receipt goes on reporting the old
+// result. So the manifest's dimensions are read back out of the PNG headers,
+// and the size ceilings are recomputed from the files on disk. Change an
+// export without updating its receipt row and this fails.
+//
+// The receipt owns the numbers. Nothing here hardcodes a dimension — the table
+// is the input, and the PNG is the referent it is checked against.
+
+const ASSET_RECEIPT = "assets/PRODUCTION-RECEIPT.md";
+
+// Ceilings the receipt's preflight states, in bytes.
+const SIZE_CEILINGS = { social: 300 * 1024, readme: 400 * 1024 };
+
+// The most this gate will ever hold decoded, regardless of what a file or the
+// receipt declares. Fixed here rather than derived from either, so it stays a
+// bound the input cannot widen.
+const MAX_DECODED_BYTES = 64 * 1024 * 1024;
+
+// Geometry and encoding both live in the IHDR chunk, at fixed offsets in every
+// PNG, so neither needs the image decoded.
+const pngHeader = (buffer) => {
+  const isPng = buffer.length >= 29 && buffer.readUInt32BE(0) === 0x89504e47;
+  if (!isPng) return null;
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+    bitDepth: buffer.readUInt8(24),
+    colourType: buffer.readUInt8(25),
+    interlace: buffer.readUInt8(28),
+  };
+};
+
+// "PNG-24" in the receipt means 8 bits per channel truecolour — colour type 2
+// (RGB) or 6 (RGBA). An export downgraded to a palette or to 16-bit would
+// change how it renders while leaving the receipt reporting a pass.
+const TRUECOLOUR = new Set([2, 6]);
+
+// The receipt also records the alpha channel as flattened to opaque, and that
+// one cannot be read off the header: colour type 6 says an alpha channel
+// exists, not that every sample in it is 255. A hero that regained
+// transparency would render wrong against exactly one of GitHub's two themes,
+// which is the failure the light/dark pairing exists to prevent, so the
+// samples are checked directly.
+//
+// Reconstructing them means undoing the per-scanline filters, which is why the
+// image is inflated here rather than inspected in place.
+const paeth = (a, b, c) => {
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  if (pa <= pb && pa <= pc) return a;
+  return pb <= pc ? b : c;
+};
+
+// Walks the chunk list once. `tRNS` is the other way a PNG carries
+// transparency — a colour key on truecolour images, where the alpha channel
+// itself is absent — so an export can be colour type 2 and still have
+// see-through pixels. Its mere presence contradicts "flattened to opaque",
+// which is why it does not need decoding to rule on.
+const readChunks = (buffer) => {
+  const idat = [];
+  let hasTrns = false;
+  for (let offset = 8; offset + 8 <= buffer.length; ) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString("ascii", offset + 4, offset + 8);
+    if (type === "IDAT") idat.push(buffer.subarray(offset + 8, offset + 8 + length));
+    if (type === "tRNS") hasTrns = true;
+    if (type === "IEND") break;
+    offset += length + 12; // length + type + data + CRC
+  }
+  return { idat, hasTrns };
+};
+
+// Returns the first non-opaque alpha value found, or null when fully opaque.
+// Throws for the encodings it deliberately does not handle, so an unsupported
+// export fails loudly rather than passing unchecked.
+const firstTransparentSample = (buffer, { width, height, colourType, interlace }) => {
+  if (colourType !== 6) return null; // no alpha channel to inspect
+  if (interlace !== 0) throw new Error("interlaced PNG");
+
+  const { idat } = readChunks(buffer);
+  if (!idat.length) throw new Error("no IDAT chunk");
+
+  // A PNG's decompressed size is exactly one filter byte plus one scanline per
+  // row, so the correct output length is known before inflating rather than
+  // discovered by inflating. Declaring it caps the decompressor at the size the
+  // header already committed to: a stream that expands past it stops with an
+  // error instead of growing until the process dies.
+  const stride = width * 4; // RGBA, 8 bits per channel
+  const expected = height * (stride + 1);
+
+  // The line above derives its bound from the header, and the header is part of
+  // what is under test — so on its own it is a limit the input gets to choose.
+  // This ceiling does not move: it is well above the largest asset this
+  // repository ships (2560 x 1280, about 13 MB decoded) and far below anything
+  // that would trouble a runner. A canvas larger than this is refused rather
+  // than decoded, whatever the receipt claims about it.
+  if (expected > MAX_DECODED_BYTES) {
+    throw new Error(
+      `declared canvas would decode to ${Math.round(expected / 1024 / 1024)} MB, above the ` +
+        `${MAX_DECODED_BYTES / 1024 / 1024} MB this gate will decode`,
+    );
+  }
+
+  const raw = inflateSync(Buffer.concat(idat), { maxOutputLength: expected });
+  if (raw.length < expected) throw new Error("truncated image data");
+  const bpp = 4; // RGBA, 8 bits per channel
+  const line = Buffer.alloc(stride);
+  const previous = Buffer.alloc(stride);
+
+  for (let y = 0, pos = 0; y < height; y++) {
+    const filter = raw[pos++];
+    raw.copy(line, 0, pos, pos + stride);
+    pos += stride;
+
+    for (let i = 0; i < stride; i++) {
+      const a = i >= bpp ? line[i - bpp] : 0;
+      const b = previous[i];
+      const c = i >= bpp ? previous[i - bpp] : 0;
+      switch (filter) {
+        case 0: break;
+        case 1: line[i] = (line[i] + a) & 0xff; break;
+        case 2: line[i] = (line[i] + b) & 0xff; break;
+        case 3: line[i] = (line[i] + ((a + b) >> 1)) & 0xff; break;
+        case 4: line[i] = (line[i] + paeth(a, b, c)) & 0xff; break;
+        default: throw new Error(`unknown filter type ${filter}`);
+      }
+    }
+
+    for (let i = bpp - 1; i < stride; i += bpp) {
+      if (line[i] !== 0xff) return line[i];
+    }
+    line.copy(previous);
+  }
+  return null;
+};
+
+let assetRowsChecked = 0;
+const committedAssets = files.filter((f) => /^assets\/[\w.-]+\.png$/.test(f));
+
+if (!files.includes(ASSET_RECEIPT)) {
+  // The receipt is the only thing that accounts for what lives in assets/, so
+  // its absence cannot be a reason to skip the checks below. Deleting it would
+  // otherwise turn every asset check off at once, quietly.
+  if (committedAssets.length) {
+    fail(
+      ASSET_RECEIPT,
+      0,
+      `${committedAssets.length} PNG(s) are committed under assets/ but the production receipt is ` +
+        `missing — nothing accounts for their dimensions, encoding or size`,
+    );
+  }
+} else {
+  const receipt = readFileSync(join(repoRoot, ASSET_RECEIPT), "utf8");
+  // | `name.png` | purpose | 2560 x 800 | ... |
+  const ROW = /^\|\s*`([\w.-]+\.png)`\s*\|[^|]*\|\s*(\d+)\s*x\s*(\d+)\s*\|/gm;
+
+  // Checking the manifest against the assets only catches rows that are
+  // present. Delete a row and its export silently stops being validated, so
+  // coverage is checked in the other direction too: every PNG committed under
+  // assets/ has to be accounted for by the receipt, either as a manifest row
+  // or as a file the replacement matrix explicitly keeps. Dropping a row makes
+  // its file unaccounted-for and fails here.
+  const manifested = new Set([...receipt.matchAll(ROW)].map(([, name]) => name));
+  const kept = new Set(
+    [...receipt.matchAll(/^\|\s*`assets\/([\w.-]+\.png)`[^|]*\|\s*\*\*Keep as-is\*\*/gm)].map(
+      ([, name]) => name,
+    ),
+  );
+
+  for (const file of committedAssets) {
+    const name = /^assets\/([\w.-]+\.png)$/.exec(file)[1];
+    if (manifested.has(name) || kept.has(name)) continue;
+    fail(
+      ASSET_RECEIPT,
+      0,
+      `${file} is committed but the receipt neither lists it in the manifest nor records it as kept — ` +
+        `an unaccounted asset is not covered by any dimension, encoding or size check`,
+    );
+  }
+
+  for (const [, name, w, h] of receipt.matchAll(ROW)) {
+    const rel = `assets/${name}`;
+    const abs = join(repoRoot, rel);
+    if (!existsSync(abs)) {
+      fail(ASSET_RECEIPT, 0, `manifest lists '${name}' but ${rel} does not exist`);
+      continue;
+    }
+
+    assetRowsChecked++;
+    const bytes = readFileSync(abs);
+    const actual = pngHeader(bytes);
+    if (!actual) {
+      fail(rel, 0, `manifest records it as a PNG export, but the file has no PNG header`);
+      continue;
+    }
+
+    // Order matters below. The geometry and size claims are read straight off
+    // the header and the file length, so they are settled first, and only an
+    // asset that already matches its row is decoded. That keeps the one
+    // expensive check bounded by numbers the receipt has already agreed to,
+    // instead of by whatever a file happens to declare about itself.
+    const claimed = { width: Number(w), height: Number(h) };
+    const geometryMatches =
+      actual.width === claimed.width && actual.height === claimed.height;
+    if (!geometryMatches) {
+      fail(
+        ASSET_RECEIPT,
+        0,
+        `manifest records '${name}' as ${claimed.width} x ${claimed.height}, but the file is ` +
+          `${actual.width} x ${actual.height} — regenerate the asset or correct the receipt`,
+      );
+    }
+
+    // The social card is the only asset the receipt holds to the tighter
+    // ceiling, and it is the only one authored at its final unfurl size.
+    const ceiling = claimed.width === 1200 && claimed.height === 630
+      ? SIZE_CEILINGS.social
+      : SIZE_CEILINGS.readme;
+    const withinCeiling = bytes.length <= ceiling;
+    if (!withinCeiling) {
+      fail(
+        rel,
+        0,
+        `${(bytes.length / 1024).toFixed(0)} KB exceeds the ${ceiling / 1024} KB ceiling the ` +
+          `receipt records as passing`,
+      );
+    }
+
+    if (actual.bitDepth !== 8 || !TRUECOLOUR.has(actual.colourType)) {
+      fail(
+        rel,
+        0,
+        `receipt records it as PNG-24, but the header says bit depth ${actual.bitDepth}, ` +
+          `colour type ${actual.colourType}`,
+      );
+    } else if (readChunks(bytes).hasTrns) {
+      fail(
+        rel,
+        0,
+        `receipt records the alpha channel as flattened to opaque, but the file carries a tRNS ` +
+          `chunk — colour-keyed transparency the alpha samples would not show`,
+      );
+    } else if (geometryMatches && withinCeiling) {
+      try {
+        const sample = firstTransparentSample(bytes, actual);
+        if (sample !== null) {
+          fail(
+            rel,
+            0,
+            `receipt records the alpha channel as flattened to opaque, but the image contains a ` +
+              `sample with alpha ${sample} — it would render wrong against one of the two themes`,
+          );
+        }
+      } catch (error) {
+        fail(rel, 0, `alpha channel could not be verified against the receipt: ${error.message}`);
+      }
+    }
+  }
+
+  if (assetRowsChecked === 0) {
+    fail(ASSET_RECEIPT, 0, `no manifest rows parsed — the receipt cannot be checked against its assets`);
+  }
+}
+
 // ---- report ----------------------------------------------------------------
 
 console.log("Documentation integrity");
@@ -255,7 +556,8 @@ console.log(`  markdown files      ${markdown.length}`);
 console.log(`  links checked       ${linksChecked}  (${relativeLinks} relative, resolved on disk; ${externalLinks} external, syntax only)`);
 console.log(`  pnpm commands       ${commandsChecked} documented references verified against package.json`);
 console.log(`  stable read paths   ${STABLE_READ_PATHS.length} confirmed in the schema; ${enumerationsChecked} prose enumerations complete`);
-console.log(`  provenance files    ${PROVENANCE_FILES.size} exempt from the tracker-identifier rule`);
+console.log(`  provenance files    ${PROVENANCE_FILES.size} exempt from the tracker-identifier rule; ${SCOPED_PROVENANCE.size} scoped to enumerated identifiers`);
+console.log(`  asset receipts      ${assetRowsChecked} manifest rows recomputed from the PNGs on disk`);
 console.log(
   `  producer-stamped    weightingVersion admitted by value on its own line; no directory is exempt`,
 );
