@@ -38,8 +38,13 @@ only by design and takes no light pair.
 Alt text for all four concepts is recorded in `PRODUCTION-RECEIPT.md` § 3 and
 should be used verbatim, since each string states the claim the asset makes.
 
-These files are staged for README integration, which is tracked separately. They
-are not yet referenced by any README in this repository.
+The root [`README.md`](../README.md) references the three pairs at their 1x
+widths: the hero above the opening definition, the surfaces visual under "What
+workspace.json adds", and the topology visual under "Who writes it and who reads
+it". The social card is deliberately not referenced from any document: it exists
+to be uploaded as the repository's social preview, which is a dashboard setting
+rather than a file reference. That setting is still unset — see
+[`docs/repository-settings.md`](../docs/repository-settings.md).
 
 ## Why these are vendored
 

@@ -1,20 +1,167 @@
 <p align="center">
-  <a href="https://github.com/workspace-json">
+  <a href="https://github.com/workspacejson/standard">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-dark.png">
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png">
-      <img src="https://raw.githubusercontent.com/workspace-json/agents-audit/main/assets/workspace-json-lockup-light.png" alt="workspace.json — Portable Repository Intelligence" width="760">
+      <source media="(prefers-color-scheme: dark)" srcset="./assets/readme-hero-dark.png">
+      <img src="./assets/readme-hero-light.png" alt="The source tree shows what exists now. workspace.json gives repository intelligence a committed, portable contract. The workspace.json lockup sits above the title." width="1280">
     </picture>
   </a>
 </p>
 
-**workspace.json** is an open specification for committed repository
-intelligence. A portable JSON artifact at **`.agents/workspace.json`** combines
-producer-generated repository metadata with evidence authored by humans or
-specialized tools.
+**workspace.json is an Apache-2.0 open standard for committed, descriptive
+repository intelligence at `.agents/workspace.json`, combining
+producer-generated metadata with human- or tool-authored evidence in a portable
+artifact.**
 
 This repository is the **canonical source of the specification** and of the
 deterministic reference behavior that interprets it.
+
+## Why it exists
+
+The source tree shows what exists now. Some repository relationships only become
+visible across history. workspace.json gives repository intelligence a
+committed, portable contract that independent tools can read and review.
+
+Two properties are load-bearing, and everything else follows from them.
+
+**The standard is descriptive, never prescriptive.** `workspace.json` reports
+what a repository *is*. It does not encode what a team *must do*. Prescriptive
+policy — approval gates, merge blocking, enforcement rules — belongs outside
+`workspace.json`, and CI rejects such fields in the schema.
+
+> AGENTS.md tells an agent how to work. workspace.json describes evidence about
+> the repository it is working in.
+
+**The committed file must remain useful without a daemon.** Because it is
+committed, workspace.json is diffable, reviewable, revision-bound, and usable by
+independent consumers without requiring a daemon or vendor service. Nothing in
+the standard may assume a background process is present.
+
+If you want portable repository intelligence to remain an open, interoperable
+standard, [star the repository](https://github.com/workspacejson/standard).
+
+## What workspace.json adds
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/surfaces-dark.png">
+    <img src="./assets/surfaces-light.png" alt="workspace.json carries four stable read paths consumers can rely on. Four cards in a row: recorded fragility, recorded co-change, file index, framework manifest." width="1280">
+  </picture>
+</p>
+
+| Path | Surface | What it carries |
+| -- | -- | -- |
+| `manual.fragileFiles` | Recorded fragility evidence | Authored evidence about specific files that have been recorded as fragile |
+| `manual.coChangePatterns` | Recorded co-change evidence | Authored or tool-recorded relationships between files observed to change together |
+| `generated.fileIndex` | Repository file index | Repository files, so consumers can locate and join repository evidence |
+| `generated.frameworkManifest` | Framework manifest | Detected framework metadata for repository-aware consumers |
+
+These are observations, not predictions. Nothing here scores, rates or forecasts
+a repository.
+
+## Who writes it and who reads it
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/topology-dark.png">
+    <img src="./assets/topology-light.png" alt="Producers write .agents/workspace.json and consumers read it. Three columns: generators, the committed file, readers." width="1280">
+  </picture>
+</p>
+
+The artifact is the interoperability center. A producer does not define the
+standard, and an integration does not become the standard — both meet at the
+committed file.
+
+## A concrete example
+
+A source tree can tell you that two files exist. Repository history can show
+that they repeatedly changed together. workspace.json gives consumers a
+committed place to carry that observation.
+
+Abridged from [`packages/spec/examples/populated-v0.4.json`](./packages/spec/examples/populated-v0.4.json),
+a shipped example that CI validates against the schema:
+
+```json
+{
+  "manual": {
+    "fragileFiles": [
+      { "path": "apps/api/src/auth.ts", "reason": "high rollback rate, auth logic" }
+    ],
+    "coChangePatterns": [
+      {
+        "files": [
+          "apps/cli/src/commands/check.ts",
+          "apps/cli/src/commands/interactive.ts"
+        ],
+        "note": "always change together — verified by git history"
+      }
+    ]
+  },
+  "generated": {
+    "specVersion": "0.4",
+    "basisRevision": "9f2c1d5b8a3e47c06d1b2f8e4a7c9013d5e6f8a2",
+    "by": { "name": "vrekod", "version": "3.0.0" },
+    "frameworkManifest": [{ "name": "turborepo", "confidence": 0.95 }]
+  }
+}
+```
+
+The `manual` block is authored by humans or by tools acting on their behalf. The
+`generated` block is producer-written and records the revision it was computed
+from, so a reader can tell how current it is. Both travel with the repository.
+
+## Quickstart
+
+Validate a `workspace.json` document without cloning anything:
+
+```bash
+npm install @workspacejson/spec
+npx workspacejson-spec validate .agents/workspace.json
+```
+
+The command exits `0` on a valid document and non-zero otherwise. `validate
+<file>` is its only command — there is no `--help` flag.
+
+To use the schema and types directly:
+
+```ts
+import { validate, validateV4 } from '@workspacejson/spec';
+import schema from '@workspacejson/spec/schema' with { type: 'json' };
+
+validate(doc);    // true for a valid v0.3 or v0.4 document
+validateV4(doc);  // true for a valid v0.4 document
+```
+
+This repository defines the format; it does not generate the artifact. Producing
+`.agents/workspace.json` belongs to `workspacejson/cli`.
+
+## The compatibility floor
+
+Four paths are externally consumed and are treated as a compatibility surface.
+They must remain present and correctly shaped:
+
+```text
+manual.fragileFiles
+manual.coChangePatterns
+generated.fileIndex
+generated.frameworkManifest
+```
+
+`scripts/check-architecture.mjs` and `scripts/verify-schema-provenance.mjs` both
+fail if any of the four is removed or renamed.
+
+### The canonical schema
+
+The normative schema lives at exactly one path in this repository:
+
+```text
+packages/spec/schema/v1.json
+```
+
+It is shipped inside the `@workspacejson/spec` tarball and resolvable as
+`@workspacejson/spec/schema`. Downstream repositories — including the website —
+must **materialize** it from a pinned package source and hash-check it, never
+maintain an editable second copy. `pnpm run check:schema` prints the canonical
+path, byte length and SHA-256 for pinning.
 
 ## Status
 
@@ -26,31 +173,6 @@ decision. Everything outside that floor may still change.
 There is no external conformance suite yet, and the known gaps are listed
 plainly in [`docs/conformance.md`](./docs/conformance.md). No adoption,
 endorsement or standards-body status is claimed.
-
-## The four repositories
-
-This is one of four, with one-way ownership:
-
-| Repository | Owns |
-| -- | -- |
-| **`workspacejson/standard`** *(this repo)* | specification, JSON Schema, standard types, validation semantics, deterministic rules, compatibility profiles, conformance fixtures, ADRs and governance |
-| `workspacejson/cli` | production and generation — the producer, repository scanning, deterministic reconciliation, CLI distribution |
-| `workspacejson/integrations` | host adapters — MCP, Codex, VS Code, skills and plugins |
-| `workspacejson/workspacejson.dev` | assembled, published documentation at `workspacejson.dev` |
-
-Dependency direction is one-way:
-
-```text
-workspacejson/standard
-        ↓
-workspacejson/cli       workspacejson/integrations
-        \                    /
-   workspacejson/workspacejson.dev
-```
-
-**This repository depends on none of the other three.** That is enforced
-mechanically by `scripts/check-architecture.mjs` in CI, with deliberate
-violations tested in `scripts/check-architecture.test.mjs`.
 
 ## Packages
 
@@ -86,70 +208,30 @@ algorithm identity live in the artifact's own basis metadata, not in the package
 number. See [`docs/versioning.md`](./docs/versioning.md) for the full profile
 table and the compatibility floor.
 
-## Quickstart
+## The four repositories
 
-Validate a `workspace.json` document without cloning anything:
+This is one of four, with one-way ownership:
 
-```bash
-npm install @workspacejson/spec
-npx workspacejson-spec validate .agents/workspace.json
-```
+| Repository | Owns |
+| -- | -- |
+| **`workspacejson/standard`** *(this repo)* | specification, JSON Schema, standard types, validation semantics, deterministic rules, compatibility profiles, conformance fixtures, ADRs and governance |
+| `workspacejson/cli` | production and generation — the producer, repository scanning, deterministic reconciliation, CLI distribution |
+| `workspacejson/integrations` | host adapters — MCP, Codex, VS Code, skills and plugins |
+| `workspacejson/workspacejson.dev` | assembled, published documentation at `workspacejson.dev` |
 
-The command exits `0` on a valid document and non-zero otherwise. `validate
-<file>` is its only command — there is no `--help` flag.
-
-To use the schema and types directly:
-
-```ts
-import { validate, validateV4 } from '@workspacejson/spec';
-import schema from '@workspacejson/spec/schema' with { type: 'json' };
-
-validate(doc);    // true for a valid v0.3 or v0.4 document
-validateV4(doc);  // true for a valid v0.4 document
-```
-
-This repository defines the format; it does not generate the artifact. Producing
-`.agents/workspace.json` belongs to `workspacejson/cli`.
-
-## Two properties that are load-bearing
-
-**The standard is descriptive, never prescriptive.** `workspace.json` reports
-what a repository *is*. It does not encode what a team *must do*. Prescriptive
-policy — approval gates, merge blocking, enforcement rules — belongs outside
-`workspace.json`, and CI rejects such fields in the schema.
-
-**The committed file must remain useful without a daemon.** `.agents/workspace.json`
-is an artifact you can read, diff and review with nothing running. Nothing in the
-standard may assume a background process is present.
-
-## Stable read paths
-
-Four paths are externally consumed and are treated as a compatibility surface.
-They must remain present and correctly shaped:
+Dependency direction is one-way:
 
 ```text
-manual.fragileFiles
-manual.coChangePatterns
-generated.fileIndex
-generated.frameworkManifest
+workspacejson/standard
+        ↓
+workspacejson/cli       workspacejson/integrations
+        \                    /
+   workspacejson/workspacejson.dev
 ```
 
-`scripts/check-architecture.mjs` and `scripts/verify-schema-provenance.mjs` both
-fail if any of the four is removed or renamed.
-
-## The canonical schema
-
-The normative schema lives at exactly one path in this repository:
-
-```text
-packages/spec/schema/v1.json
-```
-
-It is shipped inside the `@workspacejson/spec` tarball and resolvable as
-`@workspacejson/spec/schema`. Downstream repositories — including the website —
-must **materialize** it from a pinned package source and hash-check it, never
-maintain an editable second copy. `pnpm run check:schema` prints the canonical
-path, byte length and SHA-256 for pinning.
+**This repository depends on none of the other three.** That is enforced
+mechanically by `scripts/check-architecture.mjs` in CI, with deliberate
+violations tested in `scripts/check-architecture.test.mjs`.
 
 ## Development
 
@@ -196,6 +278,10 @@ source SHA `e47eb1b8556c4f361db9a78190a2f36b400756e8`, preserving history for
 standard-owned paths. See [`migration/PROVENANCE.md`](./migration/PROVENANCE.md)
 for the exact command, included and excluded paths, tree hashes, commit map and
 rollback reference.
+
+The campaign assets above are vendored in [`assets/`](./assets), with their
+production record — export sizes, alt text and recorded deviations — in
+[`assets/PRODUCTION-RECEIPT.md`](./assets/PRODUCTION-RECEIPT.md).
 
 ## Documentation
 
