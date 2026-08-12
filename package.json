@@ -33,7 +33,13 @@
     "check:adr": "node scripts/adr-index.mjs",
     "check:adr:test": "node scripts/adr-index.test.mjs",
     "adr:index": "node scripts/adr-index.mjs --write",
+    "check:release-identity": "node scripts/verify-release-identity.mjs",
+    "check:release-identity:test": "node scripts/verify-release-identity.test.mjs",
+    "check:release-credential": "node scripts/verify-npm-publish-access.mjs",
+    "release:boundary": "node scripts/release-boundary.mjs",
     "release:verify-packs": "pnpm --filter @workspacejson/spec exec node ../../scripts/verify-package-tarball.mjs && pnpm --filter @workspacejson/rules exec node ../../scripts/verify-package-tarball.mjs",
+    "release:verify-packs:test": "node scripts/verify-package-tarball.test.mjs",
+    "release:verify-consumer": "node scripts/verify-consumer-install.mjs",
     "release:verify-published": "node scripts/verify-published.mjs"
   },
   "devDependencies": {

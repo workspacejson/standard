@@ -226,21 +226,52 @@ for (const file of files.filter((f) => /^packages\/[^/]+\/package\.json$/.test(f
   }
 }
 
-// ---- No workflow may be capable of publishing ------------------------------
-// Publish authority for standard-owned packages still belongs to
-// workspace-json/agents-audit until a coordinated cutover. This repository ships NO release
-// workflow at all — see .github/RELEASE-AUTHORITY.md for why absence was chosen
-// over a disabled file. These checks scan EVERY workflow, so publication cannot
-// reappear under a different filename.
+// ---- Exactly one workflow may be capable of publishing ----------------------
+// This guard used to require that NO workflow could publish, because authority
+// over the standard-owned packages sat in workspace-json/agents-audit and this
+// repository deliberately shipped no release workflow at all.
+//
+// That rule is relaxed here on purpose, not deleted. The constraint it existed
+// to enforce — publication is reachable from exactly one auditable place — is
+// now expressed as a designated file rather than as absence. Every red test
+// still exists and still fails; one of them changed its expectation.
+//
+// The checks scan EVERY workflow, so publication cannot reappear under a
+// different filename, and the designated file carries the constraints that
+// absence used to supply for free:
+//
+//   * it publishes through Changesets, never a raw `npm publish`, which could
+//     ship any directory under any package name regardless of the release plan;
+//   * it is unreachable from `pull_request`, so no fork and no unmerged branch
+//     can reach the credential;
+//   * it declares `id-token: write`, without which npm provenance silently does
+//     nothing and the published artifact carries no binding to its commit.
+//
+// See .github/RELEASE-AUTHORITY.md for the authority this encodes.
+const RELEASE_WORKFLOW = ".github/workflows/release.yml";
+
 for (const workflow of files.filter((f) => /^\.github\/workflows\/.+\.ya?ml$/.test(f))) {
   const content = stripComments(workflow, read(workflow));
 
-  if (/changeset\s+publish|npm\s+publish|pnpm\s+publish/.test(content)) {
-    report("publish-authority", workflow, "workflow contains a publish step; this repository must be incapable of publishing until authority transfers");
+  if (workflow !== RELEASE_WORKFLOW) {
+    if (/changeset\s+publish|npm\s+publish|pnpm\s+publish/.test(content)) {
+      report("publish-authority", workflow, `workflow contains a publish step; only ${RELEASE_WORKFLOW} may publish`);
+    }
+    if (/secrets\.NPM_TOKEN|NODE_AUTH_TOKEN/.test(content)) {
+      report("publish-authority", workflow, `workflow references a publish credential; only ${RELEASE_WORKFLOW} may hold one`);
+    }
+  } else {
+    if (/\b(npm|pnpm)\s+publish\b/.test(content)) {
+      report("publish-authority", workflow, "the release workflow must publish through `changeset publish`; a raw npm/pnpm publish can ship any directory under any name, bypassing the fixed-group release plan");
+    }
+    if (/^\s*pull_request(_target)?\s*:/m.test(content)) {
+      report("publish-authority", workflow, "the release workflow is reachable from a pull request; the release credential must never be exposed to a fork or an unmerged branch");
+    }
+    if (!/id-token:\s*write/.test(content)) {
+      report("publish-authority", workflow, "the release workflow does not declare `id-token: write`; without it npm provenance is silently absent and the published artifact carries no binding to the commit that built it");
+    }
   }
-  if (/secrets\.NPM_TOKEN|NODE_AUTH_TOKEN/.test(content)) {
-    report("publish-authority", workflow, "workflow references a publish credential; no npm credential may exist here until authority transfers");
-  }
+
   if (/\bagents-audit\b/.test(content)) {
     report("foreign-publish", workflow, "workflow references agents-audit, which is published by workspacejson/cli");
   }

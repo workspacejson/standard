@@ -1,0 +1,228 @@
+name: Release
+
+# The canonical publication path for the fixed group @workspacejson/spec +
+# @workspacejson/rules. This repository publishes those two packages and nothing
+# else; agents-audit belongs to workspacejson/cli and must never appear here.
+#
+# The workflow is deliberately shaped so that the DEFAULT action is verification:
+#
+#   workflow_dispatch                 -> verify, then refuse at the boundary
+#   push of a standard-v* tag         -> verify, then publish
+#
+# `dry_run` defaults to true, so a dispatch that forgets to set anything cannot
+# publish. Crossing the boundary needs a package-scoped tag AND an explicit
+# non-dry run AND the `npm-publish` environment's approval.
+#
+# The version is never typed anywhere in this file. It comes from Changesets, and
+# `verify-release-identity` fails the run if the tag disagrees with it.
+
+on:
+  push:
+    tags:
+      - "standard-v*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Verify only, then refuse at the publication boundary"
+        type: boolean
+        default: true
+
+# Read-only by default. The publish job raises exactly what it needs, with a
+# reason, and nothing else in this file can write anything.
+permissions:
+  contents: read
+
+# A release is never cancelled mid-flight. Cancelling between `changeset publish`
+# and the registry verification would leave a published version with no receipt,
+# which is the one state that cannot be recovered from.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Everything that can be proven without touching the registry. Safe on any ref,
+  # needs no credential, and is identical on a dry run and a real release — a
+  # dry run that verified less than a release would prove nothing about it.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Verify the release candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Full history: the ADR revision index resolves each record's published
+      # commit by walking the baseline branch, and a shallow clone reports every
+      # record as unpublished.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # A clean install from the committed lockfile, on the exact release commit.
+      # `--frozen-lockfile` is what makes this a reproduction rather than a
+      # resolution: if the lockfile does not satisfy the manifests, the release
+      # stops here instead of silently publishing against different dependencies
+      # than anything that was ever tested.
+      - name: Clean install at the release commit
+        run: pnpm install --frozen-lockfile
+
+      # FIRST, before anything can look green: does this ref name the release
+      # Changesets computed? A tag is a string a human chose; the version is
+      # derived. This fails if they disagree, if the fixed group is out of
+      # lockstep, or if changesets are still pending.
+      - name: Release identity
+        run: pnpm run check:release-identity
+
+      - name: Architecture and clean-room guards
+        run: pnpm run check:architecture
+
+      - name: Architecture guard red tests
+        run: pnpm run check:architecture:test
+
+      - name: Documentation integrity
+        run: pnpm run check:docs
+
+      - name: ADR revision index
+        run: pnpm run check:adr
+
+      # Build precedes typecheck: @workspacejson/rules typechecks against
+      # @workspacejson/spec's EMITTED declarations, which `tsc --noEmit` never
+      # produces.
+      - name: Build all packages
+        run: pnpm -r build
+
+      - name: Typecheck all packages
+        run: pnpm -r typecheck
+
+      - name: Run tests
+        run: pnpm -r test
+
+      - name: Verify schema provenance
+        run: pnpm run check:schema
+
+      - name: Validate shipped examples against the package schema
+        run: pnpm run check:examples
+
+      - name: Verify the path-identity corpus and its watched-red receipt
+        run: pnpm run check:corpus
+
+      # Pack both packages and inspect the packed manifests and file lists:
+      # ownership metadata, runtime assets, the fixed-group version, and any
+      # dependency a consumer could not resolve from the registry.
+      - name: Pack and inspect both fixed-group tarballs
+        run: pnpm run release:verify-packs
+
+      - name: Packed-artifact gate red tests
+        run: pnpm run release:verify-packs:test
+
+      # The gate that runs outside the workspace: install the tarballs into an
+      # empty directory and use them by package name only.
+      - name: Clean-install the tarballs into a disposable consumer
+        run: pnpm run release:verify-consumer
+
+  # ---------------------------------------------------------------------------
+  # The publication boundary. Always runs, always green, never publishes. Its
+  # only output is the decision, so that "did this publish?" is answered by one
+  # value in one place rather than inferred from which steps were skipped.
+  # ---------------------------------------------------------------------------
+  boundary:
+    name: Publication boundary
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      proceed: ${{ steps.decide.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Decide whether to cross the publication boundary
+        id: decide
+        env:
+          # Absent on a tag push, which is correct: the default is a dry run for
+          # dispatch, and a tag push is an explicit release.
+          WORKSPACEJSON_RELEASE_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: node scripts/release-boundary.mjs
+
+  # ---------------------------------------------------------------------------
+  # Registry mutation. Gated at the JOB level on a single value, so that no
+  # individual step can be missed: if the boundary refuses, none of this exists.
+  #
+  # `environment: npm-publish` is where the human checkpoint lives. The
+  # credential is scoped to that environment, so no other job in this repository
+  # — and no pull request — can reach it.
+  # ---------------------------------------------------------------------------
+  publish:
+    name: Publish the fixed group
+    needs: [verify, boundary]
+    if: needs.boundary.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      # npm provenance. The published package carries a signed statement binding
+      # it to this workflow, this repository and this commit — which is the
+      # receipt that was missing when a previous release could not be traced back
+      # to the commit that built it.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Clean install at the release commit
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm -r build
+
+      # Re-checked on this side of the boundary. The verify job proved it on a
+      # different runner; this job is the one about to publish, and the identity
+      # of what it holds is the thing being asserted.
+      - name: Release identity
+        run: pnpm run check:release-identity
+
+      # Proves the credential ARRIVED before npm is asked to use it. An unset
+      # repository secret expands to an empty string, and the resulting npm
+      # failure reads like a permissions problem rather than a missing secret.
+      # The token's value is never printed, and command output is scrubbed.
+      - name: Verify the release credential reached this job
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm run check:release-credential
+
+      # Changesets, not a hand-rolled publish loop: it publishes exactly the
+      # packages its own plan versioned, in dependency order, so @workspacejson/spec
+      # reaches the registry before @workspacejson/rules resolves against it.
+      # `--provenance` is what makes id-token: write above mean something.
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+        run: pnpm changeset publish
+
+      # The registry is the arbiter. This installs the real published artifacts
+      # into throwaway directories and exercises their entry points, with
+      # propagation-aware retry so that "not visible yet" is not reported as
+      # "not published".
+      - name: Verify the published artifacts from the registry
+        run: pnpm run release:verify-published

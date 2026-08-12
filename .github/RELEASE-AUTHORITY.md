@@ -1,49 +1,133 @@
-# Release authority — deliberately absent
+# Release authority
 
-**This repository has no release workflow, and that is intentional.**
+This repository publishes exactly two packages — `@workspacejson/spec` and
+`@workspacejson/rules` — as one fixed Changesets group, from one workflow:
+[`workflows/release.yml`](workflows/release.yml).
 
-`@workspacejson/spec` and `@workspacejson/rules` are still published from
-`workspace-json/agents-audit`, which holds the `NPM_TOKEN` secret. Transferring
-that authority is a separate, coordinated change, and it has not happened.
+It publishes nothing else. `agents-audit` and `@workspacejson/cli` belong to
+`workspacejson/cli`; `@workspacejson/codex-mcp` belongs to
+`workspacejson/integrations`. One package, one publishing repository — a package
+with two live authorities cannot answer "which repository produced this
+version?", and answering it after the fact is harder than preventing it.
 
-## Why absence rather than a disabled workflow
+## Why there is a workflow here at all
 
-An earlier revision of this migration shipped `.github/workflows/release.yml`
-with `on: {}` and no publish step. GitHub cannot parse that as a runnable
-workflow, so every push produced a *startup failure* run — zero jobs, zero
-billable time, nothing executed, but a permanent red X on the repository.
+An earlier revision of this repository shipped **no** release workflow, on
+purpose: authority sat elsewhere, and a workflow that does not exist is
+mechanically stronger than a disabled one. (An even earlier revision shipped
+`release.yml` with `on: {}`, which GitHub cannot parse as runnable — every push
+produced a startup-failure run: zero jobs, zero billable time, permanent red X.)
 
-A workflow that does not exist is both mechanically stronger and honest about
-the current state. There is nothing to accidentally enable.
+Absence stopped being the right tool once authority had to move. Absence cannot
+be reviewed, cannot be dry-run, and gives the eventual cutover nothing to
+inspect. What replaces it is not "a workflow exists now" but a **designated**
+workflow, with the one-authority constraint moved from *nothing can publish* to
+*exactly one auditable file can, and only under these conditions*.
 
-## What currently makes publication impossible
+`scripts/check-architecture.mjs` enforces that, and its red tests in
+`scripts/check-architecture.test.mjs` prove each clause rejects a deliberate
+violation:
 
-1. **No release workflow.** No file in `.github/workflows/` contains a publish
-   step or a publish trigger.
-2. **No credential.** This repository has an empty secret list and an empty
-   variable list. `NPM_TOKEN` does not exist here.
-3. **Enforced in CI.** `scripts/check-architecture.mjs` fails the build if any
-   workflow gains `changeset publish`, `npm publish` or `pnpm publish`, or
-   references a package this repository does not own. Red tests in
-   `scripts/check-architecture.test.mjs` prove those guards reject deliberate
-   violations.
+| Rule | Enforced against |
+| -- | -- |
+| Only `workflows/release.yml` may contain a publish step | every other workflow, under any filename |
+| Only `workflows/release.yml` may reference a publish credential | every other workflow |
+| The release workflow publishes through `changeset publish` | a raw `npm publish`, which can ship any directory under any name |
+| The release workflow is unreachable from `pull_request` | a fork or unmerged branch reaching the credential |
+| The release workflow declares `id-token: write` | provenance configured but not permitted, and therefore silently absent |
+| No workflow references a package this repository does not own | claiming another repository's artifacts |
 
-## What the authority transfer must do
+## What still makes publication impossible today
 
-When publication authority transfers, in a single coordinated change:
+The workflow exists and is reviewable. It cannot publish, for reasons that are
+mechanical rather than procedural:
 
-1. Create `.github/workflows/release.yml` publishing **only**
-   `@workspacejson/spec` and `@workspacejson/rules` via the Changesets fixed
-   group already configured in `.changeset/config.json`.
-2. Add an `NPM_TOKEN` secret scoped to those two packages only.
-3. **Revoke the old repository's authority in the same change.** Two
-   repositories publishing the same package is the specific failure this
-   arrangement exists to prevent.
-4. Adopt package-scoped tags (`standard-v0.4.5`), never monorepo-wide tags.
-5. Relax the corresponding guards in `scripts/check-architecture.mjs`
-   deliberately, with the red tests updated to match the new rule — not deleted.
+1. **No credential.** This repository has no `NPM_TOKEN` secret. GitHub expands a
+   missing secret to an empty string, so `check:release-credential` checks
+   arrival explicitly and stops the run, rather than letting npm fail later with
+   a message that reads like a permissions problem.
+2. **No environment.** The publish job requires the `npm-publish` environment,
+   which does not exist yet. Creating it is where the human approval checkpoint
+   lives.
+3. **The boundary defaults to refusing.** `scripts/release-boundary.mjs` treats
+   anything other than an explicit non-dry run as a dry run, and refuses any ref
+   that is not a package-scoped `standard-v*` tag. A dispatch that sets nothing
+   verifies; it does not publish.
 
-Release order for a coordinated train is recorded in the four-repository
-migration ledger: standard packs and verifies → cli tests against packed
-standard candidates → integrations tests → standard publishes → cli → integrations
-→ site.
+## The order the workflow runs in
+
+Everything provable without a registry runs first, on any ref, with no
+credential:
+
+1. **release identity** — the tag is checked against the version Changesets
+   computed. The version is never typed into the workflow. A tag naming a version
+   nobody derived, a fixed group out of lockstep, or a changeset still pending
+   all stop the release here.
+2. **clean install at the release commit** — `--frozen-lockfile`, so a lockfile
+   that does not satisfy the manifests stops the release instead of publishing
+   against dependencies nothing ever tested.
+3. **the full gate suite** — architecture, documentation, ADR index, build,
+   typecheck, tests, schema provenance, examples, path-identity corpus.
+4. **pack and inspect** — both tarballs, their packed manifests, their file
+   lists, their ownership metadata, and any dependency a consumer could not
+   resolve from the registry.
+5. **disposable consumer** — the tarballs are installed into an empty directory
+   and used by package name only, outside the workspace that has been quietly
+   supplying anything the packages forgot to ship.
+
+Only then does the boundary decide. On the far side: credential arrival,
+`changeset publish` with provenance, and a registry install of the real published
+artifacts with propagation-aware retry.
+
+## Before a publish tag is pushed
+
+A `standard-v*` tag is the release trigger, so pushing one is the decision to
+publish. It must not be pushed until the outstanding changesets have been
+reconciled and the release candidate pinned — the accumulated changesets
+determine the version, and reviewing them after the tag exists is reviewing a
+decision already made.
+
+The identity gate enforces the mechanical half: a tag cut while changesets are
+still pending is refused, because that ref is not the output of
+`changeset version` and publishing it would drop those changesets from the
+release notes.
+
+## What the authority cutover must do, in one step
+
+1. Provision `NPM_TOKEN` in this repository, scoped to `@workspacejson/spec` and
+   `@workspacejson/rules` only, held by the `npm-publish` environment so that no
+   other job and no pull request can reach it.
+2. **Revoke the historical authority in the same change.** Two repositories
+   publishing one package is the specific failure this arrangement prevents, and
+   a window where both can publish is that failure happening.
+3. Confirm the old authority is incapable by attempting and observing, not by
+   inferring from settings — archiving a repository does not revoke its Actions
+   secrets.
+4. Record the receipts the release produces: package, version, commit, tarball
+   integrity, provenance attestation, and the rollback ref.
+
+Secret presence cannot be enumerated by every tool that might look for it.
+Failure to observe a secret is not evidence that it is absent, so this step is
+measured at the settings level by a human immediately before the mutation.
+
+## Tags
+
+Package-scoped only: `standard-v0.5.0`. Never a bare `v0.5.0` — this repository
+shares an ecosystem with three others, and a repository-wide version tag claims
+releases it does not own. The identity gate refuses a bare version tag by name.
+
+## Recovery
+
+An npm version cannot be replaced once published, so recovery is forward-only:
+publish a corrected version and move `latest`. Deprecating the bad version is
+possible; unpublishing it is not, beyond npm's narrow initial window.
+
+That is why every gate above runs *before* the boundary rather than after it, and
+why the post-publish registry check exists — its job is to detect a release that
+went wrong quickly enough to publish a corrected one, not to undo anything.
+
+## Release train order
+
+Standard packs and verifies → cli tests against packed standard candidates →
+integrations tests → standard publishes → cli → integrations → site. Recorded in
+the four-repository migration ledger.

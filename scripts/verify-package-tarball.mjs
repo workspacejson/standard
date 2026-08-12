@@ -25,6 +25,28 @@ import { spawnSync } from "node:child_process";
 
 const STANDARD_OWNED_PACKAGES = new Set(["@workspacejson/spec", "@workspacejson/rules"]);
 
+// Dependency fields a consumer actually installs. See
+// assertRegistryResolvableDependencies for why devDependencies are excluded.
+const CONSUMER_FACING_FIELDS = ["dependencies", "optionalDependencies", "peerDependencies"];
+
+// Named bypass forms, each resolvable only on the machine that wrote it.
+const BYPASS_SPECIFIERS = [
+  [/^workspace:/, "an intra-workspace link that never resolves outside this monorepo"],
+  [/^(file|link|portal):/, "a filesystem path dependency"],
+  [/^~?\.{0,2}\//, "a filesystem path dependency"],
+  [/^[a-z]:[\\/]/i, "an absolute filesystem path dependency"],
+  [/^git(\+[a-z]+)?:/, "an unpublished git dependency"],
+  [/^(github|gitlab|bitbucket|gist):/, "an unpublished git-host dependency"],
+  [/^https?:\/\//, "a URL tarball dependency"],
+];
+
+// After the named forms above, anything left must look like a registry range.
+// A semver range, a dist-tag and an `npm:` alias target are all made of these
+// characters; a path, a URL and a `user/repo` shorthand are not. This is the
+// catch-all for bypass forms not enumerated above, including ones npm has not
+// invented yet.
+const REGISTRY_RANGE = /^[A-Za-z0-9.\-+^~><=|\s*()]*$/;
+
 const packageDirectory = process.cwd();
 const sourceManifest = JSON.parse(readFileSync(join(packageDirectory, "package.json"), "utf8"));
 const packageName = sourceManifest.name;
@@ -60,6 +82,8 @@ try {
   const files = new Set(tar("-tzf", tarballPath).trim().split("\n").filter(Boolean).map(normalizeArchivePath));
   assertStandardOwnedPackage(manifest);
   assertNoWorkspaceProtocol(manifest, "package");
+  assertRegistryResolvableDependencies(sourceManifest, "committed");
+  assertRegistryResolvableDependencies(manifest, "packed");
   assertFixedGroupDependencies(manifest);
   assertRuntimeFiles(manifest, files);
   assertOwnershipMetadata(manifest);
@@ -96,6 +120,63 @@ function assertNoWorkspaceProtocol(value, path) {
   }
   if (value && typeof value === "object") {
     for (const [key, item] of Object.entries(value)) assertNoWorkspaceProtocol(item, `${path}.${key}`);
+  }
+}
+
+// Every dependency a consumer installs must be resolvable from the registry by
+// anyone, from a clean machine, forever.
+//
+// The failure class this catches is a dependency that resolves on the machine
+// that packed it and nowhere else: a sibling checkout, a local tarball, an
+// unpublished git ref. Those all install cleanly in the monorepo, pass every
+// test, pack without complaint, and then fail for the first consumer who runs
+// `npm install` — by which time the version is on the registry permanently.
+//
+// Checked twice, because the two manifests can differ and each catches something
+// the other cannot:
+//
+//   * `committed` — the manifest in source. `workspace:` is legitimate here and
+//     is exempted for fixed-group siblings only; pnpm rewrites it at pack time,
+//     which is exactly why it survives review.
+//   * `packed` — the manifest inside the tarball. Nothing is exempt. If a
+//     `workspace:` protocol reached this far the rewrite did not happen, and the
+//     published package would carry a specifier npm cannot resolve at all.
+//
+// `devDependencies` are deliberately not checked: a consumer never installs
+// them, so a local path there cannot break anyone downstream.
+function assertRegistryResolvableDependencies(manifest, origin) {
+  for (const field of CONSUMER_FACING_FIELDS) {
+    for (const [name, rawRange] of Object.entries(manifest[field] ?? {})) {
+      if (typeof rawRange !== "string") {
+        throw new Error(`${manifest.name} ${origin} ${field}.${name} is not a string specifier.`);
+      }
+
+      // `workspace:` on a sibling of the fixed release group is the documented
+      // arrangement in source, and assertFixedGroupDependencies proves it never
+      // survives into the packed manifest.
+      if (origin === "committed" && STANDARD_OWNED_PACKAGES.has(name) && rawRange.startsWith("workspace:")) {
+        continue;
+      }
+
+      for (const [pattern, description] of BYPASS_SPECIFIERS) {
+        if (pattern.test(rawRange)) {
+          throw new Error(
+            `${manifest.name} ${origin} ${field}.${name}=${JSON.stringify(rawRange)} is ${description}. ` +
+              `A published package may only depend on packages every consumer can resolve from the registry.`,
+          );
+        }
+      }
+
+      // `npm:<name>@<range>` is a registry alias: the alias target still comes
+      // from the registry, so only its range needs checking.
+      const range = rawRange.startsWith("npm:") ? rawRange.replace(/^npm:@?[^@]*@?/, "") : rawRange;
+      if (!REGISTRY_RANGE.test(range)) {
+        throw new Error(
+          `${manifest.name} ${origin} ${field}.${name}=${JSON.stringify(rawRange)} is not a registry-resolvable ` +
+            `version range. Only registry specifiers may reach a published package.`,
+        );
+      }
+    }
   }
 }
 
