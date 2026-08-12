@@ -46,9 +46,13 @@ mechanical rather than procedural:
    missing secret to an empty string, so `check:release-credential` checks
    arrival explicitly and stops the run, rather than letting npm fail later with
    a message that reads like a permissions problem.
-2. **No environment.** The publish job requires the `npm-publish` environment,
-   which does not exist yet. Creating it is where the human approval checkpoint
-   lives.
+2. **No approval gate — and its absence is not the barrier.** The publish job
+   declares the `npm-publish` environment, which does not exist on this
+   repository today. That declaration is a *placeholder for* the human
+   checkpoint, not a mechanism that currently provides one: GitHub creates a
+   referenced environment on first use, with no protection rules. An
+   unconfigured environment gates nothing. It becomes a checkpoint only once
+   required reviewers are configured on it, which is part of the cutover.
 3. **The boundary defaults to refusing.** `scripts/release-boundary.mjs` treats
    anything other than an explicit non-dry run as a dry run, and refuses any ref
    that is not a package-scoped `standard-v*` tag. A dispatch that sets nothing
@@ -94,16 +98,22 @@ release notes.
 
 ## What the authority cutover must do, in one step
 
-1. Provision `NPM_TOKEN` in this repository, scoped to `@workspacejson/spec` and
-   `@workspacejson/rules` only, held by the `npm-publish` environment so that no
-   other job and no pull request can reach it.
-2. **Revoke the historical authority in the same change.** Two repositories
+1. Create the `npm-publish` environment **and configure required reviewers on
+   it**. Creating it is not enough and neither is letting the workflow create it:
+   an environment with no protection rules is not a checkpoint, and it will exist
+   either way the first time the publish job runs.
+2. Provision `NPM_TOKEN` as an **environment** secret on `npm-publish`, scoped to
+   `@workspacejson/spec` and `@workspacejson/rules` only. A repository secret
+   would be reachable by any job in any workflow; an environment secret is
+   reachable only by a job that declares that environment and clears its
+   protection rules.
+3. **Revoke the historical authority in the same change.** Two repositories
    publishing one package is the specific failure this arrangement prevents, and
    a window where both can publish is that failure happening.
-3. Confirm that the old authority is incapable by attempting and observing, not
+4. Confirm that the old authority is incapable by attempting and observing, not
    by inferring from settings — archiving a repository does not revoke its
    Actions secrets.
-4. Record the receipts the release produces: package, version, commit, tarball
+5. Record the receipts the release produces: package, version, commit, tarball
    integrity, provenance attestation, and the rollback ref.
 
 Secret presence cannot be enumerated by every tool that might look for it.
