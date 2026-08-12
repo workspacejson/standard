@@ -317,6 +317,32 @@ if (files.includes(ASSET_RECEIPT)) {
   // | `name.png` | purpose | 2560 x 800 | ... |
   const ROW = /^\|\s*`([\w.-]+\.png)`\s*\|[^|]*\|\s*(\d+)\s*x\s*(\d+)\s*\|/gm;
 
+  // Checking the manifest against the assets only catches rows that are
+  // present. Delete a row and its export silently stops being validated, so
+  // coverage is checked in the other direction too: every PNG committed under
+  // assets/ has to be accounted for by the receipt, either as a manifest row
+  // or as a file the replacement matrix explicitly keeps. Dropping a row makes
+  // its file unaccounted-for and fails here.
+  const manifested = new Set([...receipt.matchAll(ROW)].map(([, name]) => name));
+  const kept = new Set(
+    [...receipt.matchAll(/^\|\s*`assets\/([\w.-]+\.png)`[^|]*\|\s*\*\*Keep as-is\*\*/gm)].map(
+      ([, name]) => name,
+    ),
+  );
+
+  for (const file of files) {
+    const match = /^assets\/([\w.-]+\.png)$/.exec(file);
+    if (!match) continue;
+    const name = match[1];
+    if (manifested.has(name) || kept.has(name)) continue;
+    fail(
+      ASSET_RECEIPT,
+      0,
+      `${file} is committed but the receipt neither lists it in the manifest nor records it as kept — ` +
+        `an unaccounted asset is not covered by any dimension, encoding or size check`,
+    );
+  }
+
   for (const [, name, w, h] of receipt.matchAll(ROW)) {
     const rel = `assets/${name}`;
     const abs = join(repoRoot, rel);
