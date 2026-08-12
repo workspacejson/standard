@@ -47,12 +47,27 @@ pnpm run check:architecture && pnpm run check:architecture:test
 pnpm run check:docs
 pnpm run check:adr && pnpm run check:adr:test
 pnpm run check:schema && pnpm run check:examples
-pnpm run release:verify-packs
+pnpm run release:verify-packs && pnpm run release:verify-packs:test
+pnpm run check:release-identity:test
 ```
 
 ## Publication
 
-This repository **cannot publish**. Authority for `@workspacejson/spec` and
-`@workspacejson/rules` still belongs to `workspace-json/agents-audit` until a
-coordinated cutover transfers it. Do not add an npm secret, a publish step, or a
-release workflow — see [`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md).
+This repository publishes `@workspacejson/spec` and `@workspacejson/rules` as one
+fixed Changesets group, from one designated workflow:
+[`.github/workflows/release.yml`](./.github/workflows/release.yml). No other
+workflow may contain a publish step or reference a publish credential, and
+`pnpm run check:architecture` fails the build if one does.
+
+It **cannot publish today**, for reasons that are mechanical rather than
+procedural: there is no `NPM_TOKEN` secret, no `npm-publish` environment, and the
+publication boundary refuses anything other than an explicit non-dry run on a
+package-scoped `standard-v*` tag.
+
+Authority has also not yet been revoked from `workspace-json/agents-audit`. Until
+the cutover revokes the old authority and enables this one **in the same step**,
+two repositories must not hold a live credential for these packages.
+
+So: do not provision a credential, do not create the `npm-publish` environment,
+and do not push a `standard-v*` tag as part of ordinary work — see
+[`.github/RELEASE-AUTHORITY.md`](./.github/RELEASE-AUTHORITY.md).

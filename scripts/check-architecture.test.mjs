@@ -126,14 +126,52 @@ red("unused-dependency: a runtime dependency nothing imports", "unused-dependenc
 baseline("unused-dependency: an imported subpath dependency is ACCEPTED", (d) =>
   patchJson(d, "packages/rules/package.json", (m) => { m.dependencies["ajv"] = "^8.16.0"; }));
 
-red("publish-authority: a release workflow reappears with a publish step", "publish-authority", (d) =>
-  write(d, ".github/workflows/release.yml", `name: Release\non:\n  workflow_dispatch:\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: pnpm changeset publish\n`));
+// ---- publish authority -----------------------------------------------------
+// The rule changed when authority transferred. It was "no workflow may publish";
+// it is now "exactly one designated workflow may publish, under stated
+// constraints". These cases were updated to match rather than removed — the
+// first is the changed expectation, and the ones after it are the constraints
+// that the old rule's blanket absence used to provide for free.
+//
+// The unmodified-repository baseline at the top of this file is what proves the
+// relaxation did not simply disable the guard: the real release.yml must still
+// be ACCEPTED, while every deviation from it below is still rejected.
+
+// Formerly red as "a release workflow reappears with a publish step".
+// `changeset publish` in the designated workflow is now the intended
+// arrangement — the baseline covers it — so the red case moves to what is still
+// forbidden: a publish step anywhere else.
+red("publish-authority: a SECOND workflow gains a publish step", "publish-authority", (d) =>
+  write(d, ".github/workflows/ship.yml", `name: Ship\non:\n  workflow_dispatch:\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: pnpm changeset publish\n`));
 
 red("publish-authority: publishing hidden under a different workflow filename", "publish-authority", (d) =>
   write(d, ".github/workflows/deploy.yml", `name: Deploy\non:\n  push:\njobs:\n  ship:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm publish --access public\n`));
 
-red("publish-authority: a workflow gains an npm credential", "publish-authority", (d) =>
+red("publish-authority: a non-release workflow gains an npm credential", "publish-authority", (d) =>
   write(d, ".github/workflows/ci.yml", `${readFileSync(join(d, ".github/workflows/ci.yml"), "utf8")}\n      - name: leak\n        env:\n          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}\n        run: echo x\n`));
+
+// A raw publish inside the designated workflow bypasses the release plan: it
+// ships whatever is in the working directory under whatever name the manifest
+// carries, with none of the fixed group's ordering.
+red("publish-authority: the release workflow publishes with raw npm publish", "publish-authority", (d) =>
+  write(d, ".github/workflows/release.yml", readFileSync(join(d, ".github/workflows/release.yml"), "utf8")
+    .replace("run: pnpm changeset publish", "run: npm publish --access public")));
+
+// A release workflow reachable from a pull request hands the credential to
+// anyone who can open one.
+red("publish-authority: the release workflow becomes reachable from a pull request", "publish-authority", (d) =>
+  write(d, ".github/workflows/release.yml", readFileSync(join(d, ".github/workflows/release.yml"), "utf8")
+    .replace("on:\n  push:", "on:\n  pull_request:\n  push:")));
+
+// Provenance that is configured but not permitted is provenance that is absent.
+red("publish-authority: the release workflow drops id-token: write", "publish-authority", (d) =>
+  write(d, ".github/workflows/release.yml", readFileSync(join(d, ".github/workflows/release.yml"), "utf8")
+    .replace(/^ *id-token: write$/m, "")));
+
+// One authority per package cuts both ways: the designated workflow must not
+// reach for a package this repository does not own either.
+red("foreign-publish: the release workflow reaches for a package this repo does not own", "foreign-publish", (d) =>
+  write(d, ".github/workflows/release.yml", `${readFileSync(join(d, ".github/workflows/release.yml"), "utf8")}\n      - run: npx agents-audit scan .\n`));
 
 red("foreign-publish: fixed group reintroduces agents-audit", "foreign-publish", (d) =>
   patchJson(d, ".changeset/config.json", (m) => { m.fixed = [["@workspacejson/spec", "@workspacejson/rules", "agents-audit"]]; }));

@@ -87,6 +87,17 @@ jobs:
       - name: Verify package tarballs
         run: pnpm run release:verify-packs
 
+      # The packed-artifact gate is the last thing standing between a defect and
+      # a permanent registry version, and the identity gate decides whether a tag
+      # may publish at all. Both are proven falsifiable here, on every pull
+      # request, rather than only during the release that depends on them — a
+      # guard first exercised during a release is a guard nobody has tested.
+      - name: Packed-artifact gate red tests
+        run: pnpm run release:verify-packs:test
+
+      - name: Release identity gate red tests
+        run: pnpm run check:release-identity:test
+
       # Standard owns the normative schema. These two gates prove the package
       # ships the canonical bytes and that every shipped example validates
       # against them.
