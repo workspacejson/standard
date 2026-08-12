@@ -193,10 +193,12 @@ publication.
 Topics are chosen for discovery by someone looking for this kind of artifact.
 None of them asserts adoption, endorsement or standards-body status.
 
-**No social preview image is set.** The repository has no approved neutral asset
-of its own, and borrowing one from another repository would break the moment that
-repository changes. It is left unset rather than filled with something that will
-rot.
+**No social preview image is set.** The reason it was unset no longer holds: the
+repository now vendors an approved card of its own at
+[`assets/social-card.png`](../assets/social-card.png), 1200 × 630, so nothing
+has to be borrowed from another repository. Uploading it is a dashboard-only
+action, recorded here as intended and not yet applied. Until it is, links to
+this repository unfurl with GitHub's generated default.
 
 ## Workflow permissions
 
