@@ -296,6 +296,11 @@ const ASSET_RECEIPT = "assets/PRODUCTION-RECEIPT.md";
 // Ceilings the receipt's preflight states, in bytes.
 const SIZE_CEILINGS = { social: 300 * 1024, readme: 400 * 1024 };
 
+// The most this gate will ever hold decoded, regardless of what a file or the
+// receipt declares. Fixed here rather than derived from either, so it stays a
+// bound the input cannot widen.
+const MAX_DECODED_BYTES = 64 * 1024 * 1024;
+
 // Geometry and encoding both live in the IHDR chunk, at fixed offsets in every
 // PNG, so neither needs the image decoded.
 const pngHeader = (buffer) => {
@@ -369,6 +374,20 @@ const firstTransparentSample = (buffer, { width, height, colourType, interlace }
   // error instead of growing until the process dies.
   const stride = width * 4; // RGBA, 8 bits per channel
   const expected = height * (stride + 1);
+
+  // The line above derives its bound from the header, and the header is part of
+  // what is under test — so on its own it is a limit the input gets to choose.
+  // This ceiling does not move: it is well above the largest asset this
+  // repository ships (2560 x 1280, about 13 MB decoded) and far below anything
+  // that would trouble a runner. A canvas larger than this is refused rather
+  // than decoded, whatever the receipt claims about it.
+  if (expected > MAX_DECODED_BYTES) {
+    throw new Error(
+      `declared canvas would decode to ${Math.round(expected / 1024 / 1024)} MB, above the ` +
+        `${MAX_DECODED_BYTES / 1024 / 1024} MB this gate will decode`,
+    );
+  }
+
   const raw = inflateSync(Buffer.concat(idat), { maxOutputLength: expected });
   if (raw.length < expected) throw new Error("truncated image data");
   const bpp = 4; // RGBA, 8 bits per channel
