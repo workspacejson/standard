@@ -333,6 +333,25 @@ const paeth = (a, b, c) => {
   return pb <= pc ? b : c;
 };
 
+// Walks the chunk list once. `tRNS` is the other way a PNG carries
+// transparency — a colour key on truecolour images, where the alpha channel
+// itself is absent — so an export can be colour type 2 and still have
+// see-through pixels. Its mere presence contradicts "flattened to opaque",
+// which is why it does not need decoding to rule on.
+const readChunks = (buffer) => {
+  const idat = [];
+  let hasTrns = false;
+  for (let offset = 8; offset + 8 <= buffer.length; ) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString("ascii", offset + 4, offset + 8);
+    if (type === "IDAT") idat.push(buffer.subarray(offset + 8, offset + 8 + length));
+    if (type === "tRNS") hasTrns = true;
+    if (type === "IEND") break;
+    offset += length + 12; // length + type + data + CRC
+  }
+  return { idat, hasTrns };
+};
+
 // Returns the first non-opaque alpha value found, or null when fully opaque.
 // Throws for the encodings it deliberately does not handle, so an unsupported
 // export fails loudly rather than passing unchecked.
@@ -340,14 +359,7 @@ const firstTransparentSample = (buffer, { width, height, colourType, interlace }
   if (colourType !== 6) return null; // no alpha channel to inspect
   if (interlace !== 0) throw new Error("interlaced PNG");
 
-  const idat = [];
-  for (let offset = 8; offset + 8 <= buffer.length; ) {
-    const length = buffer.readUInt32BE(offset);
-    const type = buffer.toString("ascii", offset + 4, offset + 8);
-    if (type === "IDAT") idat.push(buffer.subarray(offset + 8, offset + 8 + length));
-    if (type === "IEND") break;
-    offset += length + 12; // length + type + data + CRC
-  }
+  const { idat } = readChunks(buffer);
   if (!idat.length) throw new Error("no IDAT chunk");
 
   const raw = inflateSync(Buffer.concat(idat));
@@ -449,6 +461,13 @@ if (!files.includes(ASSET_RECEIPT)) {
         0,
         `receipt records it as PNG-24, but the header says bit depth ${actual.bitDepth}, ` +
           `colour type ${actual.colourType}`,
+      );
+    } else if (readChunks(bytes).hasTrns) {
+      fail(
+        rel,
+        0,
+        `receipt records the alpha channel as flattened to opaque, but the file carries a tRNS ` +
+          `chunk — colour-keyed transparency the alpha samples would not show`,
       );
     } else {
       try {
