@@ -77,8 +77,11 @@ A source tree can tell you that two files exist. Repository history can show
 that they repeatedly changed together. workspace.json gives consumers a
 committed place to carry that observation.
 
-Abridged from [`packages/spec/examples/populated-v0.4.json`](./packages/spec/examples/populated-v0.4.json),
-a shipped example that CI validates against the schema:
+This is a complete document — it validates as it stands, so you can paste it
+into a file and run the quickstart below against it. The values come from
+[`packages/spec/examples/populated-v0.4.json`](./packages/spec/examples/populated-v0.4.json),
+a shipped example CI validates on every run; the per-file index detail and the
+health block are trimmed to keep the point visible.
 
 ```json
 {
@@ -98,16 +101,23 @@ a shipped example that CI validates against the schema:
   },
   "generated": {
     "specVersion": "0.4",
+    "generatedAt": "2026-06-01T00:00:00Z",
     "basisRevision": "9f2c1d5b8a3e47c06d1b2f8e4a7c9013d5e6f8a2",
     "by": { "name": "vrekod", "version": "3.0.0" },
-    "frameworkManifest": [{ "name": "turborepo", "confidence": 0.95 }]
-  }
+    "frameworkManifest": [{ "name": "turborepo", "confidence": 0.95 }],
+    "fileIndex": { "apps/api/src/auth.ts": {} }
+  },
+  "agents": {},
+  "health": {}
 }
 ```
 
 The `manual` block is authored by humans or by tools acting on their behalf. The
-`generated` block is producer-written and records the revision it was computed
-from, so a reader can tell how current it is. Both travel with the repository.
+`generated` block is producer-written and records both the revision it was
+computed from and who computed it, so a reader can tell how current it is and
+what produced it. `manual`, `generated`, `agents` and `health` are all required,
+which is why the last two appear here empty rather than omitted. Everything
+travels with the repository.
 
 ## Quickstart
 
