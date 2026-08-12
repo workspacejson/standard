@@ -56,17 +56,21 @@ per guide section 09.
 | No unpublished number on any asset | Pass. Only `spec v0.4`, which `README.md` states |
 | No adoption, endorsement, benchmark or predictive claim | Pass. No star CTA in the banner, per guide 08 and GTM-33 |
 
-Two of these rows are re-checked on every run. `pnpm run check:docs` reads the
-manifest in section 2 back out of the PNG headers on disk and recomputes the
-size ceilings, so the dimension, encoding and file-size rows cannot go stale:
-regenerate an export without correcting the receipt and the gate fails.
+Part of this table is re-checked on every run. `pnpm run check:docs` reads the
+manifest in section 2 back out of the PNGs on disk and recomputes four things:
+the exported dimensions, the bit depth and colour type behind "PNG-24", that
+every alpha sample is opaque, and the size ceilings. Regenerate an export
+without correcting the receipt and the gate fails. It also fails if an asset is
+committed that this receipt does not account for, or if the receipt is deleted
+while assets remain.
 
-The remaining rows are production-time judgments about what the artwork shows —
-type sizes, accent roles, grid alignment, the absence of a vendor logo in a
-node. No gate recomputes those, and this receipt is the record that a human
-checked them against the guide on the date it was produced. Read them as a
-dated attestation, not as a continuously enforced invariant. Re-running the
-preflight is part of regenerating an asset.
+`sRGB` is not among the recomputed claims, and neither is any row in the second
+group: type sizes, accent roles, grid alignment, the absence of a vendor logo
+in a node, the alt-text and claim rules. Those are judgments about what the
+artwork shows, and nothing recomputes them from a PNG. This receipt is the
+record that a human checked them against the guide on the date it was produced.
+Read them as a dated attestation rather than a continuously enforced invariant.
+Re-running the preflight is part of regenerating an asset.
 
 ## 5. Deviations and conflicts to rule on
 

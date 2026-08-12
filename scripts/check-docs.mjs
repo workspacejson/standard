@@ -4,7 +4,7 @@
 //
 // Polish decays. A README that was accurate when it was written drifts as files
 // move, and a "cold reader can follow this" claim is worthless if nothing checks
-// it. This gate makes four properties of the public surface mechanically
+// it. This gate makes five properties of the public surface mechanically
 // verifiable instead of merely asserted:
 //
 //   1. Every relative Markdown link and image resolves to a file that exists.
@@ -15,6 +15,8 @@
 //      matches the schema. The paths are restated in several documents and the
 //      architecture guard reads only source and config, so nothing else would
 //      notice a prose copy going stale.
+//   5. The asset production receipt is recomputed from the assets it describes,
+//      so a regenerated export cannot leave it reporting a stale pass.
 //
 // External links are NOT fetched. A network check in CI fails on someone else's
 // outage and trains everyone to ignore red. They are syntax-checked here and
@@ -26,6 +28,7 @@ import { readFileSync, existsSync, statSync } from "node:fs";
 import { join, dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { inflateSync } from "node:zlib";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -296,13 +299,14 @@ const SIZE_CEILINGS = { social: 300 * 1024, readme: 400 * 1024 };
 // Geometry and encoding both live in the IHDR chunk, at fixed offsets in every
 // PNG, so neither needs the image decoded.
 const pngHeader = (buffer) => {
-  const isPng = buffer.length >= 26 && buffer.readUInt32BE(0) === 0x89504e47;
+  const isPng = buffer.length >= 29 && buffer.readUInt32BE(0) === 0x89504e47;
   if (!isPng) return null;
   return {
     width: buffer.readUInt32BE(16),
     height: buffer.readUInt32BE(20),
     bitDepth: buffer.readUInt8(24),
     colourType: buffer.readUInt8(25),
+    interlace: buffer.readUInt8(28),
   };
 };
 
@@ -310,6 +314,74 @@ const pngHeader = (buffer) => {
 // (RGB) or 6 (RGBA). An export downgraded to a palette or to 16-bit would
 // change how it renders while leaving the receipt reporting a pass.
 const TRUECOLOUR = new Set([2, 6]);
+
+// The receipt also records the alpha channel as flattened to opaque, and that
+// one cannot be read off the header: colour type 6 says an alpha channel
+// exists, not that every sample in it is 255. A hero that regained
+// transparency would render wrong against exactly one of GitHub's two themes,
+// which is the failure the light/dark pairing exists to prevent, so the
+// samples are checked directly.
+//
+// Reconstructing them means undoing the per-scanline filters, which is why the
+// image is inflated here rather than inspected in place.
+const paeth = (a, b, c) => {
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  if (pa <= pb && pa <= pc) return a;
+  return pb <= pc ? b : c;
+};
+
+// Returns the first non-opaque alpha value found, or null when fully opaque.
+// Throws for the encodings it deliberately does not handle, so an unsupported
+// export fails loudly rather than passing unchecked.
+const firstTransparentSample = (buffer, { width, height, colourType, interlace }) => {
+  if (colourType !== 6) return null; // no alpha channel to inspect
+  if (interlace !== 0) throw new Error("interlaced PNG");
+
+  const idat = [];
+  for (let offset = 8; offset + 8 <= buffer.length; ) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString("ascii", offset + 4, offset + 8);
+    if (type === "IDAT") idat.push(buffer.subarray(offset + 8, offset + 8 + length));
+    if (type === "IEND") break;
+    offset += length + 12; // length + type + data + CRC
+  }
+  if (!idat.length) throw new Error("no IDAT chunk");
+
+  const raw = inflateSync(Buffer.concat(idat));
+  const bpp = 4; // RGBA, 8 bits per channel
+  const stride = width * bpp;
+  const line = Buffer.alloc(stride);
+  const previous = Buffer.alloc(stride);
+
+  for (let y = 0, pos = 0; y < height; y++) {
+    const filter = raw[pos++];
+    raw.copy(line, 0, pos, pos + stride);
+    pos += stride;
+
+    for (let i = 0; i < stride; i++) {
+      const a = i >= bpp ? line[i - bpp] : 0;
+      const b = previous[i];
+      const c = i >= bpp ? previous[i - bpp] : 0;
+      switch (filter) {
+        case 0: break;
+        case 1: line[i] = (line[i] + a) & 0xff; break;
+        case 2: line[i] = (line[i] + b) & 0xff; break;
+        case 3: line[i] = (line[i] + ((a + b) >> 1)) & 0xff; break;
+        case 4: line[i] = (line[i] + paeth(a, b, c)) & 0xff; break;
+        default: throw new Error(`unknown filter type ${filter}`);
+      }
+    }
+
+    for (let i = bpp - 1; i < stride; i += bpp) {
+      if (line[i] !== 0xff) return line[i];
+    }
+    line.copy(previous);
+  }
+  return null;
+};
 
 let assetRowsChecked = 0;
 const committedAssets = files.filter((f) => /^assets\/[\w.-]+\.png$/.test(f));
@@ -378,6 +450,20 @@ if (!files.includes(ASSET_RECEIPT)) {
         `receipt records it as PNG-24, but the header says bit depth ${actual.bitDepth}, ` +
           `colour type ${actual.colourType}`,
       );
+    } else {
+      try {
+        const sample = firstTransparentSample(bytes, actual);
+        if (sample !== null) {
+          fail(
+            rel,
+            0,
+            `receipt records the alpha channel as flattened to opaque, but the image contains a ` +
+              `sample with alpha ${sample} — it would render wrong against one of the two themes`,
+          );
+        }
+      } catch (error) {
+        fail(rel, 0, `alpha channel could not be verified against the receipt: ${error.message}`);
+      }
     }
 
     const claimed = { width: Number(w), height: Number(h) };
