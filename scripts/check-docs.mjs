@@ -312,7 +312,21 @@ const pngHeader = (buffer) => {
 const TRUECOLOUR = new Set([2, 6]);
 
 let assetRowsChecked = 0;
-if (files.includes(ASSET_RECEIPT)) {
+const committedAssets = files.filter((f) => /^assets\/[\w.-]+\.png$/.test(f));
+
+if (!files.includes(ASSET_RECEIPT)) {
+  // The receipt is the only thing that accounts for what lives in assets/, so
+  // its absence cannot be a reason to skip the checks below. Deleting it would
+  // otherwise turn every asset check off at once, quietly.
+  if (committedAssets.length) {
+    fail(
+      ASSET_RECEIPT,
+      0,
+      `${committedAssets.length} PNG(s) are committed under assets/ but the production receipt is ` +
+        `missing — nothing accounts for their dimensions, encoding or size`,
+    );
+  }
+} else {
   const receipt = readFileSync(join(repoRoot, ASSET_RECEIPT), "utf8");
   // | `name.png` | purpose | 2560 x 800 | ... |
   const ROW = /^\|\s*`([\w.-]+\.png)`\s*\|[^|]*\|\s*(\d+)\s*x\s*(\d+)\s*\|/gm;
@@ -330,10 +344,8 @@ if (files.includes(ASSET_RECEIPT)) {
     ),
   );
 
-  for (const file of files) {
-    const match = /^assets\/([\w.-]+\.png)$/.exec(file);
-    if (!match) continue;
-    const name = match[1];
+  for (const file of committedAssets) {
+    const name = /^assets\/([\w.-]+\.png)$/.exec(file)[1];
     if (manifested.has(name) || kept.has(name)) continue;
     fail(
       ASSET_RECEIPT,
