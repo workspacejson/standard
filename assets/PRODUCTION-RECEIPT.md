@@ -56,6 +56,18 @@ per guide section 09.
 | No unpublished number on any asset | Pass. Only `spec v0.4`, which `README.md` states |
 | No adoption, endorsement, benchmark or predictive claim | Pass. No star CTA in the banner, per guide 08 and GTM-33 |
 
+Two of these rows are re-checked on every run. `pnpm run check:docs` reads the
+manifest in section 2 back out of the PNG headers on disk and recomputes the
+size ceilings, so the dimension, encoding and file-size rows cannot go stale:
+regenerate an export without correcting the receipt and the gate fails.
+
+The remaining rows are production-time judgments about what the artwork shows —
+type sizes, accent roles, grid alignment, the absence of a vendor logo in a
+node. No gate recomputes those, and this receipt is the record that a human
+checked them against the guide on the date it was produced. Read them as a
+dated attestation, not as a continuously enforced invariant. Re-running the
+preflight is part of regenerating an asset.
+
 ## 5. Deviations and conflicts to rule on
 
 These are recorded rather than resolved locally.

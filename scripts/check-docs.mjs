@@ -293,12 +293,23 @@ const ASSET_RECEIPT = "assets/PRODUCTION-RECEIPT.md";
 // Ceilings the receipt's preflight states, in bytes.
 const SIZE_CEILINGS = { social: 300 * 1024, readme: 400 * 1024 };
 
-// Width and height live in the IHDR chunk, at a fixed offset in every PNG.
-const pngSize = (buffer) => {
-  const isPng = buffer.length >= 24 && buffer.readUInt32BE(0) === 0x89504e47;
+// Geometry and encoding both live in the IHDR chunk, at fixed offsets in every
+// PNG, so neither needs the image decoded.
+const pngHeader = (buffer) => {
+  const isPng = buffer.length >= 26 && buffer.readUInt32BE(0) === 0x89504e47;
   if (!isPng) return null;
-  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+    bitDepth: buffer.readUInt8(24),
+    colourType: buffer.readUInt8(25),
+  };
 };
+
+// "PNG-24" in the receipt means 8 bits per channel truecolour — colour type 2
+// (RGB) or 6 (RGBA). An export downgraded to a palette or to 16-bit would
+// change how it renders while leaving the receipt reporting a pass.
+const TRUECOLOUR = new Set([2, 6]);
 
 let assetRowsChecked = 0;
 if (files.includes(ASSET_RECEIPT)) {
@@ -316,10 +327,19 @@ if (files.includes(ASSET_RECEIPT)) {
 
     assetRowsChecked++;
     const bytes = readFileSync(abs);
-    const actual = pngSize(bytes);
+    const actual = pngHeader(bytes);
     if (!actual) {
       fail(rel, 0, `manifest records it as a PNG export, but the file has no PNG header`);
       continue;
+    }
+
+    if (actual.bitDepth !== 8 || !TRUECOLOUR.has(actual.colourType)) {
+      fail(
+        rel,
+        0,
+        `receipt records it as PNG-24, but the header says bit depth ${actual.bitDepth}, ` +
+          `colour type ${actual.colourType}`,
+      );
     }
 
     const claimed = { width: Number(w), height: Number(h) };
