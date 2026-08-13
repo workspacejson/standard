@@ -193,12 +193,38 @@ publication.
 Topics are chosen for discovery by someone looking for this kind of artifact.
 None of them asserts adoption, endorsement or standards-body status.
 
-**No social preview image is set.** The reason it was unset no longer holds: the
-repository now vendors an approved card of its own at
-[`assets/social-card.png`](../assets/social-card.png), 1200 × 630, so nothing
-has to be borrowed from another repository. Uploading it is a dashboard-only
-action, recorded here as intended and not yet applied. Until it is, links to
-this repository unfurl with GitHub's generated default.
+**The social preview is set to the canonical card, applied and verified
+2026-08-13.** It serves [`assets/social-card.png`](../assets/social-card.png),
+1200 × 630.
+
+Verified by fetching the rendered `og:image` rather than by trusting the
+dashboard. Two independent signals:
+
+| | Before | After |
+| -- | -- | -- |
+| `og:image` host | `opengraph.githubassets.com` — GitHub's *generated* card | `repository-images.githubusercontent.com` — an *uploaded* card |
+| `og:image:width` / `:height` | `1200` / `600` | omitted, as GitHub does for uploads |
+
+The host is the discriminator: a generated card and an uploaded one are served
+from different hosts, so the unfurl cannot be confused for the default. The
+served bytes were then compared against the repository asset and are
+**byte-identical** — 127,369 bytes, SHA-256
+`89213ee0e698af67ceb096e761c7ed4e2a99b79394c7fc84da629c3f3b505f17`, PNG 1200 ×
+630 RGBA. GitHub did not re-encode it.
+
+Also observed rendering correctly in a real Open Graph client (iMessage unfurl,
+2026-08-13): full card, no cropping, footer legible.
+
+Uploading it remains a dashboard-only action — GitHub exposes no REST API for
+the social preview — so this record, not a script, is the evidence. Re-check
+with:
+
+```bash
+curl -sL https://github.com/workspacejson/standard | grep 'og:image"'
+```
+
+If the host reads `opengraph.githubassets.com`, the setting has been lost and
+the card is no longer being served.
 
 ## Workflow permissions
 
