@@ -81,7 +81,7 @@ GitHub API on 2026-08-04, it requires:
   `required_approving_review_count` is `0`. See
   [`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
-Two controls this document previously claimed are **not** in place:
+Four controls this document previously claimed are **not** in place:
 
 | Claimed | Measured |
 | -- | -- |
@@ -93,7 +93,7 @@ Two controls this document previously claimed are **not** in place:
 No ruleset supplies these separately; `GET /repos/workspacejson/standard/rulesets`
 returns `[]`.
 
-### The actual defect: no enforceable independent-review path
+### The actual defect: no review requirement at all
 
 These are four separate facts, and the defect is what they produce together —
 not any one of them alone.
@@ -107,19 +107,19 @@ not any one of them alone.
    CODEOWNERS routes review requests; it gates nothing.
 3. **Every path has exactly one code owner, and that owner authors the changes.**
    [`.github/CODEOWNERS`](../.github/CODEOWNERS) assigns `*` and every specific
-   path to `@qmarcelle`. GitHub does not permit a pull-request author to approve
-   their own pull request, so a self-authored change cannot satisfy the
-   code-owner requirement from within.
+   path to `@qmarcelle`. This is why re-enabling the code-owner requirement would
+   not help: GitHub does not permit an author to approve their own pull request,
+   so the requirement would block every change rather than get any of them
+   reviewed.
 4. **Administrator enforcement is off.** `enforce_admins: false` means the
    administrator — the same account — can bypass the protection entirely.
 
-The controls are configured. What is missing is a *second person*: no combination
-of the above currently results in a change being reviewed by someone other than
-its author. A post-calibration transition is planned: Greptile would serve as an
-enforceable independent review gate and Sourcery as a mandatory
-review-completion gate, after which required code-owner approval would be
-disabled until a second human maintainer exists. See
-[`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
+What is missing is a *second party*: nothing above results in a change being
+looked at by anyone other than its author, and since 2026-08-13 that includes
+automated reviewers. Sourcery still reviews every pull request and its threads
+must be resolved to merge, which is the only review-shaped pressure currently in
+the contract — but it is not a required context, so it constrains nothing on its
+own. See [`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
 **This is not currently a credentialed package-publication risk**, because this
 repository holds no npm credential and ships no release workflow. It is not
@@ -129,11 +129,9 @@ land the same way.
 
 ### Remediation
 
-Raising the approval count alone does not fix this. The remediation has two
-phases:
-
-**Both phases have been executed, and the outcome is worse than either
-intended. Recorded here rather than restated as a plan.**
+Raising the approval count alone does not fix this. Two phases were planned;
+**both have now executed, and the outcome is worse than either intended.**
+Recorded here as history rather than restated as a plan.
 
 *Phase 1 — Greptile as an independent review gate — was tried and withdrawn.*
 `Greptile Review` was added as a required status context and removed on
@@ -167,17 +165,19 @@ The interim governance model for this sole-steward repository:
 CODEOWNERS
     -> ownership/routing signal (not a merge gate)
 
-Required Greptile review
-+ current-head CI
+current-head CI
 + conversation resolution
 + normative governance tests
     -> merge authorization
+
+(no reviewer requirement of any kind since 2026-08-13)
 ```
 
-`enforce_admins` remains **off** during initial calibration. Admin bypass is
-retained as an exceptional, recorded recovery path until Greptile reliability
-has been observed. When a genuine second standard maintainer exists, restore
-required code-owner approval and enable administrator enforcement.
+`enforce_admins` remains **off**. It was left off during Greptile calibration as
+a recorded recovery path; with no required reviewer left, it is now the second
+way an unreviewed change reaches `main` rather than the first. When a genuine
+second standard maintainer exists, restore required code-owner approval and
+enable administrator enforcement.
 
 The following must still be closed *before* publication authority transfers:
 
