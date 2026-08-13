@@ -139,7 +139,7 @@ intended. Recorded here rather than restated as a plan.**
 `Greptile Review` was added as a required status context and removed on
 2026-08-13. The Greptile trial account reached its 50-credit limit, after which
 the app posts a credit-limit notice in place of a review and emits **no check
-run at all**. A required context nothing can produce blocks every merge, so the
+run at all**. A required context that nothing can produce blocks every merge, so the
 requirement was withdrawn rather than left to deadlock `main`. The same failure
 and the same withdrawal are recorded for `workspacejson/integrations` in that
 repository's `docs/review/merge-policy.md`.
