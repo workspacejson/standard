@@ -220,11 +220,15 @@ the social preview — so this record, not a script, is the evidence. Re-check
 with:
 
 ```bash
-curl -sL https://github.com/workspacejson/standard | grep 'og:image"'
+curl -sL https://github.com/workspacejson/standard \
+  | grep -q 'og:image" content="https://repository-images.githubusercontent.com' \
+  && echo "OK: uploaded card served" \
+  || echo "LOST: GitHub is serving its generated default"
 ```
 
-If the host reads `opengraph.githubassets.com`, the setting has been lost and
-the card is no longer being served.
+The command decides rather than printing a tag to be read, because the failure
+mode is a *different host serving a plausible-looking card* — an eyeballed
+`og:image` line looks fine either way.
 
 ## Workflow permissions
 
