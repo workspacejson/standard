@@ -33,7 +33,7 @@ squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed,defaultBranchRef
 | Merge commit | disabled | Yes |
 | Rebase merge | disabled | Yes |
 | Delete branch on merge | enabled | Yes |
-| Branch protection | enabled (PR + 1 review + CI + conversation resolution + codeowner) | Yes |
+| Branch protection | enabled (PR + CI + conversation resolution; **no reviewer required**) | Yes |
 
 All settings above were applied through the GitHub API during the public-readiness
 pass and the subsequent security hardening on 2026-07-28.
@@ -58,7 +58,7 @@ now enabled:
 
 | Control | Status | Notes |
 | -- | -- | -- |
-| Branch protection | **enabled; no independent-review path** | PR + CI on Node 20/22 + conversation resolution + codeowner review + block force-push/deletion. **General approving-review count is `0`, the sole code owner authors the changes, and admin enforcement is off.** See below. |
+| Branch protection | **enabled; no review requirement of any kind** | PR + CI on Node 20/22 + four-path conformance + conversation resolution + block force-push/deletion. **`required_approving_review_count: 0`, `require_code_owner_reviews: false`, no required review status context, and admin enforcement is off.** See below. |
 | Secret scanning | **enabled** | Free for public repositories. |
 | Secret scanning push protection | **enabled** | Blocks commits containing detected secrets. |
 | Private vulnerability reporting | **enabled** | The advisory form at [`SECURITY.md`](../SECURITY.md) now resolves. |
@@ -77,47 +77,49 @@ GitHub API on 2026-08-04, it requires:
 - dismiss stale approvals on new commits;
 - require conversation resolution;
 - block force pushes and branch deletion;
-- require review from code owners — see [`.github/CODEOWNERS`](../.github/CODEOWNERS).
-  A post-calibration transition to independent AI review layers (Greptile as
-  hard status gate, Sourcery as mandatory review-completion gate) is planned;
-  see [`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
+- **no reviewer requirement** — `require_code_owner_reviews` is `false` and
+  `required_approving_review_count` is `0`. See
+  [`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
-Two controls this document previously claimed are **not** in place:
+Four controls this document previously claimed are **not** in place:
 
 | Claimed | Measured |
 | -- | -- |
 | a pull request with at least one approving review | `required_approving_review_count: 0` |
 | enforce on admins | `enforce_admins: false` |
+| require review from code owners | `require_code_owner_reviews: false` |
+| `Greptile Review` as a required context | removed 2026-08-13 — see below |
 
 No ruleset supplies these separately; `GET /repos/workspacejson/standard/rulesets`
 returns `[]`.
 
-### The actual defect: no enforceable independent-review path
+### The actual defect: no review requirement at all
 
 These are four separate facts, and the defect is what they produce together —
 not any one of them alone.
 
 1. **The general approving-review count is `0`.** No count-based approval is
    required, so paths a code-owner rule does not reach are unprotected by review.
-2. **Code-owner review is enabled and does bind.** `require_code_owner_reviews`
-   is an independent control: it blocks an affected pull request until a code
-   owner approves it, regardless of the general count. Nothing here should be
-   read as saying that control is inert — it is not.
+2. **Code-owner review is not enabled.** `require_code_owner_reviews` is
+   `false`. This document previously stated the opposite emphatically — that the
+   control "does bind" and should not be read as inert. That was wrong when
+   measured against the API on 2026-08-13, and the API is the arbiter.
+   CODEOWNERS routes review requests; it gates nothing.
 3. **Every path has exactly one code owner, and that owner authors the changes.**
    [`.github/CODEOWNERS`](../.github/CODEOWNERS) assigns `*` and every specific
-   path to `@qmarcelle`. GitHub does not permit a pull-request author to approve
-   their own pull request, so a self-authored change cannot satisfy the
-   code-owner requirement from within.
+   path to `@qmarcelle`. This is why re-enabling the code-owner requirement would
+   not help: GitHub does not permit an author to approve their own pull request,
+   so the requirement would block every change rather than get any of them
+   reviewed.
 4. **Administrator enforcement is off.** `enforce_admins: false` means the
    administrator — the same account — can bypass the protection entirely.
 
-The controls are configured. What is missing is a *second person*: no combination
-of the above currently results in a change being reviewed by someone other than
-its author. A post-calibration transition is planned: Greptile would serve as an
-enforceable independent review gate and Sourcery as a mandatory
-review-completion gate, after which required code-owner approval would be
-disabled until a second human maintainer exists. See
-[`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
+What is missing is a *second party*: nothing above results in a change being
+looked at by anyone other than its author, and since 2026-08-13 that includes
+automated reviewers. Sourcery still reviews every pull request and its threads
+must be resolved to merge, which is the only review-shaped pressure currently in
+the contract — but it is not a required context, so it constrains nothing on its
+own. See [`.github/REVIEW-MERGE-PROTOCOL.md`](../.github/REVIEW-MERGE-PROTOCOL.md).
 
 **This is not currently a credentialed package-publication risk**, because this
 repository holds no npm credential and ships no release workflow. It is not
@@ -127,25 +129,35 @@ land the same way.
 
 ### Remediation
 
-Raising the approval count alone does not fix this. The remediation has two
-phases:
+Raising the approval count alone does not fix this. Two phases were planned;
+**both have now executed, and the outcome is worse than either intended.**
+Recorded here as history rather than restated as a plan.
 
-**Phase 1 (current): Greptile as independent review gate.**
+*Phase 1 — Greptile as an independent review gate — was tried and withdrawn.*
+`Greptile Review` was added as a required status context and removed on
+2026-08-13. The Greptile trial account reached its 50-credit limit, after which
+the app posts a credit-limit notice in place of a review and emits **no check
+run at all**. A required context that nothing can produce blocks every merge, so the
+requirement was withdrawn rather than left to deadlock `main`. The same failure
+and the same withdrawal are recorded for `workspacejson/integrations` in that
+repository's `docs/review/merge-policy.md`.
 
-Adding Greptile as a required status check creates an enforceable independent
-gate that does not depend on a second human reviewer. The `.greptile/`
-configuration (see [`.greptile/config.json`](../.greptile/config.json)) defines
-project-specific review rules. `triggerOnDrafts: true` ensures the review starts
-before the PR leaves draft, and `triggerOnUpdates: true` ensures new commits
-retrigger review.
+Observed on PR #37: Greptile reviewed the exact head `4f9e8f6f` and emitted zero
+check runs, where PRs #34, #35 and #36 each produced exactly one. A quota notice
+is not review evidence and is never recorded as a pass.
 
-**Phase 2 (after Greptile gate is demonstrated): Disable required
-code-owner approval.**
+*Phase 2 — disabling required code-owner approval — has already happened.*
+`require_code_owner_reviews` is `false`.
 
-Once the Greptile gate is proven to fire and block, required code-owner approval
-is disabled (it cannot be satisfied by the sole code owner who authors all
-changes). CODEOWNERS remains authoritative for ownership/routing but is no longer
-a merge gate.
+**Net effect: `main` currently requires no reviewer at all.** Phase 2 removed the
+gate that could not be satisfied, and Phase 1 removed the gate meant to replace
+it. CI correctness and conversation resolution are the entire merge contract.
+
+Re-admitting a review gate requires **both** of the following to be observed,
+not one: a substantive review on the current pull-request head, and a
+mechanically enforceable current-head signal that branch protection can match.
+Greptile satisfied the second only while its trial credits lasted, which is why
+it was promoted and then withdrawn inside two days.
 
 The interim governance model for this sole-steward repository:
 
@@ -153,17 +165,19 @@ The interim governance model for this sole-steward repository:
 CODEOWNERS
     -> ownership/routing signal (not a merge gate)
 
-Required Greptile review
-+ current-head CI
+current-head CI
 + conversation resolution
 + normative governance tests
     -> merge authorization
+
+(no reviewer requirement of any kind since 2026-08-13)
 ```
 
-`enforce_admins` remains **off** during initial calibration. Admin bypass is
-retained as an exceptional, recorded recovery path until Greptile reliability
-has been observed. When a genuine second standard maintainer exists, restore
-required code-owner approval and enable administrator enforcement.
+`enforce_admins` remains **off**. It was left off during Greptile calibration as
+a recorded recovery path; with no required reviewer left, it is now the second
+way an unreviewed change reaches `main` rather than the first. When a genuine
+second standard maintainer exists, restore required code-owner approval and
+enable administrator enforcement.
 
 The following must still be closed *before* publication authority transfers:
 

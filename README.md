@@ -336,17 +336,21 @@ Stated here rather than discovered later:
 - **Four ambient interop shims are retained** in `types/ambient.d.ts` for
   `simple-git`, `remark` and `ajv`. They are real CJS/ESM mismatches in
   third-party packages, tracked as their own work rather than papered over.
-- **`main` has no enforceable independent-review path.** Branch protection is
-  enabled — required checks on Node 20/22 plus four-path producer conformance,
-  dismissed stale approvals, code-owner review, conversation resolution, and no
-  force-push or deletion. But the general `required_approving_review_count` is
-  `0`; code-owner review is enabled and does block affected pull requests, yet
-  every path in [`.github/CODEOWNERS`](./.github/CODEOWNERS) is owned solely by
-  `@qmarcelle`, who authors the changes — and an author cannot approve their own
-  pull request. Administrator enforcement is also off, so the administrator can
-  bypass the protection entirely. The controls exist; no combination of them
-  currently produces review by a second person. Recorded, with the remediation
-  it actually requires, in
+- **`main` has no review requirement at all.** Branch protection is enabled —
+  required checks on Node 20/22 plus four-path producer conformance, strict
+  up-to-date branches, dismissed stale approvals, conversation resolution, and no
+  force-push or deletion. But **no reviewer of any kind is required**:
+  `required_approving_review_count` is `0`, `require_code_owner_reviews` is
+  `false`, and as of 2026-08-13 no review status context is required either. CI
+  correctness and conversation resolution are the whole gate. Administrator
+  enforcement is also off, so the administrator can bypass even that.
+
+  This is stronger than "no *independent* review": a change to the schema, the
+  guards or the governance documents can reach `main` without any second party,
+  human or automated, having looked at it. Every path in
+  [`.github/CODEOWNERS`](./.github/CODEOWNERS) is owned solely by `@qmarcelle`,
+  who authors the changes, so CODEOWNERS routes ownership but gates nothing.
+  Recorded, with what it would actually take to fix, in
   [`docs/repository-settings.md`](./docs/repository-settings.md).
 
 ## License
