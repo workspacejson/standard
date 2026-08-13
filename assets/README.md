@@ -56,14 +56,22 @@ reference that would break the moment its visibility or default branch changed.
 Vendoring them removes that dependency. The images are referenced by
 repository-relative path, which GitHub resolves directly.
 
-**Known limitation.** npm resolves relative image paths in a README against the
-`repository` field of the package manifest. That resolution requires the
-repository to be publicly readable. Until this repository's visibility changes —
-a separate authority action — the lockup will not render on the npm package
-pages, though it renders correctly on GitHub. This is recorded rather than
-worked around, because the alternatives are worse: an absolute URL to a frozen
-repository reintroduces the dependency, and a URL to this repository resolves to
-nothing while it is private.
+**Unverified, not broken.** npm resolves relative image paths in a README
+against the `repository` field of the package manifest, which requires the
+repository to be publicly readable. `workspacejson/standard` is public, so that
+precondition holds and both manifests point here with a `directory` of their own
+package.
+
+What cannot be claimed yet is that it works, because no release has been
+published from this repository. The published `0.4.4` of both packages was
+released from the historical repository, and its README carries an absolute
+`raw.githubusercontent.com` URL rather than these relative paths — so the
+package pages currently render the lockup by a route this repository does not
+control and will not use. Whether the relative form resolves is a question the
+first release published from here will answer.
+
+Recorded this way rather than as a limitation, because the visibility blocker
+that made it one is gone.
 
 These assets are not included in either package tarball. Neither package's
 `files` list covers `assets`, so they add nothing to published package weight.
