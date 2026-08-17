@@ -102,12 +102,14 @@ export function computeHygieneScore(
   const coveredFiles = new Set(
     findings.filter((f) => f.evidence.file).map((f) => f.evidence.file!),
   );
-  const coverageRatio =
-    totalRepoFiles === undefined
-      ? undefined
-      : totalRepoFiles > 0
-        ? coveredFiles.size / totalRepoFiles
-        : 0;
+  // Left `undefined` unless a denominator was actually supplied. Written as a
+  // guard rather than a nested conditional so that the three states — not
+  // measured, measured as zero, measured as a ratio — are each visible on their
+  // own line.
+  let coverageRatio: number | undefined;
+  if (totalRepoFiles !== undefined) {
+    coverageRatio = totalRepoFiles > 0 ? coveredFiles.size / totalRepoFiles : 0;
+  }
 
   return { value, grade, breakdown, coverageRatio };
 }
