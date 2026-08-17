@@ -10,13 +10,28 @@ during calibration.
 
 ### Greptile
 
-- **Role**: hard automated status gate (once proven).
+- **Role**: none. Not a merge requirement of any kind. Retained as
+  defense-in-depth for whenever it can run again.
 - **Config**: `.greptile/config.json` with `statusCheck: true`, `strictness: 1`,
   `triggerOnDrafts: true`, `triggerOnUpdates: true`, and 12 structured rules.
-- **Current state**: did not run on PR #28. The Greptile GitHub app is likely
-  not installed on this repository. This is **absence**, not a failed review.
-- **Promotion path**: once the app is installed and the status check is observed
-  firing and blocking, add `Greptile` as a required GitHub status check.
+  Kept deliberately — the rules are correct and cost nothing while dormant.
+- **Current state**: **the trial account's 50-credit limit is exhausted.** The
+  app *is* installed on the organization and does respond: it posts a
+  credit-limit notice in place of a review and emits **no check run at all**.
+  Observed on PR #37 (2026-08-13) and again on PR #42, where it posted the quota
+  notice twice and produced zero check runs.
+
+  An earlier revision of this document recorded the cause as "the Greptile
+  GitHub app is likely not installed." That was wrong, and the distinction
+  matters: an uninstalled app is a setup gap, while an exhausted quota is a
+  reviewer that answers and says nothing. A quota notice is never recorded as a
+  pass.
+- **Promotion path**: closed until the plan is upgraded. `Greptile Review` was
+  briefly a required status context and was **removed on 2026-08-13**, because a
+  required context that nothing can produce blocks every merge. Re-admitting it
+  requires paid credits *and* fresh calibration evidence on the same terms as
+  before. See [`docs/repository-settings.md`](../docs/repository-settings.md),
+  which is authoritative for the settings state.
 
 ### Sourcery
 
@@ -53,8 +68,10 @@ These are the exact check names that GitHub branch protection requires on `main`
 | `test (20)` | `ci.yml` job `test` matrix Node 20 | Existing, preserved |
 | `test (22)` | `ci.yml` job `test` matrix Node 22 | Existing, preserved |
 | `Four-path producer conformance` | `ci.yml` job `producer-conformance` | Existing, preserved |
-| `Greptile` | Greptile status check (`.greptile/config.json` `statusCheck: true`) | **Planned** (not yet required) |
-| `Sourcery` | Sourcery review completion | **Review-protocol gate** (not a GitHub check yet) |
+| `Greptile` | Greptile status check (`.greptile/config.json` `statusCheck: true`) | **Withdrawn 2026-08-13** — trial credits exhausted; emits no check run |
+| `Sourcery` | Sourcery review completion | **Not required.** Promotion needs its own calibration evidence |
+
+Verified against branch protection rather than assumed — `GET /repos/workspacejson/standard/branches/main/protection` returns exactly the three required contexts above.
 
 ## Branch protection settings
 
@@ -67,7 +84,7 @@ These are the exact check names that GitHub branch protection requires on `main`
 | Require conversation resolution | yes | Existing, preserved |
 | Block force pushes | yes | Existing, preserved |
 | Block branch deletion | yes | Existing, preserved |
-| Require code owner review | **currently required**; to be disabled after Greptile gate is demonstrated | See sole-code-owner deadlock below |
+| Require code owner review | **disabled** (`require_code_owner_reviews: false`) | Was required; disabled after the Greptile gate was withdrawn. See below |
 | Enforce for administrators | **no** during initial calibration | Retain admin bypass as exceptional recovery path |
 | Squash merge only | yes | Existing, preserved |
 
@@ -86,56 +103,73 @@ No combination of these controls results in a change being reviewed by someone
 other than its author. The admin bypass is the only merge path, which makes the
 protection advisory in practice.
 
-### Remediation
+### Remediation — attempted, and the outcome is worse than intended
 
-Adding Greptile as a required status check creates an **enforceable independent
-gate** that does not depend on a second human reviewer. The remediation
-sequence is:
+This section previously proposed a three-step sequence premised on Greptile
+becoming the enforceable independent gate. **Both of its first two steps have
+already executed, and the result is that no reviewer requirement remains.**
+Recorded as history rather than restated as a plan.
 
-1. **Add Greptile as a required status check** and demonstrate it fires and
-   blocks a merge before proceeding.
-2. **Then disable required code-owner approval**, since it cannot be satisfied
-   by the sole code owner who authors all changes.
-3. **Do not enable `enforce_admins` during initial calibration.** Retain admin
-   bypass as an exceptional, recorded recovery path until Greptile reliability
-   has been observed. Revisit after calibration.
+1. *Greptile as a required status check* — added, then **removed on
+   2026-08-13** when the trial credits ran out. It satisfied the mechanical
+   half of a gate (a matchable current-head context) only while credits lasted.
+2. *Disabling required code-owner approval* — done.
+   `require_code_owner_reviews` is `false`.
+3. *`enforce_admins`* — remains **off**. It was left off as a recorded recovery
+   path during Greptile calibration; with no required reviewer left, it is now a
+   second way an unreviewed change reaches `main` rather than a backstop behind
+   one.
 
-### Interim governance model
+[`docs/repository-settings.md`](../docs/repository-settings.md) is authoritative
+for this and states the re-admission bar: a review gate requires **both** a
+substantive review of the current pull-request head **and** a mechanically
+enforceable current-head signal that branch protection can match. Neither
+reviewer currently supplies both.
 
-For a sole-steward repository, the honest interim model is:
+### Actual governance model
+
+For a sole-steward repository with no funded automated reviewer, the honest
+statement is:
 
 ```
 CODEOWNERS
     -> ownership/routing signal (not a merge gate)
 
-Required Greptile review
-+ Sourcery review-completion gate
-+ current-head CI
+current-head required CI
 + conversation resolution
 + normative governance tests
++ the release-boundary gates in release.yml
     -> merge authorization
+
+(no reviewer requirement of any kind since 2026-08-13)
 ```
 
-When a genuine second standard maintainer exists, restore required code-owner
-approval.
+Sourcery and Greptile are defense-in-depth, not authorization. Sourcery does
+emit a `Sourcery review` check run associated with the current head, which is
+the mechanical half the re-admission bar asks for — but promoting it is a
+separate decision requiring its own calibration evidence, on the same terms
+Greptile was held to, and is deliberately not taken here.
+
+When a genuine second maintainer exists, restore required code-owner approval
+and enable administrator enforcement.
 
 ### Acceptance cases
 
 > Branch protection must not require an approval that the repository's
-> legitimate maintainer cannot produce. Until a second independent code owner
-> exists, CODEOWNERS remains authoritative for ownership/routing but required
-> code-owner approval is disabled; automated review (Greptile), current-head
-> required checks, and conversation resolution provide the enforced merge
-> gate. Admin bypass is exceptional and recorded.
+> legitimate maintainer cannot produce — and must not require a check that no
+> installed app can emit. Until a second independent code owner exists,
+> CODEOWNERS remains authoritative for ownership/routing but required
+> code-owner approval is disabled; current-head required checks and
+> conversation resolution provide the enforced merge gate. Admin bypass is
+> exceptional and recorded.
 
-> **Independent reviewer completion:** Greptile and Sourcery reviews must both
-> complete against the current PR head before merge. Greptile is the required
-> automated status gate. Sourcery begins as a mandatory review-protocol gate:
-> substantive findings must be resolved or explicitly dispositioned;
-> advisory/cosmetic findings may be dispositioned without code changes. During
-> calibration, determine whether Sourcery exposes a reliable current-head
-> GitHub status suitable for branch protection or whether a dedicated CI
-> `--check` job is warranted.
+> **Reviewer findings, when a reviewer does run:** substantive findings must be
+> resolved or explicitly dispositioned; advisory or cosmetic findings may be
+> dispositioned without code changes. This applies to whichever reviewer
+> actually produced output, and is a discipline about handling findings rather
+> than a merge gate — neither reviewer is required. A quota notice, a
+> Reviewer's Guide, or a summary is not a review and is never dispositioned as
+> one.
 
 ## Agent merge protocol
 
@@ -144,11 +178,13 @@ Before any merge to `main`, an agent must:
 1. **Required CI is green on the current head.** Verify all required status
    checks are passing on the current head commit, not just the commit the PR
    was opened with.
-2. **Greptile has completed review of the current head.** Do not merge while
-   the Greptile review is pending. A green test suite is not merge
-   authorization.
-3. **Sourcery has completed an explicitly requested review of the current
-   head; a guide or summary alone does not count.**
+2. **Do not wait on Greptile.** It cannot complete: the trial credits are
+   exhausted, so it posts a quota notice and emits no check run. Waiting on it
+   is an indefinite block, and treating its notice as a pass is worse.
+3. **Read whatever reviewer output does exist** on the current head — Sourcery,
+   Copilot, Socket, SonarCloud — and reconcile it per step 4. None of them
+   authorizes the merge; a green test suite does not either. On this repository
+   merge authorization is the steward's, exercised against the gates below.
 4. **Every actionable reviewer finding has been individually reconciled:**
    - substantive -> fixed or explicit technical disposition;
    - cosmetic/advisory -> explicit disposition is sufficient.
@@ -170,8 +206,10 @@ Before any merge to `main`, an agent must:
 The following settings are not controllable from repository files and must be
 configured in the respective dashboard or GitHub repository settings:
 
-- Greptile organization/repository connection (Greptile dashboard)
-- Greptile API token and webhook configuration (Greptile dashboard)
+- Greptile organization/repository connection (Greptile dashboard) — connected,
+  but the account's trial credits are exhausted, so no review is produced
+- Greptile plan/credits (Greptile dashboard) — the only thing that would make
+  the `.greptile/` rules run again
 - Sourcery organization/repository connection (Sourcery dashboard)
 - GitHub branch protection ruleset (GitHub repository settings or API)
 
