@@ -287,7 +287,19 @@ describe('schema identity invariants', () => {
   it('CHANGELOG top version header matches package.json version', () => {
     const changelog = readFileSync(CHANGELOG_PATH, 'utf8');
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8')) as Record<string, unknown>;
-    const match = changelog.match(/^## \[(\d+\.\d+\.\d+)\]/m);
+    // Changesets writes a bare `## <version>` heading, and step 6 of
+    // `scripts/verify-release-identity.mjs` requires exactly that form before a
+    // release may be tagged. This assertion previously required the
+    // hand-written Keep-a-Changelog form `## [<version>]`, which meant the two
+    // gates could not both be satisfied by the same file — whichever form the
+    // changelog carried, one of them failed. Matching the release gate is what
+    // makes them agree.
+    //
+    // Only the top heading is inspected. The bracketed entries below it are
+    // historical, pre-Changesets, and are deliberately not matched: a bracketed
+    // heading at the top would now yield no match at all, which is the correct
+    // failure — it says the released version was not versioned by Changesets.
+    const match = changelog.match(/^## (\d+\.\d+\.\d+)\s*$/m);
     expect(match).not.toBeNull();
     expect(match![1]).toBe(pkg['version']);
   });
