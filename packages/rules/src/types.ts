@@ -220,6 +220,11 @@ export interface VrekoContext {
 
 // ─── Section 8: Score + Audit ─────────────────────────────────────────────────
 
+/**
+ * @deprecated Scheduled for removal at the next document-profile boundary, per
+ * ADR-003 amendment A-002. A letter grade is prescriptive, and this standard is
+ * descriptive. See `computeHygieneScore` for the migration.
+ */
 export interface HygieneScore {
   value: number;
   grade: 'A' | 'B' | 'C' | 'D' | 'F';
@@ -230,7 +235,14 @@ export interface HygieneScore {
     skipCount: number;
     previewCount: number;
   };
-  coverageRatio: number;
+  /**
+   * Unique files appearing in finding evidence, over the total file count.
+   *
+   * `undefined` when no total was supplied — "coverage was not measured" and
+   * "coverage was zero" are different claims, and reporting the first as `0`
+   * made an unmeasured scan indistinguishable from an uncovered one.
+   */
+  coverageRatio?: number | undefined;
 }
 
 // ─── Section 9: Keep ALL v0.1 types still needed downstream ──────────────────
@@ -306,7 +318,16 @@ export interface AuditConfig {
 
 export interface AuditResult {
   findings: Finding[];
-  score: HygieneScore;
+  /**
+   * @deprecated Follows `HygieneScore` out at the next document-profile
+   * boundary, per ADR-003 amendment A-002.
+   *
+   * `null` when the scan observed nothing. The field is nullable rather than
+   * required so that a caller handed no evidence has somewhere truthful to put
+   * that — the previous non-nullable type left fabricating a perfect score as
+   * the only way to satisfy it.
+   */
+  score: HygieneScore | null;
   agentsMdPath: string;
   workspaceJsonFound: boolean;
   workspaceJsonStale: boolean;

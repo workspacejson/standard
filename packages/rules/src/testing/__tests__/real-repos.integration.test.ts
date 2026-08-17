@@ -44,8 +44,13 @@ describe('Real repo integration - workspace root', () => {
     const score = computeHygieneScore(findings);
 
     expect(durationMs).toBeLessThan(10_000);
-    expect(score.value).toBeGreaterThanOrEqual(0);
-    expect(score.value).toBeLessThanOrEqual(100);
+    // A real repository may legitimately produce no findings, and with no
+    // denominator supplied that is an unobserved scan rather than a perfect
+    // one. Assert the bounds only where there is a score to bound.
+    if (score !== null) {
+      expect(score.value).toBeGreaterThanOrEqual(0);
+      expect(score.value).toBeLessThanOrEqual(100);
+    }
 
     for (const finding of findings) {
       expect(finding.ruleId).toBeTruthy();
