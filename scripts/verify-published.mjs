@@ -62,9 +62,24 @@ const packages = [
 // immediate post-publish check has no way to tell "not actually published"
 // apart from "not visible here yet" and fails the Release workflow either
 // way — training everyone to ignore red, which is worse than no gate at all.
-const REGISTRY_PROPAGATION_RETRIES = 6;
+//
+// The budget is a DURATION, not an attempt count, because the attempt count is
+// exactly what drifted away from the sentence above it. Six attempts with a
+// linear five-second step is seventy-five seconds of waiting, which does not
+// cover "low minutes" and did not cover the 0.5.0 release: both packages were
+// published successfully at 00:05:31, the retries were exhausted at 00:06:48,
+// and the same script passed against the same registry minutes later. The
+// release was real; the receipt said otherwise.
+//
+// A count has to be mentally multiplied out before it can be compared to the
+// claim. A duration cannot silently disagree with it.
+const REGISTRY_PROPAGATION_BUDGET_MS = 10 * 60 * 1000;
 const REGISTRY_PROPAGATION_BASE_DELAY_MS = 5000;
+// Capped so the tail of a long wait stays responsive rather than sleeping for
+// minutes past the moment the package actually appears.
+const REGISTRY_PROPAGATION_MAX_DELAY_MS = 30000;
 const isRegistryPropagationLag = (stderr) => /\bE(TARGET|404)\b|No matching version found/.test(stderr ?? "");
+const seconds = (ms) => `${Math.round(ms / 1000)}s`;
 
 for (const pkg of packages) {
   const directory = mkdtempSync(join(tmpdir(), "workspacejson-registry-"));
@@ -80,7 +95,8 @@ for (const pkg of packages) {
 }
 
 async function installWithRetry(pkg, directory) {
-  for (let attempt = 1; attempt <= REGISTRY_PROPAGATION_RETRIES; attempt++) {
+  const startedAt = Date.now();
+  for (let attempt = 1; ; attempt++) {
     const result = spawnSync("npm", ["install", "--ignore-scripts", "--no-package-lock", `${pkg.name}@${version}`], {
       cwd: directory,
       encoding: "utf8",
@@ -88,16 +104,40 @@ async function installWithRetry(pkg, directory) {
     });
     if (result.status === 0) {
       process.stdout.write(result.stdout);
+      if (attempt > 1) {
+        console.log(`${pkg.name}@${version} became visible after ${seconds(Date.now() - startedAt)} (attempt ${attempt}).`);
+      }
       return;
     }
-    const lastAttempt = attempt === REGISTRY_PROPAGATION_RETRIES;
-    if (!isRegistryPropagationLag(result.stderr) || lastAttempt) {
+
+    const lag = isRegistryPropagationLag(result.stderr);
+    const elapsedMs = Date.now() - startedAt;
+    const exhausted = elapsedMs >= REGISTRY_PROPAGATION_BUDGET_MS;
+
+    if (!lag || exhausted) {
       process.stdout.write(result.stdout);
       process.stderr.write(result.stderr);
+      if (lag) {
+        // Say which of the two things this is, rather than leaving a reader to
+        // infer a failed publish from a failed lookup. They are not the same
+        // event and they need different responses.
+        console.error(
+          `\n${pkg.name}@${version} was still not visible after ${seconds(elapsedMs)}, which is the whole ` +
+            `${seconds(REGISTRY_PROPAGATION_BUDGET_MS)} propagation budget.\n` +
+            `This is NOT proof that publication failed. Check the registry directly before treating it as one:\n` +
+            `  npm view ${pkg.name} versions\n` +
+            `If ${version} is present, the package shipped and only this receipt is missing — re-run this script.\n` +
+            `If it is absent, the publish did not land and the release needs to be re-cut.`,
+        );
+      }
       process.exit(result.status ?? 1);
     }
-    const delayMs = REGISTRY_PROPAGATION_BASE_DELAY_MS * attempt;
-    console.log(`${pkg.name}@${version} not yet visible on the registry (attempt ${attempt}/${REGISTRY_PROPAGATION_RETRIES}) — retrying in ${delayMs}ms`);
+
+    const delayMs = Math.min(REGISTRY_PROPAGATION_BASE_DELAY_MS * attempt, REGISTRY_PROPAGATION_MAX_DELAY_MS);
+    console.log(
+      `${pkg.name}@${version} not yet visible on the registry ` +
+        `(attempt ${attempt}, ${seconds(elapsedMs)} of ${seconds(REGISTRY_PROPAGATION_BUDGET_MS)} elapsed) — retrying in ${delayMs}ms`,
+    );
     await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 }
