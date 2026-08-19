@@ -52,7 +52,7 @@ jobs:
             | tee "$RUNNER_TEMP/receipts-linux.json"
 
       - name: Upload receipts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: adr-006-receipts-linux
           path: ${{ runner.temp }}/receipts-linux.json
