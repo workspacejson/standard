@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the checkout idempotency-key format invalidates keys created before deployment. Retries of an existing order attempt after rollout will use a different key and may bypass prior idempotency protection, risking duplicate checkout/payment creation."
+  ],
+  "evidence": [
+    "`idempotencyKey` changes from `${orderId}:${attemptNumber}` to `${orderId}|${attemptNumber}` with no compatibility lookup or migration shown."
+  ],
+  "checked": [
+    "Idempotency-key continuity across the proposed format change."
+  ],
+  "gaps": [
+    "No evidence of a rollout strategy, dual-read compatibility, or confirmation that existing idempotency records are not relied on across deployments."
+  ]
+}

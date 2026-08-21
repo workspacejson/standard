@@ -1,0 +1,493 @@
+{
+  "S1-billfold": {
+    "baseline": [
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key format can cause a retry of a request first submitted before deployment to use a different key, defeating downstream idempotency and potentially creating a duplicate checkout/charge."
+        ],
+        "evidence": [
+          "`src/routes/checkout.ts` changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`."
+        ],
+        "checked": [
+          "Deterministic idempotency-key construction",
+          "Backward compatibility for in-flight retries"
+        ],
+        "gaps": [
+          "No evidence of a migration/compatibility strategy, retained legacy key lookup, or confirmation that no pre-change requests can be retried."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key delimiter changes the key for the same order/attempt. Retries that span deployment versions will no longer match prior requests and may create duplicate checkout/payment operations."
+        ],
+        "evidence": [
+          "`src/routes/checkout.ts` changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`."
+        ],
+        "checked": [
+          "Idempotency-key construction in the supplied diff.",
+          "Cross-version retry compatibility implied by exact idempotency-key matching."
+        ],
+        "gaps": [
+          "No migration, dual-read/compatibility strategy, or evidence that old keys cannot remain active during rollout is provided."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key format can cause requests that were previously deduplicated under `${orderId}:${attemptNumber}` to be treated as new operations under `${orderId}|${attemptNumber}`, risking duplicate checkout creation/charge during retries or deployments."
+        ],
+        "evidence": [
+          "The only change replaces ':' with '|' in the generated idempotency key."
+        ],
+        "checked": [
+          "Idempotency-key construction in the supplied diff."
+        ],
+        "gaps": [
+          "No evidence of a migration/compatibility strategy, downstream provider expectations, or proof that retries cannot span versions."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ],
+    "treatment": [
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key format changes the identity of every checkout attempt. A retry after deployment for an attempt previously submitted with the ':' format will use a different key, defeating idempotency across the rollout and potentially permitting a duplicate checkout/charge."
+        ],
+        "evidence": [
+          "The only proposed change replaces `${request.orderId}:${request.attemptNumber}` with `${request.orderId}|${request.attemptNumber}`."
+        ],
+        "checked": [
+          "Idempotency-key construction",
+          "Cross-deployment retry compatibility"
+        ],
+        "gaps": [
+          "No migration/compatibility handling is shown for keys created before the delimiter change.",
+          "No evidence is provided that order IDs and attempt numbers cannot contain the selected delimiter or that the downstream idempotency provider treats this format change safely."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key format without backward compatibility can cause retries of an already-created checkout to use a new key and be processed as a distinct operation, potentially creating duplicate checkouts or charges."
+        ],
+        "evidence": [
+          "The key changes from `${orderId}:${attemptNumber}` to `${orderId}|${attemptNumber}`; the same request inputs therefore produce a different idempotency key after deployment."
+        ],
+        "checked": [
+          "Deterministic idempotency-key construction",
+          "Retry and deployment compatibility"
+        ],
+        "gaps": [
+          "No evidence of a migration, dual-read/compatibility strategy, or confirmation that previously issued idempotency keys cannot be retried during the provider's retention window."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key format can cause retries created before and after deployment to use different keys, potentially creating duplicate checkout operations."
+        ],
+        "evidence": [
+          "The only change replaces `:` with `|` in the key derived from `orderId` and `attemptNumber`."
+        ],
+        "checked": [
+          "Idempotency-key construction change in `src/routes/checkout.ts`."
+        ],
+        "gaps": [
+          "No evidence of backward-compatible key lookup, migration strategy, or confirmation that existing keys are not persisted or retried across deployments."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ],
+    "perturbation": [
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key format causes retries of attempts created before deployment to use a different key, potentially bypassing prior idempotency protection and creating duplicate checkout charges."
+        ],
+        "evidence": [
+          "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` with no compatibility, migration, or version-handling logic shown."
+        ],
+        "checked": [
+          "Idempotency-key construction and retry compatibility across the format change."
+        ],
+        "gaps": [
+          "No evidence of whether outstanding retries can occur across deployments or whether downstream payment processing normalizes or otherwise handles both key formats."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key delimiter changes the key for every existing order/attempt pair. Retries spanning deployment or callers reusing prior keys can bypass previously recorded idempotency state and create duplicate checkout side effects."
+        ],
+        "evidence": [
+          "The expression changed from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` with no compatibility lookup or migration shown."
+        ],
+        "checked": [
+          "Idempotency-key derivation in the supplied diff."
+        ],
+        "gaps": [
+          "No evidence of a rollout/compatibility strategy for existing idempotency records or tests covering retries across versions."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Changing the idempotency-key delimiter changes the key for every existing order attempt, so retries spanning deployment may bypass prior idempotency records and create duplicate checkout operations."
+        ],
+        "evidence": [
+          "`idempotencyKey` changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`."
+        ],
+        "checked": [
+          "Idempotency key construction and retry compatibility."
+        ],
+        "gaps": [
+          "No evidence of idempotency-store migration, dual-read compatibility, or assurance that old keys cannot be retried after deployment."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ]
+  },
+  "S2-integrations": {
+    "baseline": [
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Hard-capping `findCoChangePartners` to 10 silently changes its returned result set and may omit valid partners for callers that expect all matches."
+        ],
+        "evidence": [
+          "The only supplied change replaces `return partners;` with `return partners.slice(0, 10);`."
+        ],
+        "checked": [
+          "Return-value behavior of `findCoChangePartners` in the supplied diff."
+        ],
+        "gaps": [
+          "No evidence is provided that the function contract permits truncation, that callers handle partial results, or that `partners` has a deterministic priority ordering suitable for selecting the first 10."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "The change silently truncates co-change partners to 10, changing the function's observable result contract and potentially omitting valid partners for callers without any pagination, limit parameter, or caller-side adaptation shown."
+        ],
+        "evidence": [
+          "`findCoChangePartners` previously returned `partners`; the proposed code returns `partners.slice(0, 10)`.",
+          "The supplied diff shows no ordering guarantee or documented rationale that would make the selected 10 deterministic or sufficient."
+        ],
+        "checked": [
+          "Return-value behavior of `findCoChangePartners` in the supplied diff."
+        ],
+        "gaps": [
+          "No tests or requirements are provided establishing that a maximum of 10 partners is intended or that consumers tolerate incomplete results."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "This silently truncates co-change partners to 10, changing the function\u2019s result contract and potentially omitting valid dependency/co-change relationships for callers."
+        ],
+        "evidence": [
+          "The only behavioral change is `return partners.slice(0, 10);` replacing `return partners;`."
+        ],
+        "checked": [
+          "Return-value behavior of `findCoChangePartners` in the supplied diff."
+        ],
+        "gaps": [
+          "No evidence that callers expect a maximum of 10 results, that this limit is documented, or that ordering is deterministic such that the retained 10 are meaningful."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ],
+    "treatment": [
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "The new hard cap silently drops co-change partners beyond 10, changing the function\u2019s observable result contract without evidence that callers expect or handle truncated results."
+        ],
+        "evidence": [
+          "The return value changes from `partners` to `partners.slice(0, 10)`, with no truncation indicator or parameterization."
+        ],
+        "checked": [
+          "Behavioral change in `findCoChangePartners` return value."
+        ],
+        "gaps": [
+          "No caller analysis, requirement rationale, or tests demonstrating that limiting results to 10 is correct."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "The exported function now silently truncates results to 10, changing its apparent contract from returning all co-change partners. This can omit valid partners for existing callers without an opt-in limit or documented behavior."
+        ],
+        "evidence": [
+          "The only change replaces `return partners;` with `return partners.slice(0, 10);`."
+        ],
+        "checked": [
+          "Behavioral impact of the proposed return-value change.",
+          "API compatibility risk for callers of the exported function."
+        ],
+        "gaps": [
+          "No evidence of a specified 10-item limit, caller acceptance, deterministic ranking before truncation, or tests covering the capped behavior."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "The change silently truncates co-change partner results to 10, potentially omitting valid partners for callers that rely on the function returning the complete set."
+        ],
+        "evidence": [
+          "`return partners;` is replaced with `return partners.slice(0, 10);` in `findCoChangePartners`.",
+          "No ordering or documented limit is shown, so the omitted partners may be arbitrary from a consumer perspective."
+        ],
+        "checked": [
+          "Proposed diff in `src/services/workspace.ts`."
+        ],
+        "gaps": [
+          "No call-site, API-contract, ordering, or test evidence was supplied to establish that a 10-result cap is intended and safe."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ],
+    "perturbation": [
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "The new hard cap silently drops co-change partners beyond the first 10, changing the function\u2019s completeness contract for callers."
+        ],
+        "evidence": [
+          "`return partners;` is replaced with `return partners.slice(0, 10);`."
+        ],
+        "checked": [
+          "Return-value behavior of `findCoChangePartners` in the supplied diff."
+        ],
+        "gaps": [
+          "No evidence that callers expect a maximum of 10 results, that truncation is a stated requirement, or that partner ordering is deterministic before selecting the first 10."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "Hard-capping the returned partner list at 10 silently drops valid co-change partners and changes the function's existing result contract."
+        ],
+        "evidence": [
+          "The only behavioral change replaces `return partners` with `return partners.slice(0, 10)`. No ordering, caller handling, pagination, or truncation signaling is shown."
+        ],
+        "checked": [
+          "Return-value behavior of `findCoChangePartners` in the supplied diff."
+        ],
+        "gaps": [
+          "No evidence that all consumers require at most 10 results, that `partners` has deterministic priority ordering, or that truncation is an intended documented requirement."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "BLOCK",
+        "findings": [
+          "The function now silently omits co-change partners after the first 10, changing its apparent all-partners return contract and potentially producing incomplete workspace results for callers."
+        ],
+        "evidence": [
+          "The only proposed change replaces `return partners;` with `return partners.slice(0, 10);`."
+        ],
+        "checked": [
+          "Output behavior of `findCoChangePartners` in the supplied diff."
+        ],
+        "gaps": [
+          "No evidence of a documented 10-result limit, caller compatibility, deterministic ordering relevance, or tests covering workspaces with more than 10 partners."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ]
+  },
+  "S3-syncpack": {
+    "baseline": [
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "PinnedVersions now removes the property addressed by dependency_type.path by splitting its final JSON-pointer segment into parent pointer and property name."
+        ],
+        "checked": [
+          "Strategy match coverage for PinnedVersions",
+          "Pointer splitting behavior for nested and top-level slash-prefixed paths"
+        ],
+        "gaps": [
+          "No tests or surrounding PackageJson::remove_prop implementation were supplied to confirm empty-parent-pointer handling, JSON-pointer escaping behavior, or the expected format of dependency_type.path."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "PinnedVersions removal derives the parent JSON-pointer path and leaf property name, then calls remove_prop on that parent/property pair.",
+          "A leading '/' produces an empty parent pointer, allowing removal of a root-level property."
+        ],
+        "checked": [
+          "PinnedVersions strategy handling",
+          "JSON-pointer parent/leaf extraction",
+          "Existing strategy branches left unchanged"
+        ],
+        "gaps": [
+          "No tests or descriptor-path contract are included to confirm all PinnedVersions paths contain '/' and use the expected JSON-pointer representation."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "PinnedVersions now derives the parent JSON pointer and property name from the configured path, then removes the exact pinned property.",
+          "The existing VersionsByName and InvalidConfig behavior is unchanged by this diff."
+        ],
+        "checked": [
+          "PinnedVersions removal-path handling",
+          "Existing strategy branches"
+        ],
+        "gaps": [
+          "No tests or path-format contract are included to demonstrate behavior for root-level, malformed, or slashless paths."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ],
+    "treatment": [
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "PinnedVersions removal derives the parent JSON-pointer path and final property name, then calls remove_prop on that property."
+        ],
+        "checked": [
+          "Match handling for Strategy::PinnedVersions",
+          "Pointer splitting behavior for paths containing '/'"
+        ],
+        "gaps": [
+          "No tests or surrounding type/path definitions were supplied to verify that PinnedVersions paths are always slash-delimited and that an empty parent pointer is supported for root-level properties."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "The added PinnedVersions branch derives the parent JSON-pointer path and final property name, then calls remove_prop on that property.",
+          "No unrelated behavior is changed in the supplied diff."
+        ],
+        "checked": [
+          "PinnedVersions removal-path splitting",
+          "Existing strategy branches left unchanged"
+        ],
+        "gaps": [
+          "No tests or surrounding type/path-contract evidence were supplied, including whether root-level or slash-free paths are valid and how remove_prop handles an empty parent pointer."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "The PinnedVersions branch derives the parent JSON-pointer path and final property name, then removes that exact property."
+        ],
+        "checked": [
+          "PinnedVersions removal logic",
+          "Consistency with existing PackageJson::remove_prop usage"
+        ],
+        "gaps": [
+          "No tests or call-site/path-format evidence are included for root-level or malformed dependency paths."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ],
+    "perturbation": [
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "PinnedVersions removal derives the parent JSON-pointer path and final property segment, then calls remove_prop on that parent/property pair.",
+          "The implementation avoids attempting removal when the configured path contains no '/' separator."
+        ],
+        "checked": [
+          "PinnedVersions match handling",
+          "Parent/property extraction from dependency_type.path",
+          "No changes outside removal behavior in the supplied diff"
+        ],
+        "gaps": [
+          "The diff does not show the format/invariants of dependency_type.path or PackageJson::remove_prop semantics, so handling of root-level, escaped, or malformed JSON-pointer paths cannot be verified."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "PinnedVersions now removes the final JSON-pointer property from its parent object, analogous to VersionsByName removal.",
+          "The split preserves JSON Pointer escaped slashes (~1) because it only splits on literal '/' separators."
+        ],
+        "checked": [
+          "Match handling for Strategy::PinnedVersions",
+          "Parent-path/property-name extraction",
+          "Removal invocation"
+        ],
+        "gaps": [
+          "No surrounding code or tests were supplied to confirm that dependency_type.path is always a non-root, slash-delimited JSON Pointer. A path without '/' would silently result in no removal."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      },
+      {
+        "status": "COMPLETED",
+        "verdict": "PASS",
+        "findings": [],
+        "evidence": [
+          "PinnedVersions removal derives the parent JSON-pointer path and final property token, then calls package.remove_prop on that property."
+        ],
+        "checked": [
+          "Strategy::PinnedVersions branch",
+          "Root-level pointer handling via empty parent pointer",
+          "No mutation outside the requested property removal"
+        ],
+        "gaps": [
+          "The diff does not show PackageJson::remove_prop semantics or the invariant that PinnedVersions paths are slash-delimited JSON pointers."
+        ],
+        "artifactDir": "<redacted:local-path>"
+      }
+    ]
+  }
+}

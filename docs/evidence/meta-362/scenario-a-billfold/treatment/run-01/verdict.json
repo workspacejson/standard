@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The diff changes only the idempotency-key delimiter from ':' to '|'.",
+    "No blocking issue is evident from the supplied diff alone."
+  ],
+  "checked": [
+    "Scoped change in src/routes/checkout.ts",
+    "Provided co-change context for src/webhooks/stripe.ts"
+  ],
+  "gaps": [
+    "No evidence was supplied showing whether persisted, externally consumed, or webhook-correlated idempotency keys require the ':' format.",
+    "The historically co-changed src/webhooks/stripe.ts was not included in the diff, so compatibility with that consumer cannot be verified."
+  ]
+}

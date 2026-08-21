@@ -1,0 +1,1751 @@
+{
+  "generatedAt": "2026-08-21T04:00:00Z",
+  "description": "M2A causal-review experiment evidence packet for META-362",
+  "provenance": {
+    "experiment": "META-362 / M2A Causal Review Proof",
+    "preregistration": {
+      "linearIssue": "META-367",
+      "linearUrl": "https://linear.app/marcelle-labs/issue/META-367",
+      "description": "Scenario preregistration and frozen run protocol"
+    },
+    "disposition": {
+      "linearIssue": "META-372",
+      "linearUrl": "https://linear.app/marcelle-labs/issue/META-372",
+      "classification": "NARROW",
+      "note": "Referenced Linear execution decision, not normative standard authority"
+    },
+    "reviewInstrument": {
+      "repository": "workspacejson/integrations",
+      "package": "@workspacejson/codex-mcp",
+      "version": "0.1.9",
+      "gitSHA": "3aa4531286ba8ebf8fa65bda3ac065fd66a86dab"
+    },
+    "model": {
+      "provider": "openrouter",
+      "model": "openai/gpt-5.6-terra",
+      "endpoint": "https://openrouter.ai/api/v1/responses",
+      "reasoningEffort": "high"
+    },
+    "scenarios": {
+      "scenario-a-billfold": {
+        "repository": "workspace-json/billfold",
+        "gitSHA": "0ff147b0333561107c5724f026454ec1afa38622",
+        "changedFile": "src/routes/checkout.ts",
+        "coChangePartner": "src/webhooks/stripe.ts",
+        "partnerSupport": 6,
+        "partnerOccurrences": 9
+      },
+      "scenario-b-integrations": {
+        "repository": "workspacejson/integrations",
+        "gitSHA": "3aa4531286ba8ebf8fa65bda3ac065fd66a86dab",
+        "changedFile": "src/services/workspace.ts",
+        "coChangePartner": "src/tools/workspace.ts",
+        "partnerSupport": 4,
+        "partnerOccurrences": 7
+      },
+      "scenario-c-syncpack": {
+        "repository": "JamieMason/syncpack",
+        "gitSHA": "958d30689ac24b60623258630242330bd6d0264b",
+        "changedFile": "src/instance.rs",
+        "coChangePartner": "src/version_group.rs",
+        "partnerSupport": 17,
+        "partnerOccurrences": 33
+      }
+    },
+    "acceptedRunCount": {
+      "scenarios": "3 scenarios x 3 arms x 3 runs = 27 accepted runs",
+      "degraded": "4 conditions x 3 runs = 12 accepted runs",
+      "preflight": "3 scenarios x 3 arms x 3 runs = 27 preflight/rejected runs (evidence not delivered)"
+    }
+  },
+  "files": [
+    {
+      "path": "RECEIPT.md",
+      "sha256": "56a5220ec28b421e26afda9d4995459e94d59c4a0f9c8cf60b8052b225e80232",
+      "size": 6796,
+      "role": "experiment receipt"
+    },
+    {
+      "path": "REDACTIONS.md",
+      "sha256": "493a0db6b3c93d0b108cb40b5062959060d8c95cd7a6cfdcdad71229f4b2c36c",
+      "size": 2412,
+      "role": "redaction log"
+    },
+    {
+      "path": "degraded-all-results.json",
+      "sha256": "129d403ddef6788644ec852a1754fae7bb51f959aa919f92b59b170f9d00f4ed",
+      "size": 10328,
+      "role": "aggregated degraded-evidence results"
+    },
+    {
+      "path": "scenario-all-results.json",
+      "sha256": "44512b6eac43202ee18c8fbab37284183c241f758f7e50e521d78ee4ec8a5c4e",
+      "size": 23775,
+      "role": "aggregated scenario results"
+    },
+    {
+      "path": "degraded-evidence/stale/run-03/receipt.json",
+      "sha256": "bd7dd9d9b4a5aea99e6a1be7fa5eac556e12502cb8d9ff405a7f3e98128c7be8",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-03/request.json",
+      "sha256": "02f99abd7de90ce1828c5e3dae984d52c0d33f006063779eccabce91c00e3b22",
+      "size": 2137,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-03/response.json",
+      "sha256": "be2e91b42eb2816d0b8b2a73f6cc28d2892258fed2faf30b3bfaddbfb0298a6b",
+      "size": 2635,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-03/verdict.json",
+      "sha256": "7dd195ad113a6e94d4b15cdd48c45409f5ab3c4425c78b57bdd004c27d3bf783",
+      "size": 708,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-02/receipt.json",
+      "sha256": "bd7dd9d9b4a5aea99e6a1be7fa5eac556e12502cb8d9ff405a7f3e98128c7be8",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-02/request.json",
+      "sha256": "02f99abd7de90ce1828c5e3dae984d52c0d33f006063779eccabce91c00e3b22",
+      "size": 2137,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-02/response.json",
+      "sha256": "069dc8d4a445c689fc6917da4688c271b53020b2336958dd9a8663533dfb720e",
+      "size": 6415,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-02/verdict.json",
+      "sha256": "224b19748101fd2859260ee6f722b49db6a7db6b4e143520233d15a53354570d",
+      "size": 1001,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-01/receipt.json",
+      "sha256": "bd7dd9d9b4a5aea99e6a1be7fa5eac556e12502cb8d9ff405a7f3e98128c7be8",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-01/request.json",
+      "sha256": "02f99abd7de90ce1828c5e3dae984d52c0d33f006063779eccabce91c00e3b22",
+      "size": 2137,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-01/response.json",
+      "sha256": "550722358b723225f17ddc5259ec89bf54751b4407106caa31f993c2a942bf7c",
+      "size": 2598,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/stale/run-01/verdict.json",
+      "sha256": "68f4537467b9fe8a61dcd7e8e69350440fca52b9e6bd006a1c02037876873643",
+      "size": 670,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-03/receipt.json",
+      "sha256": "e71c6a3343123bd65235600b0af545214bb48d868bd3c45b93554943d1f2df76",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-03/request.json",
+      "sha256": "652daaf9a37df1afe5c7dd68c10ce1143c0d78504c9d56a1a0a8b370857468cf",
+      "size": 2142,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-03/response.json",
+      "sha256": "f4c1c2a4f4f53930a09201e0a74b365332b64e8f31f80aa57283e608a6adc00c",
+      "size": 4849,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-03/verdict.json",
+      "sha256": "b14e4b1eda04556c912e35c28d810e914b3212aee2ca62571c4cc9522f210ee7",
+      "size": 574,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-02/receipt.json",
+      "sha256": "e71c6a3343123bd65235600b0af545214bb48d868bd3c45b93554943d1f2df76",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-02/request.json",
+      "sha256": "652daaf9a37df1afe5c7dd68c10ce1143c0d78504c9d56a1a0a8b370857468cf",
+      "size": 2142,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-02/response.json",
+      "sha256": "f866219b67cddb76d115189cf57e9b81552b03b6217a19e4a820a3abb8ee9428",
+      "size": 5529,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-02/verdict.json",
+      "sha256": "62d87e255459006f79403c3122bb32422a2f2ce9f9068c404d79289db24b34d8",
+      "size": 769,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-01/receipt.json",
+      "sha256": "e71c6a3343123bd65235600b0af545214bb48d868bd3c45b93554943d1f2df76",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-01/request.json",
+      "sha256": "652daaf9a37df1afe5c7dd68c10ce1143c0d78504c9d56a1a0a8b370857468cf",
+      "size": 2142,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-01/response.json",
+      "sha256": "4ff3875ec21038f92df7ad9154b839a315e337b86336b7ed019ce2897835bbb7",
+      "size": 5530,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/refused/run-01/verdict.json",
+      "sha256": "4ab1d2b70ce02e32f6485f99b0f6660d733ba5cb6ccf2b10fa78517c32b5e14d",
+      "size": 858,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-03/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-03/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-03/response.json",
+      "sha256": "76c839cc5bf9207940560b41baa557a7d9cc5d5437869f51bfb341afd36261cb",
+      "size": 5654,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-03/verdict.json",
+      "sha256": "80ce13d9a5e141e3a86b391e040ccac7382569569360039fa43def7f295b2a6d",
+      "size": 986,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-02/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-02/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-02/response.json",
+      "sha256": "e831b73c2dbe6b8d789091a125475d3b7c88a100108ae871ba8af764e84f237d",
+      "size": 4952,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-02/verdict.json",
+      "sha256": "56ab779ed284c0a17aab5cf8aa025f12fea8af6b115aef5f3cb8a239294157c1",
+      "size": 693,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-01/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-01/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-01/response.json",
+      "sha256": "4c7dfca82238b1a2a6fe87314c29ffb84ada92165904b93b9b7d53502cf57ea4",
+      "size": 5850,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/missing/run-01/verdict.json",
+      "sha256": "d828aca556aa1ef9a2ee0d4ad105de5f16fe20a0ac84fa4433e555b9e11f554f",
+      "size": 802,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-03/receipt.json",
+      "sha256": "72362019100548419b44894a6be464d690ef912fe06547622f30696f0c614267",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-03/request.json",
+      "sha256": "062a337cb81133fc3bcbc2f5250234cbcca014bf9b2f0643a9e8d5c434c3c278",
+      "size": 2205,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-03/response.json",
+      "sha256": "ab2ccad5265184c3df328f801cc1681a03bb2712d38fe12042665301ee43d090",
+      "size": 5563,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-03/verdict.json",
+      "sha256": "66ca7dae6d0ed0bec0679059d1d0cd9fa0c950d46294c1a12cd02582698a5918",
+      "size": 840,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-02/receipt.json",
+      "sha256": "72362019100548419b44894a6be464d690ef912fe06547622f30696f0c614267",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-02/request.json",
+      "sha256": "062a337cb81133fc3bcbc2f5250234cbcca014bf9b2f0643a9e8d5c434c3c278",
+      "size": 2205,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-02/response.json",
+      "sha256": "447b3c143626baab387abeb83ce1c9839d9e63d3e6c1024978a038de1fd37d16",
+      "size": 4859,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-02/verdict.json",
+      "sha256": "a5c349646fa2599a72be5cc519a12b68941ccf4dcd6516077abce50f981ee0fd",
+      "size": 599,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-01/receipt.json",
+      "sha256": "72362019100548419b44894a6be464d690ef912fe06547622f30696f0c614267",
+      "size": 257,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-01/request.json",
+      "sha256": "062a337cb81133fc3bcbc2f5250234cbcca014bf9b2f0643a9e8d5c434c3c278",
+      "size": 2205,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-01/response.json",
+      "sha256": "b3208a38cce45a0db327b83ab2df0677138e9eba550a5e179c99736b2345b58e",
+      "size": 5822,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "degraded-evidence/malformed/run-01/verdict.json",
+      "sha256": "bd958840d902a18a9938eb193e6269ce52c57a0b5974aad88b9651abaea20dc8",
+      "size": 897,
+      "role": "degraded-evidence run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-03/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-03/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-03/response.json",
+      "sha256": "05ba6aba48c77ea78b071bb12bb676e70369342eefcb485024831e6f1284b1fe",
+      "size": 4702,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-03/verdict.json",
+      "sha256": "cc32070afcc39046e9a0ca44a8efc18323919f35e07d8e08dcd243cef8da51f4",
+      "size": 471,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-02/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-02/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-02/response.json",
+      "sha256": "7c582173cb48add196e3875756d6fb8485bff9a2d8bb5c37216381ed1c768d51",
+      "size": 5837,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-02/verdict.json",
+      "sha256": "b20edcd41733f30abb666841542ac9a2dd0583ee9ea606b42235a9371e844d51",
+      "size": 997,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-01/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-01/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-01/response.json",
+      "sha256": "b55895df661613323d1554ef042a3b8411acb654ab1e99227ef26672ea68942e",
+      "size": 5764,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/baseline/run-01/verdict.json",
+      "sha256": "1315de174b2a04d6c389c63805fcce39834734d11925cb649f9ca770a891910f",
+      "size": 945,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-03/receipt.json",
+      "sha256": "8dc17d9f49e10d19755c12857f04d7ae2e16cb0b6e28d6eb99fc39456bd252a5",
+      "size": 257,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-03/request.json",
+      "sha256": "eeac2b866d167ae7659937920def12ece38b3132e78d05708bc4e6d6ff34182d",
+      "size": 2005,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-03/response.json",
+      "sha256": "95e1c3a807124557f021abd9864ea39c29ab84d43df441179ae45321120d0f0a",
+      "size": 2473,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-03/verdict.json",
+      "sha256": "e966af8e9cdcfbaf74509fcd62c93269454b5ac9fa8eae450f05ae350f4870cc",
+      "size": 558,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-02/receipt.json",
+      "sha256": "8dc17d9f49e10d19755c12857f04d7ae2e16cb0b6e28d6eb99fc39456bd252a5",
+      "size": 257,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-02/request.json",
+      "sha256": "eeac2b866d167ae7659937920def12ece38b3132e78d05708bc4e6d6ff34182d",
+      "size": 2005,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-02/response.json",
+      "sha256": "204ac93f5c139efe59b2641205f47ada64620ece38f097628cd03d0092d949cc",
+      "size": 5278,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-02/verdict.json",
+      "sha256": "3b9b1c47caff35dbdefedd9cad38d525882ba049298e4b54954547fe71a77c01",
+      "size": 893,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-01/receipt.json",
+      "sha256": "8dc17d9f49e10d19755c12857f04d7ae2e16cb0b6e28d6eb99fc39456bd252a5",
+      "size": 257,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-01/request.json",
+      "sha256": "eeac2b866d167ae7659937920def12ece38b3132e78d05708bc4e6d6ff34182d",
+      "size": 2005,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-01/response.json",
+      "sha256": "2de7b4bcb2910d7b6668b3031d3c90d13aa14b1f99f757b61ce18bd60310db59",
+      "size": 2443,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/perturbation/run-01/verdict.json",
+      "sha256": "87195b2caa588035f24433f45a6fdfbc5ef63e6923d9ba1fdc7665043669bd52",
+      "size": 528,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-03/receipt.json",
+      "sha256": "7bebeb2a43ec2ea61fc3912c6d7b0f66136b89f2b56e54b803f60da38fbd1048",
+      "size": 257,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-03/request.json",
+      "sha256": "3f1d4e96ebf3c9f0b55ed72b21892322943dd9db1f4597d48372786a544c57fd",
+      "size": 2137,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-03/response.json",
+      "sha256": "7d3d30ad9c36ef6cfab7dd665d1540e40dae16de0677fc5709597ee4eaefe7af",
+      "size": 5309,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-03/verdict.json",
+      "sha256": "8e115237a5a3cba156cc685d4e52acb4ece0517369aef1fc932db853d546e33d",
+      "size": 950,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-02/receipt.json",
+      "sha256": "7bebeb2a43ec2ea61fc3912c6d7b0f66136b89f2b56e54b803f60da38fbd1048",
+      "size": 257,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-02/request.json",
+      "sha256": "3f1d4e96ebf3c9f0b55ed72b21892322943dd9db1f4597d48372786a544c57fd",
+      "size": 2137,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-02/response.json",
+      "sha256": "acbcc5563db76312c75ba7367c7d6960e0df8dd4c53d346415bca396fcf7cbbe",
+      "size": 7726,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-02/verdict.json",
+      "sha256": "3b87f115bd76937248d49910d1dd32e2f24d7394c3a70280fc37385c8e6f96ab",
+      "size": 1086,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-01/receipt.json",
+      "sha256": "7bebeb2a43ec2ea61fc3912c6d7b0f66136b89f2b56e54b803f60da38fbd1048",
+      "size": 257,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-01/request.json",
+      "sha256": "3f1d4e96ebf3c9f0b55ed72b21892322943dd9db1f4597d48372786a544c57fd",
+      "size": 2137,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-01/response.json",
+      "sha256": "a1838d14cc6884320fec27d0fc8c033dab6b83414cf35ed2fb747a4bdd31db29",
+      "size": 2626,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-a-billfold/treatment/run-01/verdict.json",
+      "sha256": "8dafee70b397a3de04c1fe06f1fa8243a6d8483cb959ebefccb74fe967c245c9",
+      "size": 701,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-03/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-03/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-03/response.json",
+      "sha256": "bd01c57e2d9c0cbad9ecfd60a7e61704ed24778bdf87f44ae35bc50d29616a00",
+      "size": 5614,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-03/verdict.json",
+      "sha256": "6032ca50426c3c96fabf46aee7bfdf5f2b234144b68791c52f6cc01be6c814ff",
+      "size": 693,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-02/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-02/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-02/response.json",
+      "sha256": "b80e23775b7f6a576e7b3033a7ea5381fadaffd2c2b2c7c5bb81572ae5880228",
+      "size": 17677,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-02/verdict.json",
+      "sha256": "55bf44c63e157e10442d0d8c51c10b928a0ae2c6101cbff8bdd5b84b7710ba0e",
+      "size": 967,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-01/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-01/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-01/response.json",
+      "sha256": "7059d19f4510d99210b657ff0efd56f73dc938c456a69db6834ac5b21127cdf8",
+      "size": 7810,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/baseline/run-01/verdict.json",
+      "sha256": "7d896af9602e0aaf2faaba49a960765307fc056edd0dc569c33526ef7b2b4ed7",
+      "size": 862,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-03/receipt.json",
+      "sha256": "82c1a3f7c06ffab9117ea7590dc0c39f6cd9219afa44e98b46ea3a6580df266d",
+      "size": 250,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-03/request.json",
+      "sha256": "f4921476c7760d216cb71cad02dd67fbb305264b61e9ea96613e92577259f4f2",
+      "size": 2533,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-03/response.json",
+      "sha256": "9be040efcb034574e184cd513349e24a38e0d56e4ffa9aed6d018cb37eb41770",
+      "size": 7333,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-03/verdict.json",
+      "sha256": "4d98ec745b16bdc67844cb5ee75847793c902b6c708d62454a513b546f10eb41",
+      "size": 713,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-02/receipt.json",
+      "sha256": "82c1a3f7c06ffab9117ea7590dc0c39f6cd9219afa44e98b46ea3a6580df266d",
+      "size": 250,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-02/request.json",
+      "sha256": "f4921476c7760d216cb71cad02dd67fbb305264b61e9ea96613e92577259f4f2",
+      "size": 2533,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-02/response.json",
+      "sha256": "8c0c0543a5607ef48500235f5585810dcc4ce110ce12c6ef3906351196425275",
+      "size": 7394,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-02/verdict.json",
+      "sha256": "ddcccef1d1d23403a2416ee44e9bc0592c8e29441d402de1381c092d48db5fb4",
+      "size": 639,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-01/receipt.json",
+      "sha256": "82c1a3f7c06ffab9117ea7590dc0c39f6cd9219afa44e98b46ea3a6580df266d",
+      "size": 250,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-01/request.json",
+      "sha256": "f4921476c7760d216cb71cad02dd67fbb305264b61e9ea96613e92577259f4f2",
+      "size": 2533,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-01/response.json",
+      "sha256": "82e836016191860b2f2e7367072b46a305b150d35f34e2ee21a1d2b0dd0f4ba4",
+      "size": 7801,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/perturbation/run-01/verdict.json",
+      "sha256": "eccdbb4a8b0c13c3c7048771dca1092dcd4daaa213bf5aa0677de898c1d851f7",
+      "size": 578,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-03/receipt.json",
+      "sha256": "7355496ee1c6fd1acda390964675a742161673df5197612a1fd5ba637c768265",
+      "size": 250,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-03/request.json",
+      "sha256": "3182b2976f9aff9f2b827dfdf7c499d4616294c7c3870071e1ffc2997e7d70b9",
+      "size": 2607,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-03/response.json",
+      "sha256": "20ca00405f033cf6134d5dfcba73d946e0557454ed1ed21b65bb572c7b4cc865",
+      "size": 12345,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-03/verdict.json",
+      "sha256": "c2b0c864fe5b9f886b137194535244440a1a053e68f0c67285bce84ff831eeae",
+      "size": 1056,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-02/receipt.json",
+      "sha256": "7355496ee1c6fd1acda390964675a742161673df5197612a1fd5ba637c768265",
+      "size": 250,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-02/request.json",
+      "sha256": "3182b2976f9aff9f2b827dfdf7c499d4616294c7c3870071e1ffc2997e7d70b9",
+      "size": 2607,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-02/response.json",
+      "sha256": "c8c949f40fd6aaea20e87bc1bb3138ec15a862f243ab6c22def5f59db25fa000",
+      "size": 10172,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-02/verdict.json",
+      "sha256": "babdbaf8ca5cada7fc05597873d65de022184d9cb682ae426066376da41e3a62",
+      "size": 692,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-01/receipt.json",
+      "sha256": "7355496ee1c6fd1acda390964675a742161673df5197612a1fd5ba637c768265",
+      "size": 250,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-01/request.json",
+      "sha256": "3182b2976f9aff9f2b827dfdf7c499d4616294c7c3870071e1ffc2997e7d70b9",
+      "size": 2607,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-01/response.json",
+      "sha256": "2810dea8aeacc235c8216bb9a8f339342d62a5753ac8d0e4a1949d309ac682c7",
+      "size": 7614,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-c-syncpack/treatment/run-01/verdict.json",
+      "sha256": "4f37a59ee251b140cba9ebe3192abb6269dece9c52072ea7d3a584c3680bbbad",
+      "size": 774,
+      "role": "treatment run"
+    },
+    {
+      "path": "protocol/run-degraded.mjs",
+      "sha256": "c11cf08ae2d9ec7da2ce656f4dad49fbb40b7a287f1923b86dd4fa0e2fd8de20",
+      "size": 3625,
+      "role": "runner script"
+    },
+    {
+      "path": "protocol/run-scenarios-preflight.mjs",
+      "sha256": "b37781f5713d85a2ecf6138954affc8953a6f4332397385bfb8ff08f5d97b08c",
+      "size": 5803,
+      "role": "runner script"
+    },
+    {
+      "path": "protocol/run-scenarios-v2.mjs",
+      "sha256": "97c68a5927f6c26095ef5bd0b559e6fc26c94e27bac63ba205849d79d79ae4cf",
+      "size": 8493,
+      "role": "runner script"
+    },
+    {
+      "path": "protocol/diffs/scenario-a-billfold-baseline.diff",
+      "sha256": "c347c0d0368b06fc0b3643e45274c6a1d5df3bd8cd30700d738a61864e9616b6",
+      "size": 340,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-a-billfold-perturbation.txt",
+      "sha256": "fe73f8c7eedc40856fcc3c1cc4cd2a699fdb36c067825fcbf74652a2da6f96bc",
+      "size": 473,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-a-billfold-treatment.txt",
+      "sha256": "ce24a71a068ac67c180c2b00ba5d5f02dd596e6ce2f8fe43febb4fba73548ac1",
+      "size": 603,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-b-integrations-baseline.diff",
+      "sha256": "5f6089dfac693d145f6afd870fe17c8457c5f18bc1dc000332528e5ca373e547",
+      "size": 292,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-b-integrations-perturbation.txt",
+      "sha256": "f161fdffb52de8a233b3282afdedd82d27ccf9657f24cb507a53be4e3cf4962e",
+      "size": 480,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-b-integrations-treatment.txt",
+      "sha256": "98f68df92d87c4201d0f3c0884247db0bc3aba09a1529d68d139ef6820e33aaa",
+      "size": 555,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-c-syncpack-baseline.diff",
+      "sha256": "0c4dfb43f2c3213b0296e53eb1d497f1ed3dd199a30e7d7e2345fb08ca72d553",
+      "size": 743,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-c-syncpack-perturbation.txt",
+      "sha256": "89dc60fc80acc5f08f48720dad393b00cbdee944278fc1031525f9e8492b451f",
+      "size": 988,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "protocol/diffs/scenario-c-syncpack-treatment.txt",
+      "sha256": "6401ed15eb71d65db978836ddd932895a875a3b33fd7b8a75bca50688a909864",
+      "size": 1061,
+      "role": "registered diff/evidence payload"
+    },
+    {
+      "path": "preflight-rejected/all-results.json",
+      "sha256": "bbe228328c57ef0803020b9d7cc657b7a77123c8262a9a2e417634569e34a508",
+      "size": 22573,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-03/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-03/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-03/response.json",
+      "sha256": "d97c78d3772b8cabc6dc0328c457bfc84a0b2d7ad66f62a966eb5d59c23f27a4",
+      "size": 5028,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-03/verdict.json",
+      "sha256": "78728b9af8fa57e8d4891417afec444a78a3ed6a6417a58172e4c8645ce9afe3",
+      "size": 715,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-02/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-02/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-02/response.json",
+      "sha256": "b3f29985527177672ee7001ae4f81e276d6739743559b584758919238430bc5c",
+      "size": 5475,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-02/verdict.json",
+      "sha256": "b2ab97221548b12491b2db84b0b46aeb4f082600583867dafd5fdb327144c30d",
+      "size": 793,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-01/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-01/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-01/response.json",
+      "sha256": "f2cd5aaa097ed0656de05f0d4197f7a2a4344b0ffe44beaee73ce26e61b57e93",
+      "size": 6075,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/baseline/run-01/verdict.json",
+      "sha256": "c885653d07c513aad37bb6598727847c44e100ca7f480d939984313db3589625",
+      "size": 770,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-03/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-03/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-03/response.json",
+      "sha256": "52c67254bbb9e530b0775e5d417b420e8ab4eafcf74c65fd8475961d2dd03168",
+      "size": 4987,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-03/verdict.json",
+      "sha256": "db28e580de040298823bcc8506c7724573f3c81da0be743d3e480b2b69a713bc",
+      "size": 706,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-02/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-02/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-02/response.json",
+      "sha256": "5ba4bbcf9ce45650aaf17d78a0266bedad9d75e397e63a2189389ec867951a7a",
+      "size": 6376,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-02/verdict.json",
+      "sha256": "e7b1ad9800db4f2c32f3259503845e30453987fcc11a6a90a17227830b6e5509",
+      "size": 785,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-01/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-01/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-01/response.json",
+      "sha256": "b4b9698cf40158cdd1b8f65de9cc90c31c1637e1491d41c1a19a76e1dfd32d00",
+      "size": 5755,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/perturbation/run-01/verdict.json",
+      "sha256": "64022403a004ce6dae3bf7f7d5485f78354eddb20da5d2e4058fa71373c26bdf",
+      "size": 825,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-03/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-03/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-03/response.json",
+      "sha256": "7e2dc690ee496c4f92a960f10595a5a29818701d863624e6c3ae7e2f6292cb52",
+      "size": 4778,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-03/verdict.json",
+      "sha256": "1bf996a4348d357d16729923fb4a80d2ced00beb9c4629b73a5e95a5465be065",
+      "size": 669,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-02/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-02/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-02/response.json",
+      "sha256": "13f413d16af712767bf9345b737350a6fc4f979fb1dbe2306b2e9f6dc416de20",
+      "size": 5959,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-02/verdict.json",
+      "sha256": "660fce95c6cdf90726c79320fd9dfe95134a1e5c63ba8ba4d1df00cdff5a7b55",
+      "size": 857,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-01/receipt.json",
+      "sha256": "ba94ac24c1ac9b33a409cb4c7c7abd55c9c9ea0e2058b06fd76766f275376412",
+      "size": 257,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-01/request.json",
+      "sha256": "c56c65c1a992b3930d95435274dea31da7bdb69b7ff01d7d80c6aa23025e2c97",
+      "size": 1870,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-01/response.json",
+      "sha256": "7710b42c5186e73c1321d23396ae0b64ec880339c2930258175d858f6faad6cb",
+      "size": 6325,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-a-billfold/treatment/run-01/verdict.json",
+      "sha256": "1458b2e88511b79ad29846bd6bea4a6243828600c913bf7570ccbb6b5c29a05d",
+      "size": 961,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-03/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-03/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-03/response.json",
+      "sha256": "44af34d156fb92066cc0b841d5ceed4dc0b86db8c24963f5c1c56ae97cbed035",
+      "size": 6443,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-03/verdict.json",
+      "sha256": "8cc468369b7a9e4036617817d6bae7dbd76b74ae1bb06f2ece40d1db28ce3428",
+      "size": 597,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-02/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-02/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-02/response.json",
+      "sha256": "bce8d44505edd343b57877dc39a14404ca55047fc6c71d816b99b0c974d2f28d",
+      "size": 6147,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-02/verdict.json",
+      "sha256": "09fb96e9bc60b6331435615ecd4ee630a1e732c73279920dbec62ef3fb5e3552",
+      "size": 693,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-01/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-01/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-01/response.json",
+      "sha256": "e1e6312d9876d1229df9bd23686d981747e9aa5d7c76536b02ee692be0814c46",
+      "size": 7874,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/baseline/run-01/verdict.json",
+      "sha256": "c3945282a48df7beebf2ec7d79f33d130fd6ca454185db0e253549a5334095ca",
+      "size": 665,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-03/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-03/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-03/response.json",
+      "sha256": "09f8f06f8f4979a13e4865546e63811bde6748ac5925b6ba72cb226c67f24e29",
+      "size": 7480,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-03/verdict.json",
+      "sha256": "8f92d9251eaf64482e3fafec5b1f105f8454a170311d6c8cf1ccd4c28de140ec",
+      "size": 606,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-02/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-02/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-02/response.json",
+      "sha256": "3cc108e5f6ff668ae3bc82e68e3eb5075ef1e7b78d5b15fea2018c4fbbb26511",
+      "size": 7647,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-02/verdict.json",
+      "sha256": "57b6b84f28f31a6f0264963548dcfad47bd1b6de590ee2516a644475adce8dbc",
+      "size": 718,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-01/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-01/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-01/response.json",
+      "sha256": "ae126977abb9bbec357bf0cbd5726e93f5f817bd9f5cccf18e93d83a61690d53",
+      "size": 6531,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/perturbation/run-01/verdict.json",
+      "sha256": "da46dc4b005ea4b2e959cbafa5db98da2ed6d5f0621da49cf2edb59a3dd6ff19",
+      "size": 780,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-03/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-03/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-03/response.json",
+      "sha256": "ba542097d3e7189ba06cd09d62c5ae4b967997085db0c254ea9dca35971f5c32",
+      "size": 6930,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-03/verdict.json",
+      "sha256": "2399cb5596387efcefae3d257ba0cfe69954949ea3569cbfdd076b004052ebc3",
+      "size": 502,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-02/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-02/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-02/response.json",
+      "sha256": "a8b937d030a13a6cdb29eafd2268f626cfe9e46f8ed9358d4f002007c1299a43",
+      "size": 7505,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-02/verdict.json",
+      "sha256": "97790419025a829718e5c458be2b396752ad5adb4e347cb70f953e98edb5647b",
+      "size": 648,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-01/receipt.json",
+      "sha256": "aeb792e7c8ea58716fbd7ee1c45d661b1bd06599dc30b886546c7fa965af1061",
+      "size": 250,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-01/request.json",
+      "sha256": "d0d2f98b9718651c004531491cfa875547a5a031f19f6edb6a1f54cbd48405d3",
+      "size": 2284,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-01/response.json",
+      "sha256": "6dabc9c61d3e08355a9482af9125539955d39e00c6041329dc9c9ceb3d88016d",
+      "size": 6369,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-c-syncpack/treatment/run-01/verdict.json",
+      "sha256": "9c3ca617b8607b8423106c9a414acaf04682efe62d788d0a859fe7a271f19d64",
+      "size": 610,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-03/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-03/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-03/response.json",
+      "sha256": "ce79ef594ecd7c60d0c57d03b0909274dff64e69ee6e6d2ac57dcccdec0922ea",
+      "size": 4831,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-03/verdict.json",
+      "sha256": "a14d7fc2d82e1868837ed6550ca8a352b0e5c8c0c7c8e859c4ac3d908c606191",
+      "size": 695,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-02/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-02/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-02/response.json",
+      "sha256": "984e245d6134bea7134d8cb1c8a7aa2db5a6031cd5e521fc0c932000e5479ac7",
+      "size": 5652,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-02/verdict.json",
+      "sha256": "b8d38a20d55cfe3313810476904ccdad5623a75ec7f4f520f3da0817841e422b",
+      "size": 882,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-01/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-01/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-01/response.json",
+      "sha256": "33af7a32e6cf76dbee9126d6e8bf1f4be19299fa1c3141e4003a548af7262b84",
+      "size": 4919,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/baseline/run-01/verdict.json",
+      "sha256": "6f73f982726ce42aa3136afa37d4218a1b31f80cc0aca33056f32257f501e5b9",
+      "size": 706,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-03/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-03/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-03/response.json",
+      "sha256": "05fe6558a97d04d2588fd9085fbb0e6cd0c201bddebc19b3257b0a231d706dbb",
+      "size": 5115,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-03/verdict.json",
+      "sha256": "e0d18053944a6085ea7c875aa428c1f2a8c434351e4eef386851d7a2636e7b47",
+      "size": 698,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-02/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-02/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-02/response.json",
+      "sha256": "b695409057f5f804a46c7f4d768a321c71b8fc64e37e51c16769545b83f9697e",
+      "size": 5222,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-02/verdict.json",
+      "sha256": "4938616762236339b3ee8583eef1203f618a232f8e8f83e5aec275cbf60f64c9",
+      "size": 740,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-01/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-01/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-01/response.json",
+      "sha256": "6354b8c6198506bba2490bcaad91394d1497a69a85204381225c2d4fa0713495",
+      "size": 5153,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/perturbation/run-01/verdict.json",
+      "sha256": "d19b7b7d91824a9cb7b97b10445299d28c4eead9aca638dd7f4d711dd980a442",
+      "size": 641,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-03/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-03/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-03/response.json",
+      "sha256": "39a61c33eae856dc02d8e160c94fd6750ebb8dda38ab1c895a0239a85d698db4",
+      "size": 6215,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-03/verdict.json",
+      "sha256": "aa25f668c41848e6ed23567e8432d91da44ba48a878b45232e4820ddc5916827",
+      "size": 744,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-02/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-02/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-02/response.json",
+      "sha256": "4cc1bee3fcfc4d17b990f50bc3ea4e2b35cf3c1f2dddd176176cc81f6011a14f",
+      "size": 5164,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-02/verdict.json",
+      "sha256": "fdb64acabb1b45db6b4d632d02b69e60f376489ea62f1cb72bd7649d015e6764",
+      "size": 769,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-01/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-01/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-01/response.json",
+      "sha256": "b24eb49d6084939ed347214ce7194cf8dfb229efd3fd3fbe45d9d8e31f9775ef",
+      "size": 4842,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "preflight-rejected/scenario-b-integrations/treatment/run-01/verdict.json",
+      "sha256": "29e1af74145390225c9c6f64dde0ad56852a27cbaf00ab2c62dadd77d93fc08d",
+      "size": 662,
+      "role": "preflight/rejected run (evidence not delivered)"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-03/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-03/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-03/response.json",
+      "sha256": "c975520ce15ea087a70095763248d12b81c7d1c6f1761247a70d9058ec45af87",
+      "size": 4929,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-03/verdict.json",
+      "sha256": "e3c27d1c60c63c7c8ebae816cfa94a9266cb1d9571c3f4a826687f1e530dc22f",
+      "size": 430,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-02/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-02/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-02/response.json",
+      "sha256": "b9847df7fb1cf5bec6647dfc303b4cd25fc526f289e4e12ecdb0d118eb5158cf",
+      "size": 6187,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-02/verdict.json",
+      "sha256": "e271c66fb5fb39230df1ea97f5405f14e37eace3723218574605f00f4547f756",
+      "size": 1004,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-01/receipt.json",
+      "sha256": "2269b561ecc3768a039d47559484931a7c681c756ccb21001e5cf7775b173ff7",
+      "size": 260,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-01/request.json",
+      "sha256": "581ef6565439b3bd5bc8462ee046efe5b68255a6c6d05f8bf5443c867d41e805",
+      "size": 1822,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-01/response.json",
+      "sha256": "f6feb30b951e826c5503020e18685283da0f8d22fd93565d9bc24c4ed7d163e0",
+      "size": 4838,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/baseline/run-01/verdict.json",
+      "sha256": "230279b09bc44c6a84020568f55d0a1daaf33f4eed9537ac3508bd8f308226ab",
+      "size": 678,
+      "role": "baseline run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-03/receipt.json",
+      "sha256": "a468592898844b8be59c4a55309487f682e4dcfe19d0a89e7b7fdfcabde28ecd",
+      "size": 260,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-03/request.json",
+      "sha256": "17d37289c1216f49f93f3a5a93f2af65a4e9e5699ed28a43af35cb4733c3bda0",
+      "size": 2013,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-03/response.json",
+      "sha256": "6ece8b68418c8d0d697ffbe7b90fdc0763e9cb622472ffd6d21341fca1aeef37",
+      "size": 4557,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-03/verdict.json",
+      "sha256": "79de3066dd0393cfd0e2fcea15556cb007c3f38095f1685f2af7abc87c627d15",
+      "size": 673,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-02/receipt.json",
+      "sha256": "a468592898844b8be59c4a55309487f682e4dcfe19d0a89e7b7fdfcabde28ecd",
+      "size": 260,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-02/request.json",
+      "sha256": "17d37289c1216f49f93f3a5a93f2af65a4e9e5699ed28a43af35cb4733c3bda0",
+      "size": 2013,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-02/response.json",
+      "sha256": "7e8477341733fd9fcd05aae467151a6e6db78f2b82a8ea9f25e994f0ad0e6c6b",
+      "size": 5216,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-02/verdict.json",
+      "sha256": "efd07cda9801b162fb5e4038fa44243aa7fc58b802947714e6b5530ee421493a",
+      "size": 701,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-01/receipt.json",
+      "sha256": "a468592898844b8be59c4a55309487f682e4dcfe19d0a89e7b7fdfcabde28ecd",
+      "size": 260,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-01/request.json",
+      "sha256": "17d37289c1216f49f93f3a5a93f2af65a4e9e5699ed28a43af35cb4733c3bda0",
+      "size": 2013,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-01/response.json",
+      "sha256": "86028ed4d4df333d83c0a763a2712c97fed7b6f61bec4c59d17e74d7ed3dc6ac",
+      "size": 5386,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/perturbation/run-01/verdict.json",
+      "sha256": "9156cd09cdae4a2e698ad56b1fca8db8a851436826163c9749b25aa5e9681b49",
+      "size": 703,
+      "role": "perturbation run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-03/receipt.json",
+      "sha256": "02757ef0bee092c3b07503ff081e71606cdc290ca1b63fdd553bfcea6c674ec2",
+      "size": 260,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-03/request.json",
+      "sha256": "25b5f6a047a23f85199ae009c83594c4ef5d9a5e050366425dd3e123b3b96760",
+      "size": 2089,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-03/response.json",
+      "sha256": "fb9b0d9afd12ccb18c96a1e74c6faf7e93481a43ed010d56c49f440828de881c",
+      "size": 5198,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-03/verdict.json",
+      "sha256": "03a94ebc9ed6ae5f65efa838f1194478670c9a94091d1c565d7a11726d4f0382",
+      "size": 704,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-02/receipt.json",
+      "sha256": "02757ef0bee092c3b07503ff081e71606cdc290ca1b63fdd553bfcea6c674ec2",
+      "size": 260,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-02/request.json",
+      "sha256": "25b5f6a047a23f85199ae009c83594c4ef5d9a5e050366425dd3e123b3b96760",
+      "size": 2089,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-02/response.json",
+      "sha256": "57679f9c30745a1ea2d444c2b90ca6f6d9b9a5e92faca8436d8696789367618b",
+      "size": 6667,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-02/verdict.json",
+      "sha256": "a224aedc9204ff3ced75486202d069e9cde3f3422e3f6082daaae6f9429d377a",
+      "size": 822,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-01/receipt.json",
+      "sha256": "02757ef0bee092c3b07503ff081e71606cdc290ca1b63fdd553bfcea6c674ec2",
+      "size": 260,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-01/request.json",
+      "sha256": "25b5f6a047a23f85199ae009c83594c4ef5d9a5e050366425dd3e123b3b96760",
+      "size": 2089,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-01/response.json",
+      "sha256": "8aec33c2086c1c7a4d459886ad50aecb13746022c7d02184b119d5e1d1100367",
+      "size": 5435,
+      "role": "treatment run"
+    },
+    {
+      "path": "scenario-b-integrations/treatment/run-01/verdict.json",
+      "sha256": "5b0e30374f416acb8b45e26acb0dcd026d1cb1aa3e4b870bcf0a0f35f24caa60",
+      "size": 737,
+      "role": "treatment run"
+    }
+  ],
+  "fileCount": 281,
+  "totalSize": 687929
+}

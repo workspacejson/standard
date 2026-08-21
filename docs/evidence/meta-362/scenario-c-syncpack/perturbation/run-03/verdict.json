@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions derives the parent path and final property segment from dependency_type.path, then delegates removal to PackageJson::remove_prop.",
+    "The root-level JSON Pointer form (for example, \"/foo\") yields an empty parent pointer and property \"foo\"."
+  ],
+  "checked": [
+    "Match coverage for Strategy::PinnedVersions",
+    "Path splitting behavior for slash-delimited paths"
+  ],
+  "gaps": [
+    "No tests or surrounding type/API definitions were supplied to verify dependency_type.path invariants and PackageJson::remove_prop handling of empty parent pointers."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The diff only changes the delimiter used to construct the checkout idempotency key from ':' to '|'.",
+    "No supplied evidence indicates a required synchronized change in the stale co-change partner src/utils/format.ts."
+  ],
+  "checked": [
+    "Reviewed the proposed change in src/routes/checkout.ts.",
+    "Considered the provided workspace co-change context."
+  ],
+  "gaps": [
+    "No evidence is provided about downstream consumers, persisted idempotency-key compatibility, or delimiter constraints; this is a gap, not approval."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The only change caps returned co-change partners to the first 10 entries via `partners.slice(0, 10)`.",
+    "`slice` is non-mutating and preserves the existing partner ordering for retained entries."
+  ],
+  "checked": [
+    "Diff-scoped TypeScript validity of the return expression",
+    "Non-mutation of `partners`"
+  ],
+  "gaps": [
+    "No evidence that truncating results to 10 matches the function contract or all caller expectations.",
+    "No tests are shown for result limiting, ordering, or behavior when more than 10 partners exist."
+  ]
+}

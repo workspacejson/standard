@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The PinnedVersions branch derives the containing JSON-pointer path and final property token, then calls remove_prop on that property.",
+    "For standard JSON-pointer paths such as /overrides/react, this produces parent /overrides and property react; root-level paths such as /react produce parent \"\" and property react."
+  ],
+  "checked": [
+    "Strategy match handling for the added PinnedVersions case",
+    "JSON-pointer parent/property splitting behavior"
+  ],
+  "gaps": [
+    "The supplied diff does not show how dependency_type.path is constructed or tests confirming PinnedVersions paths are always removable property pointers."
+  ]
+}

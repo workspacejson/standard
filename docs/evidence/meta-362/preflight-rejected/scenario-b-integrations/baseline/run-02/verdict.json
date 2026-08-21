@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The change silently truncates co-change partners to 10, changing the function's observable result contract and potentially omitting valid partners for callers without any pagination, limit parameter, or caller-side adaptation shown."
+  ],
+  "evidence": [
+    "`findCoChangePartners` previously returned `partners`; the proposed code returns `partners.slice(0, 10)`.",
+    "The supplied diff shows no ordering guarantee or documented rationale that would make the selected 10 deterministic or sufficient."
+  ],
+  "checked": [
+    "Return-value behavior of `findCoChangePartners` in the supplied diff."
+  ],
+  "gaps": [
+    "No tests or requirements are provided establishing that a maximum of 10 partners is intended or that consumers tolerate incomplete results."
+  ]
+}

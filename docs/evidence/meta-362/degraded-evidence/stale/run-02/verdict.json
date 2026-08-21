@@ -1,0 +1,20 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the delimiter changes every generated idempotency key. Retries of an order attempt that was previously submitted with `orderId:attemptNumber` will use a new key and may be treated as a new checkout/charge rather than an idempotent retry."
+  ],
+  "evidence": [
+    "The diff changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` in `createCheckout`."
+  ],
+  "checked": [
+    "Idempotency-key construction in the supplied diff.",
+    "Provided co-change context."
+  ],
+  "gaps": [
+    "No compatibility, migration, or dual-read/dual-write handling is shown for existing idempotency keys.",
+    "The supplied diff does not show downstream idempotency-provider behavior or retry/rollout handling.",
+    "The listed co-change evidence for `src/utils/format.ts` is stale and does not establish whether a related update is needed."
+  ]
+}

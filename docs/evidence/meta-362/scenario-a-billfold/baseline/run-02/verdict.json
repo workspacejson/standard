@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format causes retries for an existing order/attempt that used the prior `:` key to be treated as new requests, potentially allowing duplicate checkout processing or charges during/after rollout."
+  ],
+  "evidence": [
+    "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`, producing a different value for every existing order/attempt pair."
+  ],
+  "checked": [
+    "Deterministic idempotency-key construction",
+    "Compatibility of generated key values across deployments"
+  ],
+  "gaps": [
+    "No evidence of a migration/compatibility strategy, version pinning, or confirmation that old keys cannot be retried after deployment.",
+    "No evidence that `orderId` cannot contain the selected delimiter; either delimiter is ambiguous if its components are not constrained or encoded."
+  ]
+}

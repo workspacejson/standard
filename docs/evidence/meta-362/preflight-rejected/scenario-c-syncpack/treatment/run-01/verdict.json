@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions removal derives the parent JSON-pointer path and final property name, then calls remove_prop on that property."
+  ],
+  "checked": [
+    "Match handling for Strategy::PinnedVersions",
+    "Pointer splitting behavior for paths containing '/'"
+  ],
+  "gaps": [
+    "No tests or surrounding type/path definitions were supplied to verify that PinnedVersions paths are always slash-delimited and that an empty parent pointer is supported for root-level properties."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions derives the parent JSON Pointer and final property segment, then calls remove_prop on that parent/property pair.",
+    "The '/' delimiter is ASCII, so indices returned by rfind('/') are valid UTF-8 slice boundaries."
+  ],
+  "checked": [
+    "PinnedVersions match handling",
+    "JSON Pointer parent/property split behavior",
+    "Root-level pointer handling shape"
+  ],
+  "gaps": [
+    "No tests or implementation details for PackageJson::remove_prop were supplied, so behavior for empty/root or malformed dependency paths is not evidenced."
+  ]
+}

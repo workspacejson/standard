@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The PinnedVersions branch derives the parent JSON-pointer path and final property name, then removes that exact property."
+  ],
+  "checked": [
+    "PinnedVersions removal logic",
+    "Consistency with existing PackageJson::remove_prop usage"
+  ],
+  "gaps": [
+    "No tests or call-site/path-format evidence are included for root-level or malformed dependency paths."
+  ]
+}

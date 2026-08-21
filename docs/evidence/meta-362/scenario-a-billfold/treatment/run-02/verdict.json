@@ -1,0 +1,21 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format without a compatibility/migration path can cause a retry spanning deployment to use a new key, defeating deduplication and potentially creating a duplicate checkout/charge.",
+    "The identified Stripe webhook co-change partner is not updated; any webhook correlation or parsing based on the prior `orderId:attemptNumber` format may break."
+  ],
+  "evidence": [
+    "`src/routes/checkout.ts` changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`.",
+    "Workspace context identifies `src/webhooks/stripe.ts` as a historical co-change partner (6 of 9 qualifying commits)."
+  ],
+  "checked": [
+    "Idempotency-key construction change",
+    "Reported Stripe webhook co-change relationship"
+  ],
+  "gaps": [
+    "No evidence of backward-compatible handling for existing idempotency keys.",
+    "No `src/webhooks/stripe.ts` diff is supplied to verify correlation/parsing compatibility."
+  ]
+}

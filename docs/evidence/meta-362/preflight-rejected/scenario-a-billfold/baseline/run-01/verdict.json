@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format can cause a retry of a request first submitted before deployment to use a different key, defeating downstream idempotency and potentially creating a duplicate checkout/charge."
+  ],
+  "evidence": [
+    "`src/routes/checkout.ts` changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`."
+  ],
+  "checked": [
+    "Deterministic idempotency-key construction",
+    "Backward compatibility for in-flight retries"
+  ],
+  "gaps": [
+    "No evidence of a migration/compatibility strategy, retained legacy key lookup, or confirmation that no pre-change requests can be retried."
+  ]
+}

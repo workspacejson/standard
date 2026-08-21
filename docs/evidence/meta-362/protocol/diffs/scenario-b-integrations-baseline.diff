@@ -1,0 +1,6 @@
+diff --git a/src/services/workspace.ts b/src/services/workspace.ts
+--- a/src/services/workspace.ts
++++ b/src/services/workspace.ts
+@@ -XX,XX +XX,XX @@ export function findCoChangePartners(ws: NormalizedWorkspace, path: string): string[] {
+-  return partners;
++  return partners.slice(0, 10);

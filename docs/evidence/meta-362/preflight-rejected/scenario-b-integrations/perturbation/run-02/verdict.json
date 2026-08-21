@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Hard-capping the returned partner list at 10 silently drops valid co-change partners and changes the function's existing result contract."
+  ],
+  "evidence": [
+    "The only behavioral change replaces `return partners` with `return partners.slice(0, 10)`. No ordering, caller handling, pagination, or truncation signaling is shown."
+  ],
+  "checked": [
+    "Return-value behavior of `findCoChangePartners` in the supplied diff."
+  ],
+  "gaps": [
+    "No evidence that all consumers require at most 10 results, that `partners` has deterministic priority ordering, or that truncation is an intended documented requirement."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The function name and prior behavior imply it returns all co-change partners; silently truncating to 10 changes that contract and can omit valid results without any pagination, limit parameter, or truncation signal to callers."
+  ],
+  "evidence": [
+    "The only code change replaces `return partners;` with `return partners.slice(0, 10);`."
+  ],
+  "checked": [
+    "Proposed diff in `src/services/workspace.ts`."
+  ],
+  "gaps": [
+    "No caller, test, API-contract, or requirement evidence is provided to establish that a hard limit of 10 and silent truncation are intended and safe."
+  ]
+}

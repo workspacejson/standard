@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions now derives the parent JSON pointer and property name from the configured path, then removes the exact pinned property.",
+    "The existing VersionsByName and InvalidConfig behavior is unchanged by this diff."
+  ],
+  "checked": [
+    "PinnedVersions removal-path handling",
+    "Existing strategy branches"
+  ],
+  "gaps": [
+    "No tests or path-format contract are included to demonstrate behavior for root-level, malformed, or slashless paths."
+  ]
+}

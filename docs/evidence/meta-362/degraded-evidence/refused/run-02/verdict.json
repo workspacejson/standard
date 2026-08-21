@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format will cause retries of checkouts created before deployment to use a different key, bypassing prior idempotency records and potentially creating duplicate charges/orders. Preserve or dual-read the previous format during a transition."
+  ],
+  "evidence": [
+    "The only functional change replaces `${request.orderId}:${request.attemptNumber}` with `${request.orderId}|${request.attemptNumber}`."
+  ],
+  "checked": [
+    "Reviewed the supplied diff for idempotency behavior."
+  ],
+  "gaps": [
+    "workspace.json is unavailable, so co-change, key-format contract, and rollout/migration evidence could not be checked."
+  ]
+}

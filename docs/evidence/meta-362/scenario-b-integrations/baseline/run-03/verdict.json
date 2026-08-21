@@ -1,0 +1,15 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The diff applies a deterministic maximum of 10 returned partners."
+  ],
+  "checked": [
+    "Return-value change in findCoChangePartners."
+  ],
+  "gaps": [
+    "No evidence is provided that callers expect or accept truncation to 10 results, or that the limit is an intended product requirement."
+  ]
+}

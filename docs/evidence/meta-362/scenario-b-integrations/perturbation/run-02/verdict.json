@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "This silently changes findCoChangePartners from returning all discovered partners to at most 10, potentially omitting valid results for existing callers without any pagination, limit parameter, or documented contract change."
+  ],
+  "evidence": [
+    "The only functional change is `return partners.slice(0, 10);` replacing `return partners;`."
+  ],
+  "checked": [
+    "Supplied diff for behavior and API-result changes."
+  ],
+  "gaps": [
+    "No evidence of intended result-limit semantics, caller compatibility, deterministic ordering of `partners`, or tests covering truncation."
+  ]
+}

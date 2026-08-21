@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions removal derives the parent JSON-pointer path and leaf property name, then calls remove_prop on that parent/property pair.",
+    "A leading '/' produces an empty parent pointer, allowing removal of a root-level property."
+  ],
+  "checked": [
+    "PinnedVersions strategy handling",
+    "JSON-pointer parent/leaf extraction",
+    "Existing strategy branches left unchanged"
+  ],
+  "gaps": [
+    "No tests or descriptor-path contract are included to confirm all PinnedVersions paths contain '/' and use the expected JSON-pointer representation."
+  ]
+}

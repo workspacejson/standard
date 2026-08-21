@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions removal derives the parent JSON-pointer path and final property segment, then calls remove_prop on that parent/property pair.",
+    "The implementation avoids attempting removal when the configured path contains no '/' separator."
+  ],
+  "checked": [
+    "PinnedVersions match handling",
+    "Parent/property extraction from dependency_type.path",
+    "No changes outside removal behavior in the supplied diff"
+  ],
+  "gaps": [
+    "The diff does not show the format/invariants of dependency_type.path or PackageJson::remove_prop semantics, so handling of root-level, escaped, or malformed JSON-pointer paths cannot be verified."
+  ]
+}

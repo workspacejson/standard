@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The new PinnedVersions branch derives the parent JSON-pointer path and final property name, then calls remove_prop on that property."
+  ],
+  "checked": [
+    "Strategy dispatch coverage for PinnedVersions removal",
+    "Parent/property extraction from slash-delimited paths"
+  ],
+  "gaps": [
+    "No tests or call-site/path-format evidence were supplied to confirm PinnedVersions paths are always slash-delimited JSON-pointer property paths."
+  ]
+}

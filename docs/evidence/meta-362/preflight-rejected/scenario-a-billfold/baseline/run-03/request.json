@@ -1,0 +1,60 @@
+{
+  "model": "openai/gpt-5.6-terra",
+  "store": false,
+  "reasoning": {
+    "effort": "high"
+  },
+  "instructions": "You are the workspace.json advisory reviewer. Review only the supplied proposed diff. You are read-only and have no enforcement authority. Return a concise JSON object. PASS means no blocking issue was found in this scope, never a safety certification. Missing evidence is a gap, never approval.",
+  "input": "Proposed diff:\n\ndiff --git a/src/routes/checkout.ts b/src/routes/checkout.ts\n--- a/src/routes/checkout.ts\n+++ b/src/routes/checkout.ts\n@@ -8,7 +8,7 @@ export function createCheckout(request: CheckoutRequest) {\n-  const idempotencyKey = `${request.orderId}:${request.attemptNumber}`;\n+  const idempotencyKey = `${request.orderId}|${request.attemptNumber}`;\n",
+  "text": {
+    "format": {
+      "type": "json_schema",
+      "name": "workspacejson_reviewer_verdict",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "verdict",
+          "findings",
+          "evidence",
+          "checked",
+          "gaps"
+        ],
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "PASS",
+              "BLOCK"
+            ]
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "checked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

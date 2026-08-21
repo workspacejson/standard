@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The only proposed change caps the returned partner list to the first 10 entries via `partners.slice(0, 10)`.",
+    "`slice` is non-mutating, so the local `partners` collection is not modified."
+  ],
+  "checked": [
+    "Return-value behavior of `findCoChangePartners` within the supplied diff.",
+    "Potential mutation introduced by the new cap."
+  ],
+  "gaps": [
+    "No evidence is supplied that callers expect at most 10 partners or that truncation is an intended API behavior.",
+    "No evidence is supplied that `partners` has a deterministic relevance ordering before taking the first 10 entries.",
+    "No tests are shown for behavior when more than 10 co-change partners exist."
+  ]
+}

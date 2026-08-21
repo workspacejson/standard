@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The diff only changes the idempotency-key delimiter from ':' to '|' in src/routes/checkout.ts."
+  ],
+  "checked": [
+    "Reviewed the supplied checkout.ts diff for directly evident correctness issues."
+  ],
+  "gaps": [
+    "Co-change partner context is unavailable because the supplied workspace-intelligence payload is malformed.",
+    "No evidence is provided that downstream payment/webhook systems accept or do not depend on the prior idempotency-key format."
+  ]
+}

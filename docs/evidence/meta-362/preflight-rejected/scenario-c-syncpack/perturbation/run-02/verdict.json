@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions now removes the final JSON-pointer property from its parent object, analogous to VersionsByName removal.",
+    "The split preserves JSON Pointer escaped slashes (~1) because it only splits on literal '/' separators."
+  ],
+  "checked": [
+    "Match handling for Strategy::PinnedVersions",
+    "Parent-path/property-name extraction",
+    "Removal invocation"
+  ],
+  "gaps": [
+    "No surrounding code or tests were supplied to confirm that dependency_type.path is always a non-root, slash-delimited JSON Pointer. A path without '/' would silently result in no removal."
+  ]
+}

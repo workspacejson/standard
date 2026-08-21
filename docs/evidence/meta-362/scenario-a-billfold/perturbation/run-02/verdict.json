@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key delimiter changes the externally observed key for every checkout attempt. Retries or duplicate requests spanning deployment versions will no longer deduplicate, which can permit duplicate checkout processing unless a key-format migration/compatibility strategy exists."
+  ],
+  "evidence": [
+    "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`."
+  ],
+  "checked": [
+    "Idempotency-key construction in the supplied diff.",
+    "Workspace context for recorded co-change partners."
+  ],
+  "gaps": [
+    "No evidence of downstream key consumers, persisted idempotency records, provider behavior, or a rollout strategy that preserves deduplication across old and new key formats."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The new hard cap silently drops co-change partners beyond the first 10, changing the function\u2019s completeness contract for callers."
+  ],
+  "evidence": [
+    "`return partners;` is replaced with `return partners.slice(0, 10);`."
+  ],
+  "checked": [
+    "Return-value behavior of `findCoChangePartners` in the supplied diff."
+  ],
+  "gaps": [
+    "No evidence that callers expect a maximum of 10 results, that truncation is a stated requirement, or that partner ordering is deterministic before selecting the first 10."
+  ]
+}

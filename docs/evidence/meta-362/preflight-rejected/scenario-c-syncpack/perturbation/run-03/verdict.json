@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions removal derives the parent JSON-pointer path and final property token, then calls package.remove_prop on that property."
+  ],
+  "checked": [
+    "Strategy::PinnedVersions branch",
+    "Root-level pointer handling via empty parent pointer",
+    "No mutation outside the requested property removal"
+  ],
+  "gaps": [
+    "The diff does not show PackageJson::remove_prop semantics or the invariant that PinnedVersions paths are slash-delimited JSON pointers."
+  ]
+}

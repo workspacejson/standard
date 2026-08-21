@@ -1,0 +1,15 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The diff changes only the idempotency-key delimiter from ':' to '|'."
+  ],
+  "checked": [
+    "Potential direct key-construction ambiguity in the supplied change."
+  ],
+  "gaps": [
+    "No evidence is provided that downstream idempotency storage/providers, existing persisted keys, or orderId validation support this delimiter change."
+  ]
+}
