@@ -1,0 +1,6 @@
+diff --git a/src/routes/checkout.ts b/src/routes/checkout.ts
+--- a/src/routes/checkout.ts
++++ b/src/routes/checkout.ts
+@@ -8,7 +8,7 @@ export function createCheckout(request: CheckoutRequest) {
+-  const idempotencyKey = `${request.orderId}:${request.attemptNumber}`;
++  const idempotencyKey = `${request.orderId}|${request.attemptNumber}`;

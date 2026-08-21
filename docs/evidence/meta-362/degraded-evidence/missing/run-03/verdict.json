@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format for an existing checkout attempt can cause retries after deployment to use a different key, defeating prior idempotency and potentially creating duplicate charges/orders."
+  ],
+  "evidence": [
+    "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` with no compatibility handling shown."
+  ],
+  "checked": [
+    "Derived idempotency-key stability across deployments",
+    "Potential ambiguity in delimiter-based key composition"
+  ],
+  "gaps": [
+    "No evidence of a migration/dual-read strategy, key versioning, or confirmation that old keys are not persisted or sent to an external payment provider.",
+    "No evidence that orderId and attemptNumber cannot contain the selected delimiter; delimiter substitution alone does not make concatenated keys unambiguous."
+  ]
+}

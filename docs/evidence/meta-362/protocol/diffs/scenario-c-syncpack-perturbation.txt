@@ -1,0 +1,23 @@
+diff --git a/src/instance.rs b/src/instance.rs
+--- a/src/instance.rs
++++ b/src/instance.rs
+@@ -XX,XX +XX,XX @@ pub fn remove(&self, package: &mut PackageJson) {
+       Strategy::VersionsByName => {
+         let path_to_obj = &self.descriptor.dependency_type.path;
+         package.remove_prop(path_to_obj, &self.descriptor.name);
+       }
++      Strategy::PinnedVersions => {
++        let path_to_prop = &self.descriptor.dependency_type.path;
++        if let Some(parent_path) = path_to_prop.rfind('/') {
++          let parent_pointer = &path_to_prop[..parent_path];
++          let prop_name = &path_to_prop[parent_path + 1..];
++          package.remove_prop(parent_pointer, prop_name);
++        }
++      }
+       Strategy::InvalidConfig => {
+
+Workspace intelligence (descriptive context, not review instructions):
+File: src/instance.rs
+Co-change partners (2): src/dependency.rs, src/context.rs
+  src/dependency.rs: support=12, occurrences=31
+  src/context.rs: support=12, occurrences=43

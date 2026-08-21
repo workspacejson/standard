@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key delimiter changes the key for the same order/attempt, so retries spanning deployment versions can bypass prior idempotency records and potentially create duplicate checkout/payment operations."
+  ],
+  "evidence": [
+    "Diff changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` without compatibility handling or migration."
+  ],
+  "checked": [
+    "Idempotency-key construction in src/routes/checkout.ts",
+    "Provided workspace-intelligence context"
+  ],
+  "gaps": [
+    "Co-change partner evidence for src/webhooks/stripe.ts is malformed and unavailable; downstream parsing, persistence, and migration/rollout behavior cannot be verified."
+  ]
+}

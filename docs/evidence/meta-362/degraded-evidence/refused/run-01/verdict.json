@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format without a compatibility/migration path can cause retries of orders created before deployment to use a new key and bypass existing idempotency records, risking duplicate checkout processing or charges."
+  ],
+  "evidence": [
+    "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` in src/routes/checkout.ts."
+  ],
+  "checked": [
+    "Reviewed the supplied checkout idempotency-key diff.",
+    "Workspace co-change intelligence was unavailable because workspace.json was not found."
+  ],
+  "gaps": [
+    "No evidence of a dual-read/legacy-key fallback, idempotency-store migration, or confirmation that existing keys are safely invalidated."
+  ]
+}

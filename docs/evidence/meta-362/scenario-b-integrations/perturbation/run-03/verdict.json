@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The only change limits the returned partner list to the first 10 entries via `partners.slice(0, 10)`.",
+    "`slice` is non-mutating and preserves the existing ordering of the first 10 partners."
+  ],
+  "checked": [
+    "Diff-level behavior change in `findCoChangePartners`.",
+    "Potential mutation introduced by the truncation operation."
+  ],
+  "gaps": [
+    "No stated API contract, caller expectations, or tests are provided to establish whether truncating results at 10 is the intended limit or whether ordering is deterministic."
+  ]
+}

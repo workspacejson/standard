@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The exported function now silently truncates results to 10, changing its apparent contract from returning all co-change partners. This can omit valid partners for existing callers without an opt-in limit or documented behavior."
+  ],
+  "evidence": [
+    "The only change replaces `return partners;` with `return partners.slice(0, 10);`."
+  ],
+  "checked": [
+    "Behavioral impact of the proposed return-value change.",
+    "API compatibility risk for callers of the exported function."
+  ],
+  "gaps": [
+    "No evidence of a specified 10-item limit, caller acceptance, deterministic ranking before truncation, or tests covering the capped behavior."
+  ]
+}

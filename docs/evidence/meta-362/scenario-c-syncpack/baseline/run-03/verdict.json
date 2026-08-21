@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions now derives the parent JSON-pointer path and property name, then removes that property via package.remove_prop.",
+    "The split uses the last literal '/', preserving nested parent paths."
+  ],
+  "checked": [
+    "Strategy match handling for PinnedVersions",
+    "JSON-pointer path splitting behavior"
+  ],
+  "gaps": [
+    "No evidence that PinnedVersions paths are always non-empty, slash-delimited property paths; paths without '/' are silently ignored.",
+    "No tests are shown for root-level, nested, malformed, or trailing-slash paths."
+  ]
+}

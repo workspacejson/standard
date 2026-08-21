@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The function now silently omits co-change partners after the first 10, changing its apparent all-partners return contract and potentially producing incomplete workspace results for callers."
+  ],
+  "evidence": [
+    "The only proposed change replaces `return partners;` with `return partners.slice(0, 10);`."
+  ],
+  "checked": [
+    "Output behavior of `findCoChangePartners` in the supplied diff."
+  ],
+  "gaps": [
+    "No evidence of a documented 10-result limit, caller compatibility, deterministic ordering relevance, or tests covering workspaces with more than 10 partners."
+  ]
+}

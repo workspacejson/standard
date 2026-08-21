@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions removal derives the parent object pointer and terminal property name, then calls remove_prop on that pair.",
+    "A root-level JSON-pointer-style path such as `/foo` produces an empty parent pointer and property `foo`."
+  ],
+  "checked": [
+    "Strategy match handling for PinnedVersions",
+    "Path splitting behavior for slash-delimited paths"
+  ],
+  "gaps": [
+    "No tests or PackageJson::remove_prop contract were supplied to verify empty-root pointers and malformed/no-slash paths."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Hard-capping `findCoChangePartners` to 10 silently changes its returned result set and may omit valid partners for callers that expect all matches."
+  ],
+  "evidence": [
+    "The only supplied change replaces `return partners;` with `return partners.slice(0, 10);`."
+  ],
+  "checked": [
+    "Return-value behavior of `findCoChangePartners` in the supplied diff."
+  ],
+  "gaps": [
+    "No evidence is provided that the function contract permits truncation, that callers handle partial results, or that `partners` has a deterministic priority ordering suitable for selecting the first 10."
+  ]
+}

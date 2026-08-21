@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The new hard cap silently drops co-change partners beyond 10, changing the function\u2019s observable result contract without evidence that callers expect or handle truncated results."
+  ],
+  "evidence": [
+    "The return value changes from `partners` to `partners.slice(0, 10)`, with no truncation indicator or parameterization."
+  ],
+  "checked": [
+    "Behavioral change in `findCoChangePartners` return value."
+  ],
+  "gaps": [
+    "No caller analysis, requirement rationale, or tests demonstrating that limiting results to 10 is correct."
+  ]
+}

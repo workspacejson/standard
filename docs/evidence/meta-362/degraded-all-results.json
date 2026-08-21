@@ -1,0 +1,220 @@
+{
+  "missing": [
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the checkout idempotency-key format invalidates keys created before deployment. Retries of an existing order attempt after rollout will use a different key and may bypass prior idempotency protection, risking duplicate checkout/payment creation."
+      ],
+      "evidence": [
+        "`idempotencyKey` changes from `${orderId}:${attemptNumber}` to `${orderId}|${attemptNumber}` with no compatibility lookup or migration shown."
+      ],
+      "checked": [
+        "Idempotency-key continuity across the proposed format change."
+      ],
+      "gaps": [
+        "No evidence of a rollout strategy, dual-read compatibility, or confirmation that existing idempotency records are not relied on across deployments."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the idempotency-key format will cause retries for attempts created before deployment to use a different key, potentially creating duplicate checkout/payment operations."
+      ],
+      "evidence": [
+        "The key changes from `${orderId}:${attemptNumber}` to `${orderId}|${attemptNumber}` with no compatibility lookup or migration shown."
+      ],
+      "checked": [
+        "Idempotency-key construction in src/routes/checkout.ts."
+      ],
+      "gaps": [
+        "No evidence of a backward-compatible rollout, dual-key lookup, or confirmation that prior keys cannot be retried after deployment."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the idempotency-key format for an existing checkout attempt can cause retries after deployment to use a different key, defeating prior idempotency and potentially creating duplicate charges/orders."
+      ],
+      "evidence": [
+        "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` with no compatibility handling shown."
+      ],
+      "checked": [
+        "Derived idempotency-key stability across deployments",
+        "Potential ambiguity in delimiter-based key composition"
+      ],
+      "gaps": [
+        "No evidence of a migration/dual-read strategy, key versioning, or confirmation that old keys are not persisted or sent to an external payment provider.",
+        "No evidence that orderId and attemptNumber cannot contain the selected delimiter; delimiter substitution alone does not make concatenated keys unambiguous."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    }
+  ],
+  "stale": [
+    {
+      "status": "COMPLETED",
+      "verdict": "PASS",
+      "findings": [],
+      "evidence": [
+        "The diff only changes the delimiter used to construct the checkout idempotency key from ':' to '|'.",
+        "No supplied evidence indicates a required synchronized change in the stale co-change partner src/utils/format.ts."
+      ],
+      "checked": [
+        "Reviewed the proposed change in src/routes/checkout.ts.",
+        "Considered the provided workspace co-change context."
+      ],
+      "gaps": [
+        "No evidence is provided about downstream consumers, persisted idempotency-key compatibility, or delimiter constraints; this is a gap, not approval."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the delimiter changes every generated idempotency key. Retries of an order attempt that was previously submitted with `orderId:attemptNumber` will use a new key and may be treated as a new checkout/charge rather than an idempotent retry."
+      ],
+      "evidence": [
+        "The diff changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` in `createCheckout`."
+      ],
+      "checked": [
+        "Idempotency-key construction in the supplied diff.",
+        "Provided co-change context."
+      ],
+      "gaps": [
+        "No compatibility, migration, or dual-read/dual-write handling is shown for existing idempotency keys.",
+        "The supplied diff does not show downstream idempotency-provider behavior or retry/rollout handling.",
+        "The listed co-change evidence for `src/utils/format.ts` is stale and does not establish whether a related update is needed."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "PASS",
+      "findings": [],
+      "evidence": [
+        "The diff changes only the idempotency-key delimiter in src/routes/checkout.ts.",
+        "Workspace context identifies src/utils/format.ts as a stale, low-support co-change partner (2 supporting changes; last observed 180 days ago), which is insufficient to establish a required accompanying change."
+      ],
+      "checked": [
+        "Scoped changed file: src/routes/checkout.ts",
+        "Provided workspace co-change context"
+      ],
+      "gaps": [
+        "No tests, idempotency-key format contract, or downstream consumer evidence was provided to confirm that changing ':' to '|' is compatible."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    }
+  ],
+  "malformed": [
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the idempotency-key format causes retries of an existing order attempt after deployment to use a new key, potentially bypassing provider-side idempotency and creating a duplicate checkout/payment. No compatibility or migration handling is shown."
+      ],
+      "evidence": [
+        "The only behavioral change replaces `${orderId}:${attemptNumber}` with `${orderId}|${attemptNumber}`."
+      ],
+      "checked": [
+        "Reviewed the supplied diff in src/routes/checkout.ts.",
+        "Treated malformed co-change-partner context as unavailable evidence."
+      ],
+      "gaps": [
+        "No evidence that previously generated keys are not persisted, retried, parsed, or used by payment/webhook systems.",
+        "No evidence that orderId cannot contain `|` or that all consumers accept the new key format."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "PASS",
+      "findings": [],
+      "evidence": [
+        "The diff only changes the idempotency-key delimiter from ':' to '|' in src/routes/checkout.ts."
+      ],
+      "checked": [
+        "Reviewed the supplied checkout.ts diff for directly evident correctness issues."
+      ],
+      "gaps": [
+        "Co-change partner context is unavailable because the supplied workspace-intelligence payload is malformed.",
+        "No evidence is provided that downstream payment/webhook systems accept or do not depend on the prior idempotency-key format."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the idempotency-key delimiter changes the key for the same order/attempt, so retries spanning deployment versions can bypass prior idempotency records and potentially create duplicate checkout/payment operations."
+      ],
+      "evidence": [
+        "Diff changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` without compatibility handling or migration."
+      ],
+      "checked": [
+        "Idempotency-key construction in src/routes/checkout.ts",
+        "Provided workspace-intelligence context"
+      ],
+      "gaps": [
+        "Co-change partner evidence for src/webhooks/stripe.ts is malformed and unavailable; downstream parsing, persistence, and migration/rollout behavior cannot be verified."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    }
+  ],
+  "refused": [
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the idempotency-key format without a compatibility/migration path can cause retries of orders created before deployment to use a new key and bypass existing idempotency records, risking duplicate checkout processing or charges."
+      ],
+      "evidence": [
+        "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` in src/routes/checkout.ts."
+      ],
+      "checked": [
+        "Reviewed the supplied checkout idempotency-key diff.",
+        "Workspace co-change intelligence was unavailable because workspace.json was not found."
+      ],
+      "gaps": [
+        "No evidence of a dual-read/legacy-key fallback, idempotency-store migration, or confirmation that existing keys are safely invalidated."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "BLOCK",
+      "findings": [
+        "Changing the idempotency-key format will cause retries of checkouts created before deployment to use a different key, bypassing prior idempotency records and potentially creating duplicate charges/orders. Preserve or dual-read the previous format during a transition."
+      ],
+      "evidence": [
+        "The only functional change replaces `${request.orderId}:${request.attemptNumber}` with `${request.orderId}|${request.attemptNumber}`."
+      ],
+      "checked": [
+        "Reviewed the supplied diff for idempotency behavior."
+      ],
+      "gaps": [
+        "workspace.json is unavailable, so co-change, key-format contract, and rollout/migration evidence could not be checked."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    },
+    {
+      "status": "COMPLETED",
+      "verdict": "PASS",
+      "findings": [],
+      "evidence": [
+        "The diff changes only the delimiter used to construct the idempotency key; both orderId and attemptNumber remain included."
+      ],
+      "checked": [
+        "Reviewed the supplied checkout.ts diff for key-component retention and obvious construction errors."
+      ],
+      "gaps": [
+        "No workspace.json or co-change/consumer evidence was available to verify whether the serialized idempotency-key format is externally persisted or contract-sensitive."
+      ],
+      "artifactDir": "<redacted:local-path>"
+    }
+  ]
+}

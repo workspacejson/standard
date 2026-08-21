@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "PinnedVersions splits the path at '/', then passes the final JSON-Pointer token directly to remove_prop. This fails for property names containing '/' or '~': encoded tokens (for example @scope~1pkg) are not decoded, while unencoded scoped package names are split at the wrong slash. The removal can therefore target the wrong property or leave the pinned entry behind."
+  ],
+  "evidence": [
+    "The new code uses path_to_prop.rfind('/') and passes &path_to_prop[parent_path + 1..] as prop_name without JSON-Pointer token decoding."
+  ],
+  "checked": [
+    "PinnedVersions removal path decomposition",
+    "Handling of JSON-Pointer-reserved characters"
+  ],
+  "gaps": [
+    "No tests or path-format contract are included to establish whether dependency_type.path is a JSON Pointer and whether remove_prop expects encoded or decoded property names."
+  ]
+}

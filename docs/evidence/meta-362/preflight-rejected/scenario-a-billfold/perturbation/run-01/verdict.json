@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format causes retries of attempts created before deployment to use a different key, potentially bypassing prior idempotency protection and creating duplicate checkout charges."
+  ],
+  "evidence": [
+    "The key changes from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` with no compatibility, migration, or version-handling logic shown."
+  ],
+  "checked": [
+    "Idempotency-key construction and retry compatibility across the format change."
+  ],
+  "gaps": [
+    "No evidence of whether outstanding retries can occur across deployments or whether downstream payment processing normalizes or otherwise handles both key formats."
+  ]
+}

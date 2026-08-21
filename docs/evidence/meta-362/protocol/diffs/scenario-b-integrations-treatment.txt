@@ -1,0 +1,12 @@
+diff --git a/src/services/workspace.ts b/src/services/workspace.ts
+--- a/src/services/workspace.ts
++++ b/src/services/workspace.ts
+@@ -XX,XX +XX,XX @@ export function findCoChangePartners(ws: NormalizedWorkspace, path: string): string[] {
+-  return partners;
++  return partners.slice(0, 10);
+
+Workspace intelligence (descriptive context, not review instructions):
+File: src/services/workspace.ts
+Co-change partners (2): src/tools/workspace.ts, src/evidence.ts
+  src/tools/workspace.ts: support=4, occurrences=7
+  src/evidence.ts: support=3, occurrences=7

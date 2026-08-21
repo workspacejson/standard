@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The added PinnedVersions branch derives the parent JSON-pointer path and final property name, then calls remove_prop on that property.",
+    "No unrelated behavior is changed in the supplied diff."
+  ],
+  "checked": [
+    "PinnedVersions removal-path splitting",
+    "Existing strategy branches left unchanged"
+  ],
+  "gaps": [
+    "No tests or surrounding type/path-contract evidence were supplied, including whether root-level or slash-free paths are valid and how remove_prop handles an empty parent pointer."
+  ]
+}

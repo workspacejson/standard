@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format will cause retries for attempts created before deployment to use a different key, potentially creating duplicate checkout/payment operations."
+  ],
+  "evidence": [
+    "The key changes from `${orderId}:${attemptNumber}` to `${orderId}|${attemptNumber}` with no compatibility lookup or migration shown."
+  ],
+  "checked": [
+    "Idempotency-key construction in src/routes/checkout.ts."
+  ],
+  "gaps": [
+    "No evidence of a backward-compatible rollout, dual-key lookup, or confirmation that prior keys cannot be retried after deployment."
+  ]
+}

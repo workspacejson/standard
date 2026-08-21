@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The final path segment is passed directly as a property name. If `dependency_type.path` is a JSON Pointer, escaped segments (for example `~1` for `/` in scoped/package names) are not decoded, so the intended pinned entry will not be removed."
+  ],
+  "evidence": [
+    "The new code derives `prop_name` via string slicing after `rfind('/')` and calls `package.remove_prop(parent_pointer, prop_name)` without JSON-Pointer unescaping."
+  ],
+  "checked": [
+    "PinnedVersions removal-path derivation",
+    "Handling of nested paths"
+  ],
+  "gaps": [
+    "The diff does not show the `PackageJson::remove_prop` path/property encoding contract or how `dependency_type.path` is represented, so compatibility with unescaped paths cannot be confirmed."
+  ]
+}

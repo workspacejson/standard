@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format causes retries of an existing order attempt after deployment to use a new key, potentially bypassing provider-side idempotency and creating a duplicate checkout/payment. No compatibility or migration handling is shown."
+  ],
+  "evidence": [
+    "The only behavioral change replaces `${orderId}:${attemptNumber}` with `${orderId}|${attemptNumber}`."
+  ],
+  "checked": [
+    "Reviewed the supplied diff in src/routes/checkout.ts.",
+    "Treated malformed co-change-partner context as unavailable evidence."
+  ],
+  "gaps": [
+    "No evidence that previously generated keys are not persisted, retried, parsed, or used by payment/webhook systems.",
+    "No evidence that orderId cannot contain `|` or that all consumers accept the new key format."
+  ]
+}

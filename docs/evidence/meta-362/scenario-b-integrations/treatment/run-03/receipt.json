@@ -1,0 +1,9 @@
+{
+  "provider": "openrouter",
+  "endpoint": "https://openrouter.ai/api/v1/responses",
+  "model": "openai/gpt-5.6-terra",
+  "scopeHash": "ea3e3d7794b98e09ff312df5a7da4af91b7c87048b6985fd94d4209ac1381e87",
+  "scopePaths": [
+    "src/services/workspace.ts"
+  ]
+}

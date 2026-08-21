@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format changes the identity of every checkout attempt. A retry after deployment for an attempt previously submitted with the ':' format will use a different key, defeating idempotency across the rollout and potentially permitting a duplicate checkout/charge."
+  ],
+  "evidence": [
+    "The only proposed change replaces `${request.orderId}:${request.attemptNumber}` with `${request.orderId}|${request.attemptNumber}`."
+  ],
+  "checked": [
+    "Idempotency-key construction",
+    "Cross-deployment retry compatibility"
+  ],
+  "gaps": [
+    "No migration/compatibility handling is shown for keys created before the delimiter change.",
+    "No evidence is provided that order IDs and attempt numbers cannot contain the selected delimiter or that the downstream idempotency provider treats this format change safely."
+  ]
+}

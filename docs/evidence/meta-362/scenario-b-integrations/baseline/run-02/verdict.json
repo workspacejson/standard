@@ -1,0 +1,22 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The function now silently omits co-change partners after the first 10, changing its previously complete result contract without any caller-facing limit or indication of truncation.",
+    "If partner ordering is not explicitly deterministic and relevance-ranked, the retained 10 entries may be arbitrary."
+  ],
+  "evidence": [
+    "The return value changed from `partners` to `partners.slice(0, 10)`.",
+    "No corresponding API, metadata, or ordering change is included in the supplied diff."
+  ],
+  "checked": [
+    "Return-value behavior change in `findCoChangePartners`.",
+    "Potential effects of hard-coded result truncation."
+  ],
+  "gaps": [
+    "No tests demonstrate that callers expect a maximum of 10 results.",
+    "No evidence that `partners` is deterministically ordered or ranked before truncation.",
+    "No evidence of a documented product requirement for this limit."
+  ]
+}

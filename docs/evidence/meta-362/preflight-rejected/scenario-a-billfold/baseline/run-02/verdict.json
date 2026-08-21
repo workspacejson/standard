@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key delimiter changes the key for the same order/attempt. Retries that span deployment versions will no longer match prior requests and may create duplicate checkout/payment operations."
+  ],
+  "evidence": [
+    "`src/routes/checkout.ts` changes `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}`."
+  ],
+  "checked": [
+    "Idempotency-key construction in the supplied diff.",
+    "Cross-version retry compatibility implied by exact idempotency-key matching."
+  ],
+  "gaps": [
+    "No migration, dual-read/compatibility strategy, or evidence that old keys cannot remain active during rollout is provided."
+  ]
+}

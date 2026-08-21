@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "PinnedVersions derives `prop_name` directly from a JSON-pointer path segment and passes it to `remove_prop` without decoding JSON Pointer escapes. Keys containing `/` or `~` (notably scoped package names such as `@scope/pkg`, represented as `@scope~1pkg` in a pointer) will be removed using the escaped literal rather than the actual object key, so the pinned override remains."
+  ],
+  "evidence": [
+    "The new code sets `prop_name = &path_to_prop[parent_path + 1..]`; no `~1`/`~0` decoding occurs before `package.remove_prop(parent_pointer, prop_name)`.",
+    "The prior VersionsByName path passes `self.descriptor.name`, which is the logical dependency/property name rather than a pointer token."
+  ],
+  "checked": [
+    "PinnedVersions removal path splitting and property-key handling"
+  ],
+  "gaps": [
+    "No test evidence is supplied for removal of pinned entries whose key is scoped or otherwise requires JSON Pointer escaping."
+  ]
+}

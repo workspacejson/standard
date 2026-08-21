@@ -1,0 +1,16 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "PinnedVersions now removes the property addressed by dependency_type.path by splitting its final JSON-pointer segment into parent pointer and property name."
+  ],
+  "checked": [
+    "Strategy match coverage for PinnedVersions",
+    "Pointer splitting behavior for nested and top-level slash-prefixed paths"
+  ],
+  "gaps": [
+    "No tests or surrounding PackageJson::remove_prop implementation were supplied to confirm empty-parent-pointer handling, JSON-pointer escaping behavior, or the expected format of dependency_type.path."
+  ]
+}

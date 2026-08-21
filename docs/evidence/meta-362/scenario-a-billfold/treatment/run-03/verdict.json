@@ -1,0 +1,20 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the checkout idempotency-key format can break retry deduplication across deployments: the same order/attempt will produce a different key before versus after this change, potentially allowing a second provider charge."
+  ],
+  "evidence": [
+    "The diff changes the key delimiter from ':' to '|'.",
+    "src/webhooks/stripe.ts historically co-changes with this file (6 of 9 qualifying commits), suggesting downstream Stripe/idempotency handling may depend on this behavior."
+  ],
+  "checked": [
+    "Reviewed the supplied checkout.ts diff.",
+    "Considered supplied co-change intelligence."
+  ],
+  "gaps": [
+    "No evidence of a compatibility/migration strategy for in-flight retries using the prior key format.",
+    "No corresponding review evidence for src/webhooks/stripe.ts or provider-facing idempotency handling."
+  ]
+}

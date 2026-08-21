@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format can cause requests that were previously deduplicated under `${orderId}:${attemptNumber}` to be treated as new operations under `${orderId}|${attemptNumber}`, risking duplicate checkout creation/charge during retries or deployments."
+  ],
+  "evidence": [
+    "The only change replaces ':' with '|' in the generated idempotency key."
+  ],
+  "checked": [
+    "Idempotency-key construction in the supplied diff."
+  ],
+  "gaps": [
+    "No evidence of a migration/compatibility strategy, downstream provider expectations, or proof that retries cannot span versions."
+  ]
+}

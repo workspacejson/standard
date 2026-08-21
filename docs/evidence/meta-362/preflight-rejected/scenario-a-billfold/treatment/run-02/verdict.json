@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key format without backward compatibility can cause retries of an already-created checkout to use a new key and be processed as a distinct operation, potentially creating duplicate checkouts or charges."
+  ],
+  "evidence": [
+    "The key changes from `${orderId}:${attemptNumber}` to `${orderId}|${attemptNumber}`; the same request inputs therefore produce a different idempotency key after deployment."
+  ],
+  "checked": [
+    "Deterministic idempotency-key construction",
+    "Retry and deployment compatibility"
+  ],
+  "gaps": [
+    "No evidence of a migration, dual-read/compatibility strategy, or confirmation that previously issued idempotency keys cannot be retried during the provider's retention window."
+  ]
+}

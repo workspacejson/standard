@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The change silently truncates co-change partner results to 10 entries, changing the apparent all-partners contract and potentially omitting relevant workspace relationships."
+  ],
+  "evidence": [
+    "`return partners;` is replaced with `return partners.slice(0, 10);` in `findCoChangePartners`. No ranking, limit parameter, or caller opt-in is shown."
+  ],
+  "checked": [
+    "Proposed diff for `src/services/workspace.ts` only."
+  ],
+  "gaps": [
+    "No evidence of the expected result contract, ordering/ranking guarantees, caller handling of incomplete results, or tests for workspaces with more than 10 partners."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "The change silently truncates co-change partner results to 10, potentially omitting valid partners for callers that rely on the function returning the complete set."
+  ],
+  "evidence": [
+    "`return partners;` is replaced with `return partners.slice(0, 10);` in `findCoChangePartners`.",
+    "No ordering or documented limit is shown, so the omitted partners may be arbitrary from a consumer perspective."
+  ],
+  "checked": [
+    "Proposed diff in `src/services/workspace.ts`."
+  ],
+  "gaps": [
+    "No call-site, API-contract, ordering, or test evidence was supplied to establish that a 10-result cap is intended and safe."
+  ]
+}

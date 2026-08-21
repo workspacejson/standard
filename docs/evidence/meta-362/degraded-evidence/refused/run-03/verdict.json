@@ -1,0 +1,15 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "The diff changes only the delimiter used to construct the idempotency key; both orderId and attemptNumber remain included."
+  ],
+  "checked": [
+    "Reviewed the supplied checkout.ts diff for key-component retention and obvious construction errors."
+  ],
+  "gaps": [
+    "No workspace.json or co-change/consumer evidence was available to verify whether the serialized idempotency-key format is externally persisted or contract-sensitive."
+  ]
+}

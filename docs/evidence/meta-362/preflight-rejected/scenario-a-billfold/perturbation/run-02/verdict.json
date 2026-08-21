@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "Changing the idempotency-key delimiter changes the key for every existing order/attempt pair. Retries spanning deployment or callers reusing prior keys can bypass previously recorded idempotency state and create duplicate checkout side effects."
+  ],
+  "evidence": [
+    "The expression changed from `${request.orderId}:${request.attemptNumber}` to `${request.orderId}|${request.attemptNumber}` with no compatibility lookup or migration shown."
+  ],
+  "checked": [
+    "Idempotency-key derivation in the supplied diff."
+  ],
+  "gaps": [
+    "No evidence of a rollout/compatibility strategy for existing idempotency records or tests covering retries across versions."
+  ]
+}

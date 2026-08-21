@@ -1,0 +1,17 @@
+{
+  "status": "COMPLETED",
+  "artifactDir": "<redacted:local-path>",
+  "verdict": "BLOCK",
+  "findings": [
+    "This silently truncates co-change partners to 10, changing the function\u2019s result contract and potentially omitting valid dependency/co-change relationships for callers."
+  ],
+  "evidence": [
+    "The only behavioral change is `return partners.slice(0, 10);` replacing `return partners;`."
+  ],
+  "checked": [
+    "Return-value behavior of `findCoChangePartners` in the supplied diff."
+  ],
+  "gaps": [
+    "No evidence that callers expect a maximum of 10 results, that this limit is documented, or that ordering is deterministic such that the retained 10 are meaningful."
+  ]
+}
